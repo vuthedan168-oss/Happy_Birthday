@@ -2,602 +2,625 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title id="page-title">Món Quà Sinh Nhật Đặc Biệt 🎂✨</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Studio Tạo Thiệp Sinh Nhật & Kỷ Niệm 🎁✨</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✨</text></svg>">
   
-  <meta name="description" content="Một tấm thiệp sinh nhật tương tác đặc biệt — thắp nến, ước một điều ước, và những lời chúc ấm áp dành riêng cho cậu. 🎂">
-  <meta name="theme-color" content="#2c1520">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎂</text></svg>">
-
-  <!-- Stylesheets -->
-  <link rel="stylesheet" href="css/lovegift.css">
-  <link rel="stylesheet" href="css/style.css">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="css/creator.css">
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
 </head>
-<body class="lovegift-stage-bg lovegift-no-select">
+<body>
 
-  <!-- AUDIO ELEMENT -->
-  <audio id="bg-audio" src="assets/audio/birthday.mp3" loop preload="auto"></audio>
+  <!-- Background Animated Bubbles -->
+  <div class="creator-bg-glow"></div>
 
-  <!-- PETALS CONTAINER -->
-  <div id="petals-container" aria-hidden="true" style="pointer-events: none; position: fixed; inset: 0; z-index: 30; overflow: hidden;"></div>
-
-  <!-- METEOR SKY CONTAINER (FOR INTERACTIVE STAR DROPS) -->
-  <div id="meteor-sky-container" aria-hidden="true" style="position:fixed; inset:0; pointer-events:none; z-index:15;"></div>
-
-  <!-- FLOATING AUDIO CONTROLLER -->
-  <button type="button" class="lovegift-audio-btn" id="btn-audio-toggle" title="Bật / Tắt Nhạc Nền" aria-label="Bật / Tắt Nhạc Nền">
-    <span id="audio-icon">🎵</span>
-  </button>
-
-
-
-  <!-- ======================================================= -->
-  <!-- GIAI ĐOẠN 0: COUNTDOWN LOCK (CHUẨN CINEMATIC HAPPY_BDAY)  -->
-  <!-- ======================================================= -->
-  <section class="stage-countdown-overlay" id="stage-countdown" style="display: none;">
-    <!-- Ambient Background Radial Shadow -->
-    <div aria-hidden="true" class="countdown-stage-ambient"></div>
-
-    <!-- Twinkle Stars (Hiệu ứng ánh sao lấp lánh như Happy_Birthday) -->
-    <div class="lovegift-reveal-late" aria-hidden="true" style="pointer-events: none; position: absolute; inset: 0; z-index: 1;">
-      <span class="lovegift-twinkle" style="position: absolute; color: var(--color-gold); left: 14%; top: 20%; font-size: 16px; animation-delay: 0s;">✦</span>
-      <span class="lovegift-twinkle" style="position: absolute; color: var(--color-gold); left: 82%; top: 16%; font-size: 12px; animation-delay: 0.6s;">✦</span>
-      <span class="lovegift-twinkle" style="position: absolute; color: var(--color-gold); left: 68%; top: 68%; font-size: 14px; animation-delay: 1.1s;">✦</span>
-      <span class="lovegift-twinkle" style="position: absolute; color: var(--color-gold); left: 24%; top: 74%; font-size: 11px; animation-delay: 0.3s;">✦</span>
-      <span class="lovegift-twinkle" style="position: absolute; color: var(--color-gold); left: 88%; top: 52%; font-size: 13px; animation-delay: 0.9s;">✦</span>
-      <span class="lovegift-twinkle" style="position: absolute; color: var(--color-gold); left: 10%; top: 58%; font-size: 12px; animation-delay: 1.4s;">✦</span>
-    </div>
-
-    <!-- Floating Balloons (Bóng bay lơ lửng SVG như Happy_Birthday) -->
-    <div class="lovegift-reveal-late" aria-hidden="true" style="pointer-events: none; position: absolute; right: 10%; top: 12%; z-index: 2;">
-      <svg class="lovegift-balloon" width="56" height="78" viewBox="0 0 52 72" fill="none" stroke="#e8cf94" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
-        <ellipse cx="18" cy="19" rx="12" ry="15"></ellipse>
-        <ellipse cx="36" cy="26" rx="10" ry="13"></ellipse>
-        <path d="M18 34 C 18 43, 26 47, 25 58"></path>
-        <path d="M36 39 C 36 46, 30 50, 30 58"></path>
-        <path d="M21 58 q 4 5 8 0"></path>
-      </svg>
-    </div>
-
-    <!-- Kicker Tag -->
-    <div class="countdown-kicker lovegift-kicker">
-      ⏳ Giai Đoạn 0 • Đang Chờ Đến Giờ G
-    </div>
-
-    <!-- Calligraphy Hero Title -->
-    <h1 class="countdown-hero-title" id="countdown-title">
-      Món Quà Bí Mật Đang Chuẩn Bị
-    </h1>
-
-    <!-- Dòng thông điệp người nhận -->
-    <p class="countdown-recipient-line font-serif" id="countdown-msg">
-      Dành riêng cho <span id="countdown-recipient-highlight" class="countdown-highlight-name">Hương Giang</span> 🎂✨
-    </p>
-
-    <!-- Pill hiển thị ngày giờ mở thiệp chính thức -->
-    <div class="countdown-target-pill" id="countdown-target-display">
-      <span class="pill-icon">⏰</span>
-      <span>Chính thức mở vào: <strong id="countdown-target-time" style="color: #ffd98e;">Đang tính thời gian...</strong></span>
-    </div>
-
-    <!-- KHUNG ĐỒNG HỒ ĐẾM NGƯỢC SIÊU LỚN & PHÁT SÁNG THEO CHUẨN HAPPY_BIRTHDAY -->
-    <div class="countdown-grand-container">
-      <!-- Vòng hào quang phát sáng trung tâm (lovegift-reveal-glow) -->
-      <span class="countdown-central-glow" aria-hidden="true"></span>
-
-      <div class="countdown-timer-grid" id="countdown-timer-blocks">
-        <!-- Khối Ngày -->
-        <div class="countdown-unit-card">
-          <span class="countdown-num font-serif" id="cd-days">00</span>
-          <span class="countdown-unit-lbl lovegift-kicker">Ngày</span>
+  <!-- Header / Navigation -->
+  <header class="creator-header">
+    <div class="header-container">
+      <a href="gift.html" class="logo-group">
+        <span class="logo-icon">🎂</span>
+        <div>
+          <h1 class="logo-title">Birthday & Love Studio</h1>
+          <p class="logo-sub">Tạo thiệp tương tác, vòng quay may mắn & nhạc sinh nhật</p>
         </div>
-
-        <div class="countdown-colon font-serif">:</div>
-
-        <!-- Khối Giờ -->
-        <div class="countdown-unit-card">
-          <span class="countdown-num font-serif" id="cd-hours">00</span>
-          <span class="countdown-unit-lbl lovegift-kicker">Giờ</span>
-        </div>
-
-        <div class="countdown-colon font-serif">:</div>
-
-        <!-- Khối Phút -->
-        <div class="countdown-unit-card">
-          <span class="countdown-num font-serif" id="cd-minutes">00</span>
-          <span class="countdown-unit-lbl lovegift-kicker">Phút</span>
-        </div>
-
-        <div class="countdown-colon font-serif">:</div>
-
-        <!-- Khối Giây -->
-        <div class="countdown-unit-card">
-          <span class="countdown-num font-serif" id="cd-seconds">00</span>
-          <span class="countdown-unit-lbl lovegift-kicker">Giây</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Lời nhắn nhủ thơ mộng từ người gửi -->
-    <p class="countdown-quote font-serif" id="countdown-sub-text">
-      "Hãy kiên nhẫn chờ đợi thời khắc đặc biệt này nhé! 💖"
-    </p>
-
-    <!-- Màn hình báo hết hạn (nếu vượt quá endDate) -->
-    <div class="countdown-expired-box" id="countdown-expired-box" style="display: none; max-width: 440px; margin-bottom: 1.5rem;">
-      <div class="expired-icon">⌛</div>
-      <h3 class="expired-title">Khoảnh Khắc Đã Diễn Ra</h3>
-      <p class="expired-desc">Thiệp mừng này đã kết thúc thời gian phát trực tiếp. Bạn vẫn có thể bấm nút bên dưới để xem lại trọn vẹn kỷ niệm bất cứ lúc nào!</p>
-    </div>
-
-    <!-- Thanh tác vụ nút bấm theo phong cách Happy_Birthday -->
-    <div class="countdown-actions-bar">
-      <a href="#" target="_blank" rel="noopener noreferrer" class="btn-lovegift-pill" id="btn-add-calendar" style="display: none;">
-        📅 Đặt lời nhắc Google Calendar
       </a>
-      <button type="button" class="btn-lovegift-outline" id="btn-bypass-cd">
-        🔓 Mở khóa xem trước (Dành cho người tạo)
-      </button>
-    </div>
-  </section>
-
-  <!-- ========================================================= -->
-  <!-- MAIN APP CONTAINER                                        -->
-  <!-- ========================================================= -->
-  <main id="app-container" style="width: 100%; min-height: 100dvh; display: flex; align-items: center; justify-content: center; position: relative;">
-
-    <!-- ======================================================= -->
-    <!-- GIAI ĐOẠN 1: DATE REEL OPENING                          -->
-    <!-- ======================================================= -->
-    <section class="lovegift-fade-in" id="stage-opening" style="position: fixed; inset: 0; z-index: 40; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; padding: 1.25rem;">
-      <div aria-hidden="true" style="pointer-events: none; position: absolute; inset: 0; background: radial-gradient(62% 42% at 50% 46%, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0) 70%);"></div>
-
-      <!-- Twinkle Stars -->
-      <div class="lovegift-reveal-late" aria-hidden="true" style="pointer-events: none; position: absolute; inset: 0; z-index: 0;">
-        <span class="lovegift-twinkle" style="position: absolute; color: var(--color-gold); left: 16%; top: 24%; font-size: 15px; animation-delay: 0s;">✦</span>
-        <span class="lovegift-twinkle" style="position: absolute; color: var(--color-gold); left: 80%; top: 18%; font-size: 11px; animation-delay: 0.6s;">✦</span>
-        <span class="lovegift-twinkle" style="position: absolute; color: var(--color-gold); left: 64%; top: 62%; font-size: 14px; animation-delay: 1.1s;">✦</span>
-        <span class="lovegift-twinkle" style="position: absolute; color: var(--color-gold); left: 28%; top: 68%; font-size: 10px; animation-delay: 0.3s;">✦</span>
-        <span class="lovegift-twinkle" style="position: absolute; color: var(--color-gold); left: 86%; top: 48%; font-size: 13px; animation-delay: 0.9s;">✦</span>
-      </div>
-
-      <!-- Floating Balloons -->
-      <div class="lovegift-reveal-late" aria-hidden="true" style="pointer-events: none; position: absolute; right: 14%; top: 16%; z-index: 10;">
-        <svg class="lovegift-balloon" width="52" height="72" viewBox="0 0 52 72" fill="none" stroke="#e8cf94" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
-          <ellipse cx="18" cy="19" rx="12" ry="15"></ellipse>
-          <ellipse cx="36" cy="26" rx="10" ry="13"></ellipse>
-          <path d="M18 34 C 18 43, 26 47, 25 58"></path>
-          <path d="M36 39 C 36 46, 30 50, 30 58"></path>
-          <path d="M21 58 q 4 5 8 0"></path>
-        </svg>
-      </div>
-
-      <!-- Calligraphy Header -->
-      <h1 class="lovegift-script-in" id="opening-greeting" style="position: relative; z-index: 10; margin-bottom: 1.25rem; max-width: 86vw; text-align: center; font-family: var(--font-hand); font-weight: 600; line-height: 0.98; font-size: clamp(46px, 14vw, 88px); text-shadow: 0 0 26px rgba(255,220,150,0.35);">
-        Happy Birthday
-      </h1>
-
-      <!-- Date Reel Window -->
-      <div class="lovegift-reel-container" id="reel-window">
-        <div class="lovegift-reel" id="reel-scroller" style="--reel-from: -190px; --reel-to: -1254px;">
-          <!-- Items 1 to 31 populated by JS -->
-        </div>
-
-        <!-- Highlight Overlay Center -->
-        <div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 20; display: flex; width: max-content; align-items: center; justify-content: center; gap: 0.75rem;">
-          <span class="lovegift-reveal-glow" aria-hidden="true" style="position: absolute; left: 50%; top: 50%; width: 230px; height: 230px; border-radius: 50%; background: radial-gradient(circle, rgba(255,206,120,0.55) 0%, rgba(255,180,80,0.2) 42%, rgba(255,180,80,0) 70%);"></span>
-          <span class="lovegift-arrow-in" style="font-family: var(--font-serif); color: var(--color-gold); font-size: clamp(26px, 7vw, 44px);">→</span>
-          <span class="lovegift-reveal-pop" id="reel-selected-day" style="font-family: var(--font-serif); font-weight: 600; line-height: 1; font-size: clamp(72px, 22vw, 128px); color: #f4d68a; text-shadow: 0 0 30px rgba(255,206,120,0.6);">17</span>
-          <span class="lovegift-month-in" id="reel-selected-month" style="align-self: flex-end; white-space: nowrap; padding-bottom: 0.5rem; font-family: var(--font-serif); font-size: clamp(20px, 6vw, 34px); color: var(--color-cream);">Tháng 7</span>
-        </div>
-      </div>
-
-      <!-- Skip / Tap Hint -->
-      <p class="lovegift-reveal-late" style="position: relative; z-index: 20; margin-top: 1.5rem; font-family: var(--font-sans); font-size: 0.82rem; color: rgba(246, 234, 216, 0.55); cursor: pointer;" id="btn-skip-opening">
-        Chạm để tiếp tục →
-      </p>
-    </section>
-
-    <!-- ======================================================= -->
-    <!-- GIAI ĐOẠN 2: REALISTIC CAKE & BLOW CANDLE               -->
-    <!-- ======================================================= -->
-    <section class="lovegift-fade-in" id="stage-intro" style="display: none; position: relative; width: 100%; max-width: 440px; flex-direction: column; align-items: center; padding: 1.5rem 1.25rem 6.5rem;">
       
-      <!-- Top Garland Bunting -->
-      <div style="position: relative; z-index: 5; margin-bottom: 1rem; width: 100%; max-width: 380px; text-align: center;">
-        <svg viewBox="0 0 380 50" fill="none" style="width: 100%; height: auto; max-height: 48px;">
-          <path d="M 10,12 Q 190,42 370,12" stroke="rgba(201,162,75,0.4)" stroke-width="1.2" stroke-dasharray="3 3"/>
-          <polygon points="40,16 65,19 52,42" fill="#e89d88" opacity="0.9"/>
-          <polygon points="90,22 115,25 102,48" fill="#ffd682" opacity="0.9"/>
-          <polygon points="140,26 165,28 152,52" fill="#dfb3c8" opacity="0.9"/>
-          <polygon points="190,28 215,28 202,52" fill="#c9a24b" opacity="0.9"/>
-          <polygon points="240,26 265,24 252,48" fill="#e89d88" opacity="0.9"/>
-          <polygon points="290,22 315,19 302,43" fill="#ffd682" opacity="0.9"/>
-          <polygon points="340,16 365,12 352,36" fill="#dfb3c8" opacity="0.9"/>
-        </svg>
+      <div class="header-actions">
+        <a href="gift.html" class="btn btn-outline" target="_blank" id="btn-view-demo">
+          👁️ Xem Thiệp Mẫu
+        </a>
+        <button type="button" class="btn btn-primary" id="btn-quick-generate">
+          ✨ Tạo & Lấy Link
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Creator Container -->
+  <main class="creator-main">
+    <div class="form-wrapper">
+
+      <div class="intro-card">
+        <div class="intro-badge">✨ MIỄN PHÍ & CHẠY 100% TRÊN GITHUB PAGES ✨</div>
+        <h2>Tùy biến thiệp sinh nhật của riêng bạn</h2>
+        <p>Điền thông tin bên dưới để tạo thiệp chúc mừng độc nhất vô nhị. Người nhận sẽ được mở hộp quà 3D, thổi nến bánh kem, quay vòng quay trúng 6 món quà và nghe giai điệu ngọt ngào!</p>
       </div>
 
-      <!-- Dimming Overlay on Hold -->
-      <div id="candle-dim-overlay" aria-hidden="true" style="pointer-events: none; position: fixed; inset: 0; background: #000; opacity: 0; transition: opacity 0.5s ease; z-index: 18;"></div>
-
-      <!-- Cake & Candle Wrap (Chuẩn Happy_Birthday) -->
-      <div class="lovegift-sway lovegift-cake-wrap" id="cake-interactive-wrap" style="position: relative; width: clamp(230px, 66vw, 310px); margin: 0 auto; cursor: pointer; touch-action: none;">
-        <!-- Candle Holder (Touch / Click Target) -->
-        <div class="lovegift-candle-holder" id="candle-touch-zone" title="Nhấn và giữ ngọn nến để thổi tắt!">
-          
-          <!-- Hào quang ấm áp tỏa sau ngọn nến -->
-          <div aria-hidden="true" class="lovegift-flame-halo" id="flame-halo"></div>
-
-          <!-- Circular Hold Progress SVG (104x104 bao quanh đúng ngọn nến) -->
-          <svg class="lovegift-hold-progress-svg" id="hold-progress-svg" viewBox="0 0 104 104" width="104" height="104" aria-hidden="true">
-            <circle cx="52" cy="52" r="46" fill="none" stroke="rgba(255, 214, 150, 0.28)" stroke-width="2" />
-            <circle id="hold-progress-bar" cx="52" cy="52" r="46" fill="none" stroke="rgba(255, 214, 150, 0.95)" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="289.026" stroke-dashoffset="289.026" />
-          </svg>
-
-          <!-- Ngọn lửa sinh nhật sống động -->
-          <div class="lovegift-flame-wrapper" id="flame-wrap">
-            <div class="lovegift-flame" id="flame-element">
-              <div class="lovegift-flame-inner"></div>
-              <div class="lovegift-flame-blue"></div>
+      <form id="creator-form" autocomplete="off">
+        
+        <!-- SECTION 1: THÔNG TIN CƠ BẢN -->
+        <div class="form-section">
+          <div class="section-heading">
+            <span class="heading-icon">💌</span>
+            <div>
+              <h3>Thông Tin Người Nhận & Lời Chúc</h3>
+              <p>Lời chúc ấm áp và tiêu đề rực rỡ dành cho người ấy</p>
             </div>
           </div>
 
-          <!-- Thân nến vàng xoắn sang trọng với tim nến -->
-          <div class="lovegift-candle-body" id="candle-body">
-            <div class="lovegift-candle-wick"></div>
+          <div class="form-group">
+            <label for="input-title">Tiêu đề thiệp: <span class="req">*</span></label>
+            <input type="text" id="input-title" class="form-control" placeholder="Tiêu đề, Ví dụ: Chúc mừng sinh nhật bạn thân!" required value="Chúc Mừng Sinh Nhật! 🎉🎂✨">
           </div>
 
-          <!-- Làn khói bay lên khi nến tắt -->
-          <span id="candle-smoke" style="display: none;" class="lovegift-smoke" aria-hidden="true"></span>
-        </div>
+          <div class="form-row">
+            <div class="form-group col">
+              <label for="input-recipient">Tên người nhận: <span class="req">*</span></label>
+              <input type="text" id="input-recipient" class="form-control" placeholder="Ví dụ: Hương Giang, My Baby, Cậu Bạn Thân..." required value="Hương Giang">
+            </div>
+            <div class="form-group col">
+              <label for="input-sender">Tên người gửi: <span class="req">*</span></label>
+              <input type="text" id="input-sender" class="form-control" placeholder="Ví dụ: Tớ, Anh, Bạn Thân..." required value="Tớ">
+            </div>
+          </div>
 
-        <!-- Các hạt bụi vàng lơ lửng quanh ngọn nến (Chuẩn Happy_Birthday) -->
-        <span class="lovegift-mote" style="left: 46%; top: -40px; animation-delay: 0s; animation-duration: 4s;"></span>
-        <span class="lovegift-mote" style="left: 49%; top: -40px; animation-delay: 0.9s; animation-duration: 4.6s;"></span>
-        <span class="lovegift-mote" style="left: 52%; top: -40px; animation-delay: 1.8s; animation-duration: 5.2s;"></span>
-        <span class="lovegift-mote" style="left: 55%; top: -40px; animation-delay: 2.7s; animation-duration: 5.8s;"></span>
+          <div class="form-row">
+            <div class="form-group col">
+              <label for="input-birth-day">Ngày sinh nhật: <span class="req">*</span></label>
+              <input type="number" id="input-birth-day" class="form-control" min="1" max="31" value="17" placeholder="1 - 31" required>
+              <small class="field-hint">Kích hoạt vòng quay số Date Reel cuộn đến ngày này!</small>
+            </div>
+            <div class="form-group col">
+              <label for="input-birth-month">Tháng sinh: <span class="req">*</span></label>
+              <input type="number" id="input-birth-month" class="form-control" min="1" max="12" value="7" placeholder="1 - 12" required>
+              <small class="field-hint">Tháng sinh của người nhận</small>
+            </div>
+          </div>
 
-        <!-- Cake High-res Image -->
-        <img src="assets/images/cake-new.webp" alt="Bánh kem sinh nhật" class="lovegift-cake-img" id="cake-img" draggable="false">
-      </div>
+          <div class="form-group">
+            <label for="input-nickname">Biệt danh / Lời khen dễ thương:</label>
+            <input type="text" id="input-nickname" class="form-control" placeholder="Ví dụ: Cô bạn đáng yêu & rạng rỡ nhất ✨" value="Cô bạn đáng yêu & rạng rỡ nhất ✨">
+          </div>
 
-      <!-- Text Prompts -->
-      <div style="position: relative; z-index: 25; margin-top: 1.75rem; text-align: center;">
-        <p class="font-serif" style="font-size: 1.5rem; color: var(--color-cream);" id="cake-intro-line1">
-          Có một món quà nhỏ dành cho cậu…
-        </p>
-        <p class="font-sans" style="margin-top: 0.5rem; font-size: 1rem; color: rgba(246, 234, 216, 0.75);" id="cake-intro-line2">
-          Nhưng trước khi mở, thổi nến trước nhé 🎂
-        </p>
-        <p class="font-sans" id="candle-hint" style="margin-top: 1.5rem; font-size: 0.92rem; color: #ffd98e; font-weight: 500;">
-          👆 Nhấn & giữ ngọn nến, hoặc THỔI trực tiếp vào micro 🎂💨
-        </p>
-      </div>
-    </section>
+          <!-- 4 ĐIỀU ƯỚC SINH NHẬT -->
+          <div class="form-group" style="background: rgba(201,162,75,0.08); padding: 1rem; border-radius: 10px; border: 1px dashed rgba(201,162,75,0.35);">
+            <label style="font-weight: 600; color: #c9a24b; display: flex; align-items: center; gap: 0.4rem;">
+              <span>🎋</span> 4 Thẻ Bài Điều Ước (Để người nhận chọn 1 điều ước bay lên trời):
+            </label>
+            <div class="form-row" style="margin-top: 0.5rem;">
+              <div class="form-group col">
+                <input type="text" id="input-wish-1" class="form-control form-control-sm" value="Hạnh phúc hơn" placeholder="Điều ước 1">
+              </div>
+              <div class="form-group col">
+                <input type="text" id="input-wish-2" class="form-control form-control-sm" value="Trúng Vietlott" placeholder="Điều ước 2">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group col">
+                <input type="text" id="input-wish-3" class="form-control form-control-sm" value="Khỏe mạnh hơn" placeholder="Điều ước 3">
+              </div>
+              <div class="form-group col">
+                <input type="text" id="input-wish-4" class="form-control form-control-sm" value="Bình yên hơn" placeholder="Điều ước 4">
+              </div>
+            </div>
+          </div>
 
-    <!-- ======================================================= -->
-    <!-- GIAI ĐOẠN 2.5: EMOTIONAL BEATS (CHỮ TÂM TÌNH)           -->
-    <!-- ======================================================= -->
-    <section id="stage-beats" style="display: none; position: fixed; inset: 0; z-index: 40; background: #000; align-items: center; justify-content: center; padding: 2rem;">
-      <div style="max-width: 520px; text-align: center; position: relative;">
-        <p class="font-script" id="beats-text" style="font-size: clamp(22px, 5.5vw, 32px); color: var(--color-cream); line-height: 1.5; transition: opacity 0.6s ease, transform 0.6s ease;">
-          Ngọn nến đã tắt…
-        </p>
-      </div>
-    </section>
+          <div class="form-group">
+            <label for="input-wishes">Nội dung bức thư (Lời chúc tâm tình, câu chuyện kỷ niệm): <span class="req">*</span></label>
+            <textarea id="input-wishes" class="form-control textarea-lg" rows="6" placeholder="Câu chúc, lời nhắn nhủ đến bạn đấy. Mỗi đoạn văn có thể xuống dòng..." required>Chúc mừng sinh nhật cậu nhé! 🎉🎂
 
-    <!-- ======================================================= -->
-    <!-- GIAI ĐOẠN 3: 4 WISH CARDS (CHỌN ĐIỀU ƯỚC)               -->
-    <!-- ======================================================= -->
-    <section class="lovegift-fade-in" id="stage-wish" style="display: none; position: relative; width: 100%; max-width: 460px; flex-direction: column; align-items: center; text-align: center; padding: 2rem 1.25rem 6.5rem;">
-      <p class="lovegift-kicker" id="wish-kicker">Một điều ước</p>
-      <h2 class="font-serif" id="wish-question" style="margin-top: 0.5rem; font-size: clamp(24px, 5vw, 30px); line-height: 1.35; color: var(--color-cream);">
-        Bây giờ… chọn một điều ước cho ngày sinh nhật của cậu.
-      </h2>
+Năm vừa rồi chắc chẳng dễ dàng gì, vậy mà cậu vẫn đi tới được hôm nay — giỏi hơn cậu nghĩ nhiều đấy.
 
-      <!-- 4 Traditional Wish Plaques Grid -->
-      <div class="lovegift-wish-grid" id="wish-cards-container">
-        <!-- Generated by JS -->
-      </div>
+Tớ chỉ mong cậu ăn ngon ngủ đủ, bớt lo một chút, và nhớ là luôn có người ở đây khi cậu cần.
 
-      <!-- Feedback reply -->
-      <p class="font-script lovegift-fade-in" id="wish-reply" style="display: none; margin-top: 1.75rem; font-size: 1.25rem; color: #ffd98e;">
-        Điều ước đã được nhận. Mong nó từ từ thành hiện thực.
-      </p>
-    </section>
+Chúc cậu tuổi mới ngập tràn niềm vui, nụ cười rạng rỡ và luôn hạnh phúc! 💖✨</textarea>
+            <small class="field-hint">💡 Lời chúc này sẽ hiển thị trên cuộn thư da vintage cổ điển cực kỳ sang trọng!</small>
+          </div>
 
-    <!-- ======================================================= -->
-    <!-- GIAI ĐOẠN 4: HEART PHOTO MOSAIC & PETALS                -->
-    <!-- ======================================================= -->
-    <section class="lovegift-fade-in" id="stage-heart" style="display: none; position: relative; width: 100%; max-width: 480px; flex-direction: column; align-items: center; text-align: center; padding: 2.5rem 1.25rem 4rem;">
-      
-      <!-- Heart 10x11 Grid Container -->
-      <div class="lovegift-heart-container">
-        <div class="lovegift-heart-glow" aria-hidden="true"></div>
-        <div class="lovegift-heart-burst" aria-hidden="true"></div>
-        <div class="lovegift-heart-ring" aria-hidden="true"></div>
-        
-        <!-- Sparks -->
-        <div id="heart-sparks-wrap" aria-hidden="true"></div>
+          <div class="form-row">
+            <div class="form-group col">
+              <label for="input-signature">Chữ ký kết thư:</label>
+              <input type="text" id="input-signature" class="form-control" placeholder="Ví dụ: — Tớ" value="— Tớ">
+            </div>
+          </div>
 
-        <!-- The Photo Heartbeat Grid -->
-        <div class="lovegift-heartbeat">
-          <div class="lovegift-heart-grid" id="heart-grid-tiles">
-            <!-- 10x11 tiles populated by JS -->
+          <div class="form-group">
+            <label for="input-custom-slug">Đường dẫn / Tên gợi nhớ (tùy chọn):</label>
+            <div class="input-with-prefix">
+              <span class="url-prefix">🔗</span>
+              <input type="text" id="input-custom-slug" class="form-control" placeholder="nhap-duong-dan-tai-day (ví dụ: huong-giang-hpbd)">
+            </div>
           </div>
         </div>
-      </div>
 
-      <p class="font-sans" id="heart-tap-hint" style="margin-top: 1.25rem; font-size: 0.82rem; color: rgba(246, 234, 216, 0.55);">
-        Chạm vào trái tim để xem ảnh ♡
-      </p>
+        <!-- SECTION 2: HẸN GIỜ & THỜI GIAN CHO PHÉP XEM -->
+        <div class="form-section">
+          <div class="section-heading">
+            <span class="heading-icon">⏳</span>
+            <div>
+              <h3>Giai Đoạn 0: Hẹn Giờ Mở Thiệp (Countdown Lock)</h3>
+              <p>Khóa bí mật: Người nhận mở sớm sẽ thấy màn hình đếm ngược hồi hộp chờ đến giờ G!</p>
+            </div>
+          </div>
 
-      <p class="font-sans" id="heart-caption" style="margin-top: 1.5rem; font-size: 0.95rem; color: rgba(246, 234, 216, 0.75);">
-        Tất cả những kỷ niệm nhỏ này là dành cho cậu.
-      </p>
-      <h2 class="font-serif" id="heart-title" style="margin-top: 0.4rem; font-size: clamp(30px, 8vw, 40px); line-height: 1.2; color: var(--color-cream);">
-        Chúc Mừng Sinh Nhật, Cậu.
-      </h2>
-      <p class="font-sans" id="heart-subtitle" style="margin-top: 0.4rem; font-size: 1rem; color: rgba(246, 234, 216, 0.75);">
-        Hôm nay cậu nhất định phải được ăn mừng.
-      </p>
+          <div class="form-row">
+            <div class="form-group col">
+              <label for="input-start-date">Ngày bắt đầu cho phép xem:</label>
+              <input type="datetime-local" id="input-start-date" class="form-control">
+              <small class="field-hint">Để trống nếu muốn người nhận có thể xem ngay lập tức bất cứ lúc nào.</small>
+            </div>
+            <div class="form-group col">
+              <label for="input-end-date">Ngày kết thúc cho phép xem (tùy chọn):</label>
+              <input type="datetime-local" id="input-end-date" class="form-control">
+              <small class="field-hint">Để trống nếu không giới hạn thời gian.</small>
+            </div>
+          </div>
 
-      <div style="margin-top: 2rem;">
-        <button type="button" class="lovegift-btn-gold" id="btn-goto-letter">
-          Có một lá thư dành cho cậu →
-        </button>
-      </div>
-    </section>
-
-    <!-- ======================================================= -->
-    <!-- GIAI ĐOẠN 5: VINTAGE LETTER (LÁ THƯ NHỎ)                -->
-    <!-- ======================================================= -->
-    <section class="lovegift-fade-up" id="stage-letter" style="display: none; position: relative; width: 100%; max-width: 440px; flex-direction: column; align-items: center; text-align: center; padding: 2.5rem 1.25rem 4rem;">
-      <p class="lovegift-kicker" id="letter-kicker">Lá thư nhỏ</p>
-
-      <!-- Parchment Paper Card -->
-      <div class="lovegift-letter-paper" id="letter-paper-wrap">
-        <button type="button" class="lovegift-wax-seal" id="btn-open-letter" style="transition: opacity 0.3s ease;">💌</button>
-        <div class="wax-seal-hint">👆 Chạm vào con dấu để mở thư</div>
-        
-        <div class="lovegift-letter-scroll" id="letter-scroll-content" style="opacity: 0; transition: opacity 0.8s ease; pointer-events: none;">
-          <div class="lovegift-letter-body" id="letter-body-text"></div>
-          
-          <div class="lovegift-letter-sign" id="letter-signature-text" style="opacity: 0; transition: opacity 1s ease;">
-            — Tớ
+          <!-- Quick Action Buttons for Countdown Lock -->
+          <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px;">
+            <button type="button" class="btn-secondary" id="btn-quick-set-bday-time" style="padding: 8px 14px; font-size: 0.85rem; border-radius: 12px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color: #fff; cursor: pointer;">
+              ⚡ Hẹn đúng 00:00 ngày sinh nhật
+            </button>
+            <button type="button" class="btn-secondary" id="btn-preview-countdown-lock" style="padding: 8px 14px; font-size: 0.85rem; border-radius: 12px; background: rgba(251,191,36,0.15); border: 1px solid rgba(251,191,36,0.4); color: #fde68a; cursor: pointer;">
+              👁️ Xem Thử Màn Hình Khóa Đếm Ngược (Giai Đoạn 0)
+            </button>
           </div>
         </div>
-      </div>
 
-      <div style="margin-top: 2.25rem; display: none; flex-direction: column; gap: 0.8rem; width: 100%; max-width: 300px;" id="letter-actions-wrap">
-        <button type="button" class="lovegift-btn-secondary" id="btn-skip-typewriter">
-          Hiển thị toàn bộ thư
-        </button>
-        <button type="button" class="lovegift-btn-gold" id="btn-goto-final" style="display: none;">
-          Vẫn còn nữa →
-        </button>
-      </div>
-    </section>
-
-    <!-- ======================================================= -->
-    <!-- GIAI ĐOẠN 6: FINAL CARD & REMINDER                      -->
-    <!-- ======================================================= -->
-    <section class="lovegift-fade-up" id="stage-final" style="display: none; position: relative; width: 100%; max-width: 440px; flex-direction: column; align-items: center; text-align: center; padding: 2.5rem 1.25rem 4rem;">
-      
-      <div class="lovegift-final-card">
-        <!-- Metallic corner ornaments -->
-        <span class="lovegift-corner-border tl"></span>
-        <span class="lovegift-corner-border tr"></span>
-        <span class="lovegift-corner-border br"></span>
-        <span class="lovegift-corner-border bl"></span>
-
-        <p class="lovegift-kicker" id="final-kicker">Dành cho cậu</p>
-        <h2 class="font-serif" id="final-title" style="margin-top: 0.5rem; font-size: clamp(28px, 6vw, 36px); line-height: 1.2; color: var(--color-cream);">
-          Chúc Mừng Sinh Nhật, Cậu
-        </h2>
-        <p class="font-script" id="final-from" style="margin-top: 0.35rem; font-size: 1.35rem; color: var(--color-gold);">
-          từ Tớ
-        </p>
         
-        <div style="margin: 1.25rem auto; width: 60px; height: 1px; background: rgba(201, 162, 75, 0.5);"></div>
+        <!-- SECTION 2.5: CÂU HỎI TRẮC NGHIỆM ĐỘNG -->
+        <div class="form-section">
+          <div class="section-heading">
+            <span class="heading-icon">🕹️</span>
+            <div>
+              <h3>Câu Hỏi Trắc Nghiệm (Thử Thách Mở Tiệc)</h3>
+              <p>Thêm số lượng câu hỏi tùy thích để thử thách người nhận trước khi vào tiệc!</p>
+            </div>
+          </div>
+          <div id="quiz-questions-container">
+            <!-- Danh sách câu hỏi render động từ creator.js -->
+          </div>
+          <div class="quiz-actions-bar">
+            <button type="button" class="btn-add-q" id="btn-add-quiz-q">
+              ➕ Thêm Câu Hỏi Mới
+            </button>
+          </div>
+        </div>
 
-        <p class="font-sans" id="final-message" style="font-size: 1rem; line-height: 1.6; color: rgba(246, 234, 216, 0.85);">
-          Mong điều ước cậu chọn lúc nãy thật sự tìm được đường đến với cậu trong năm nay.
-        </p>
-      </div>
+        <!-- SECTION 3: ÂM NHẠC THEO TỪNG GIAI ĐOẠN (SCENE-BY-SCENE MUSIC) -->
+        <div class="form-section highlight-section">
+          <div class="section-heading">
+            <span class="heading-icon">🎵</span>
+            <div>
+              <h3>Âm Nhạc Riêng Cho Từng Giai Đoạn</h3>
+              <p>Chủ động chọn hoặc tải nhạc từ máy tính (.mp3, .wav, .m4a) riêng cho từng màn để tăng cảm xúc!</p>
+            </div>
+          </div>
 
-      <!-- Action Buttons -->
-      <div style="margin-top: 2rem; display: flex; flex-direction: column; gap: 1rem; width: 100%; max-width: 320px; align-items: stretch;">
-        <button type="button" class="lovegift-btn-gold" id="btn-goto-starlight">
-          ✨ Gửi điều ước lên trời
-        </button>
-      </div>
-    </section>
+          <div class="scene-music-grid">
+            <!-- Giai đoạn 1: Mở đầu & Quiz -->
+            <div class="scene-music-card stage-intro" data-stage="intro">
+              <div class="scene-music-header">
+                <span class="scene-music-icon">💡</span>
+                <div>
+                  <div class="scene-music-title">1. Mở Đầu & Thử Thách Quiz</div>
+                  <div class="scene-music-desc">Phát khi bật đèn & làm câu hỏi</div>
+                </div>
+              </div>
+              <div class="form-group mb-2">
+                <select class="form-control form-select select-stage-music" data-stage="intro">
+                  <option value="preset-romantic-candle" selected>🎂 Món Quà Sinh Nhật Lãng Mạn (birthday.mp3)</option>
+                  <option value="preset-piano">🎹 Happy Birthday Piano</option>
+                  <option value="preset-lofi">🎧 Sweet Lofi Memories</option>
+                  <option value="preset-romantic">🎻 Romantic Harp & Strings</option>
+                  <option value="preset-party">🎉 Upbeat Celebration</option>
+                  <option value="preset-synth">🔔 Web Audio Chimes</option>
+                  <option value="custom-upload">📁 Tải file từ máy tính...</option>
+                  <option value="custom-url">🔗 Nhập link MP3 tùy chỉnh...</option>
+                </select>
+              </div>
+              <div class="stage-upload-box mb-2" style="display:none;" data-stage="intro">
+                <input type="file" class="form-control form-control-sm stage-file-input" accept="audio/*" data-stage="intro">
+                <small class="field-hint">Hỗ trợ file .mp3, .wav, .m4a từ máy</small>
+              </div>
+              <div class="stage-url-box mb-2" style="display:none;" data-stage="intro">
+                <input type="url" class="form-control form-control-sm stage-url-input" placeholder="https://.../music.mp3" data-stage="intro">
+              </div>
+              <div class="scene-music-actions">
+                <button type="button" class="audio-preview-btn" data-stage="intro">▶️ Nghe thử</button>
+                <span class="audio-status-badge" data-stage="intro">Món Quà Sinh Nhật Lãng Mạn</span>
+              </div>
+            </div>
 
-    <!-- ======================================================= -->
-    <!-- GIAI ĐOẠN 7: STARLIGHT SHOOTING STARS SKY               -->
-    <!-- ======================================================= -->
-    <section class="lovegift-fade-in" id="stage-starlight" style="display: none; position: relative; width: 100%; max-width: 440px; flex-direction: column; align-items: center; text-align: center; padding: 2.5rem 1.25rem 4rem;">
-      <p class="lovegift-kicker" id="starlight-kicker">Gửi lên trời</p>
-      <h2 class="font-serif" id="starlight-title" style="margin-top: 0.5rem; font-size: clamp(26px, 6vw, 32px); line-height: 1.3; color: var(--color-cream);">
-        Biến điều ước thành sao băng
-      </h2>
-      <p class="font-sans" id="starlight-subtitle" style="margin-top: 0.5rem; font-size: 0.95rem; color: rgba(246, 234, 216, 0.75);">
-        Chạm vào ngôi sao để gửi điều ước của cậu lên trời đêm ✨
-      </p>
+            <!-- Giai đoạn 2: Bánh kem & Thổi nến -->
+            <div class="scene-music-card stage-cake" data-stage="cake">
+              <div class="scene-music-header">
+                <span class="scene-music-icon">🎂</span>
+                <div>
+                  <div class="scene-music-title">2. Bánh Kem & Thổi Nến</div>
+                  <div class="scene-music-desc">Khoảnh khắc ước nguyện ngọt ngào</div>
+                </div>
+              </div>
+              <div class="form-group mb-2">
+                <select class="form-control form-select select-stage-music" data-stage="cake">
+                  <option value="preset-romantic-candle" selected>🎂 Món Quà Sinh Nhật Lãng Mạn (birthday.mp3)</option>
+                  <option value="preset-piano">🎹 Happy Birthday Piano</option>
+                  <option value="preset-romantic">🎻 Romantic Harp & Strings</option>
+                  <option value="preset-lofi">🎧 Sweet Lofi Memories</option>
+                  <option value="preset-party">🎉 Upbeat Celebration</option>
+                  <option value="preset-synth">🔔 Web Audio Chimes</option>
+                  <option value="custom-upload">📁 Tải file từ máy tính...</option>
+                  <option value="custom-url">🔗 Nhập link MP3 tùy chỉnh...</option>
+                </select>
+              </div>
+              <div class="stage-upload-box mb-2" style="display:none;" data-stage="cake">
+                <input type="file" class="form-control form-control-sm stage-file-input" accept="audio/*" data-stage="cake">
+                <small class="field-hint">Hỗ trợ file .mp3, .wav, .m4a từ máy</small>
+              </div>
+              <div class="stage-url-box mb-2" style="display:none;" data-stage="cake">
+                <input type="url" class="form-control form-control-sm stage-url-input" placeholder="https://.../music.mp3" data-stage="cake">
+              </div>
+              <div class="scene-music-actions">
+                <button type="button" class="audio-preview-btn" data-stage="cake">▶️ Nghe thử</button>
+                <span class="audio-status-badge" data-stage="cake">Happy Birthday Piano</span>
+              </div>
+            </div>
 
-      <!-- The Wishing Star Target -->
-      <button type="button" id="btn-launch-star" style="margin-top: 1.75rem; background: transparent; border: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 1rem; outline: none;">
-        <span id="wishing-star-element" class="lovegift-twinkle" style="position: relative; display: flex; width: 110px; height: 110px; align-items: center; justify-content: center;">
-          <span aria-hidden="true" style="position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle, rgba(255,224,150,0.55) 0%, rgba(255,200,110,0.2) 45%, rgba(255,200,110,0) 70%);"></span>
-          <span style="font-size: 3.5rem; color: #ffe6a6; text-shadow: 0 0 20px rgba(255,214,130,0.95);">✦</span>
-        </span>
+            <!-- Giai đoạn 3: Vòng quay may mắn -->
+            <div class="scene-music-card stage-wheel" data-stage="wheel">
+              <div class="scene-music-header">
+                <span class="scene-music-icon">🎡</span>
+                <div>
+                  <div class="scene-music-title">3. Vòng Quay May Mắn</div>
+                  <div class="scene-music-desc">Sôi nổi, hào hứng quay nhận quà</div>
+                </div>
+              </div>
+              <div class="form-group mb-2">
+                <select class="form-control form-select select-stage-music" data-stage="wheel">
+                  <option value="preset-party" selected>🎉 Upbeat Celebration (Vui tươi)</option>
+                  <option value="preset-piano">🎹 Happy Birthday Piano</option>
+                  <option value="preset-lofi">🎧 Sweet Lofi Memories</option>
+                  <option value="preset-romantic">🎻 Romantic Harp & Strings</option>
+                  <option value="preset-synth">🔔 Web Audio Chimes</option>
+                  <option value="custom-upload">📁 Tải file từ máy tính...</option>
+                  <option value="custom-url">🔗 Nhập link MP3 tùy chỉnh...</option>
+                </select>
+              </div>
+              <div class="stage-upload-box mb-2" style="display:none;" data-stage="wheel">
+                <input type="file" class="form-control form-control-sm stage-file-input" accept="audio/*" data-stage="wheel">
+                <small class="field-hint">Hỗ trợ file .mp3, .wav, .m4a từ máy</small>
+              </div>
+              <div class="stage-url-box mb-2" style="display:none;" data-stage="wheel">
+                <input type="url" class="form-control form-control-sm stage-url-input" placeholder="https://.../music.mp3" data-stage="wheel">
+              </div>
+              <div class="scene-music-actions">
+                <button type="button" class="audio-preview-btn" data-stage="wheel">▶️ Nghe thử</button>
+                <span class="audio-status-badge" data-stage="wheel">Upbeat Celebration</span>
+              </div>
+            </div>
 
-        <!-- Chosen Wish Pill -->
-        <span id="starlight-chosen-wish" style="display: inline-block; border-radius: 9999px; border: 1px solid rgba(201,162,75,0.5); background: rgba(0,0,0,0.4); padding: 0.5rem 1.25rem; font-family: var(--font-script); font-size: 1.15rem; color: #ffe6a6; transition: opacity 0.5s ease;">
-          “Điều ước của cậu”
-        </span>
-      </button>
+            <!-- Giai đoạn 4: Thư & Album ảnh -->
+            <div class="scene-music-card stage-galaxy" data-stage="galaxy">
+              <div class="scene-music-header">
+                <span class="scene-music-icon">💌</span>
+                <div>
+                  <div class="scene-music-title">4. Bức Thư & Kỷ Niệm 3D</div>
+                  <div class="scene-music-desc">Lắng đọng, cảm xúc và ngọt ngào</div>
+                </div>
+              </div>
+              <div class="form-group mb-2">
+                <select class="form-control form-select select-stage-music" data-stage="galaxy">
+                  <option value="preset-romantic" selected>🎻 Romantic Harp & Strings</option>
+                  <option value="preset-lofi">🎧 Sweet Lofi Memories</option>
+                  <option value="preset-piano">🎹 Happy Birthday Piano</option>
+                  <option value="preset-party">🎉 Upbeat Celebration</option>
+                  <option value="preset-synth">🔔 Web Audio Chimes</option>
+                  <option value="custom-upload">📁 Tải file từ máy tính...</option>
+                  <option value="custom-url">🔗 Nhập link MP3 tùy chỉnh...</option>
+                </select>
+              </div>
+              <div class="stage-upload-box mb-2" style="display:none;" data-stage="galaxy">
+                <input type="file" class="form-control form-control-sm stage-file-input" accept="audio/*" data-stage="galaxy">
+                <small class="field-hint">Hỗ trợ file .mp3, .wav, .m4a từ máy</small>
+              </div>
+              <div class="stage-url-box mb-2" style="display:none;" data-stage="galaxy">
+                <input type="url" class="form-control form-control-sm stage-url-input" placeholder="https://.../music.mp3" data-stage="galaxy">
+              </div>
+              <div class="scene-music-actions">
+                <button type="button" class="audio-preview-btn" data-stage="galaxy">▶️ Nghe thử</button>
+                <span class="audio-status-badge" data-stage="galaxy">Romantic Harp & Strings</span>
+              </div>
+            </div>
+          </div>
+        </div>
 
-      <!-- Confirmation after Launch -->
-      <div id="starlight-launched-feedback" class="lovegift-fade-up" style="display: none; margin-top: 1.5rem;">
-        <p class="font-script" style="font-size: 1.5rem; color: #ffd98e;" id="starlight-sent-title">
-          Điều ước đã được gửi đi ✨
-        </p>
-        <p class="font-sans" style="margin-top: 0.75rem; font-size: 0.95rem; line-height: 1.6; color: rgba(246, 234, 216, 0.75);" id="starlight-sent-msg">
-          Người ta nói điều ước theo sao băng sớm muộn cũng thành hiện thực. Từ đêm nay, sẽ luôn có một ngôi sao giữ lời ước ấy giúp cậu.
-        </p>
-        <p class="font-sans" style="margin-top: 1.25rem; font-size: 0.85rem; color: #ffd98e;" id="starlight-tap-hint">
-          Chạm vào bầu trời để thả thêm sao băng nhé ✧
-        </p>
-      </div>
+        <!-- SECTION 4: VÒNG QUAY MAY MẮN (6 QUÀ TÙY CHỈNH) -->
+        <div class="form-section highlight-section">
+          <div class="section-heading">
+            <span class="heading-icon">🎡</span>
+            <div>
+              <h3>Vòng Quay May Mắn (Lucky Spin Wheel)</h3>
+              <p>Món quà bất ngờ thú vị! Nhập 6 phần quà và lời nhắn tương ứng</p>
+            </div>
+          </div>
 
-      <!-- Action Navigation (Hiện sau khi gửi điều ước) -->
-      <div id="starlight-actions-wrap" style="margin-top: 2.5rem; display: none; flex-direction: column; gap: 0.85rem; width: 100%; max-width: 300px;">
-        <button type="button" class="lovegift-btn-gold" id="btn-open-wheel-starlight">
-          🎡 Quay thưởng nhận quà sinh nhật
-        </button>
-      </div>
-    </section>
+          <div class="form-row">
+            <div class="form-group col">
+              <label for="input-spin-limit">Số lượt quay tối đa/lần:</label>
+              <input type="number" id="input-spin-limit" class="form-control" min="1" max="10" value="1" placeholder="Số lượt quay tối đa (không bắt buộc)">
+            </div>
+            <div class="form-group col">
+              <label for="select-spin-mode">Chế độ kết quả:</label>
+              <select id="select-spin-mode" class="form-control form-select">
+                <option value="weighted" selected>Quay theo tỷ lệ % từng món quà</option>
+                <option value="fixed-1">Bắt buộc trúng Quà 1</option>
+                <option value="fixed-2">Bắt buộc trúng Quà 2</option>
+                <option value="fixed-3">Bắt buộc trúng Quà 3</option>
+                <option value="random">Ngẫu nhiên đều 6 ô (16.6%)</option>
+              </select>
+            </div>
+          </div>
 
+          <h4 class="sub-heading-title">✨ Nhập 6 quà tùy chỉnh</h4>
+
+          <div class="gifts-grid" id="gifts-inputs-container">
+            <!-- Quà 1 -->
+            <div class="gift-item-card">
+              <div class="gift-badge">Quà 1 🎂</div>
+              <div class="form-group">
+                <label>Tên quà 1:</label>
+                <input type="text" class="form-control gift-name" value="Bánh kem" placeholder="Ví dụ: Bánh kem, Trà sữa...">
+              </div>
+              <div class="form-group">
+                <label>Kết quả khi quay trúng 1:</label>
+                <textarea class="form-control gift-msg" rows="2" placeholder="Lời nhắn khi trúng...">Chúc mừng cậu đã may mắn trúng bánh kem nhé! Nhắn tớ liền để nhận quà nha 🎂✨</textarea>
+              </div>
+              <div class="form-group">
+                <label>Tỷ lệ 1 (%):</label>
+                <input type="number" class="form-control gift-rate" min="0" max="100" value="20">
+              </div>
+            </div>
+
+            <!-- Quà 2 -->
+            <div class="gift-item-card">
+              <div class="gift-badge">Quà 2 🧸</div>
+              <div class="form-group">
+                <label>Tên quà 2:</label>
+                <input type="text" class="form-control gift-name" value="Gấu bông" placeholder="Ví dụ: Gấu bông...">
+              </div>
+              <div class="form-group">
+                <label>Kết quả khi quay trúng 2:</label>
+                <textarea class="form-control gift-msg" rows="2">Chúc mừng cậu đã trúng một em gấu bông siêu đáng yêu 🧸! Nhắn tớ liền để nhận nha!</textarea>
+              </div>
+              <div class="form-group">
+                <label>Tỷ lệ 2 (%):</label>
+                <input type="number" class="form-control gift-rate" min="0" max="100" value="20">
+              </div>
+            </div>
+
+            <!-- Quà 3 -->
+            <div class="gift-item-card">
+              <div class="gift-badge">Quà 3 💸</div>
+              <div class="form-group">
+                <label>Tên quà 3:</label>
+                <input type="text" class="form-control gift-name" value="300.000đ" placeholder="Ví dụ: 300.000đ...">
+              </div>
+              <div class="form-group">
+                <label>Kết quả khi quay trúng 3:</label>
+                <textarea class="form-control gift-msg" rows="2">Oaaa! Cậu vừa hốt trọn 300.000đ vào túi rồi! Liên hệ ngay để nhận quà nào 💸</textarea>
+              </div>
+              <div class="form-group">
+                <label>Tỷ lệ 3 (%):</label>
+                <input type="number" class="form-control gift-rate" min="0" max="100" value="15">
+              </div>
+            </div>
+
+            <!-- Quà 4 -->
+            <div class="gift-item-card">
+              <div class="gift-badge">Quà 4 🧧</div>
+              <div class="form-group">
+                <label>Tên quà 4:</label>
+                <input type="text" class="form-control gift-name" value="400.000đ" placeholder="Ví dụ: 400.000đ...">
+              </div>
+              <div class="form-group">
+                <label>Kết quả khi quay trúng 4:</label>
+                <textarea class="form-control gift-msg" rows="2">Xịn quá trời luôn! Cậu vừa ẵm ngay 400.000đ vào ví 🔥 Liên hệ ngay để nhận quà nha!</textarea>
+              </div>
+              <div class="form-group">
+                <label>Tỷ lệ 4 (%):</label>
+                <input type="number" class="form-control gift-rate" min="0" max="100" value="15">
+              </div>
+            </div>
+
+            <!-- Quà 5 -->
+            <div class="gift-item-card">
+              <div class="gift-badge">Quà 5 🎁</div>
+              <div class="form-group">
+                <label>Tên quà 5:</label>
+                <input type="text" class="form-control gift-name" value="Quà ngẫu nhiên" placeholder="Ví dụ: Quà ngẫu nhiên...">
+              </div>
+              <div class="form-group">
+                <label>Kết quả khi quay trúng 5:</label>
+                <textarea class="form-control gift-msg" rows="2">Bạn vừa trúng một phần quà ngẫu nhiên 🎉 Vui lòng liên hệ để nhận quà nhé!</textarea>
+              </div>
+              <div class="form-group">
+                <label>Tỷ lệ 5 (%):</label>
+                <input type="number" class="form-control gift-rate" min="0" max="100" value="15">
+              </div>
+            </div>
+
+            <!-- Quà 6 -->
+            <div class="gift-item-card">
+              <div class="gift-badge">Quà 6 ⭐</div>
+              <div class="form-group">
+                <label>Tên quà 6:</label>
+                <input type="text" class="form-control gift-name" value="Tự chọn quà" placeholder="Ví dụ: Tự chọn quà...">
+              </div>
+              <div class="form-group">
+                <label>Kết quả khi quay trúng 6:</label>
+                <textarea class="form-control gift-msg" rows="2">Bạn vừa nhận được quyền tự chọn quà tặng 🎁 Mau nhắn tin chọn quà nào!</textarea>
+              </div>
+              <div class="form-group">
+                <label>Tỷ lệ 6 (%):</label>
+                <input type="number" class="form-control gift-rate" min="0" max="100" value="15">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 5: BỘ ICON & STICKER TƯƠNG TÁC CHO NGƯỜI DÙNG -->
+        <div class="form-section">
+          <div class="section-heading">
+            <span class="heading-icon">💖</span>
+            <div>
+              <h3>Chọn Bộ Icon Tương Tác (Sticker Picker)</h3>
+              <p>Người nhận có thể bấm vào thanh dock để thả các icon này bay bổng khắp màn hình</p>
+            </div>
+          </div>
+
+          <div class="icon-presets-wrapper">
+            <label class="icon-preset-card active">
+              <input type="radio" name="icon-theme" value="birthday" checked>
+              <div class="preset-emojis">🎂 🎉 🎈 🎁 🍰 🕯️</div>
+              <div class="preset-name">Tiệc Sinh Nhật Rực Rỡ</div>
+            </label>
+
+            <label class="icon-preset-card">
+              <input type="radio" name="icon-theme" value="love">
+              <div class="preset-emojis">💖 💕 💌 💘 🥰 🌸</div>
+              <div class="preset-name">Ngọt Ngào & Lãng Mạn</div>
+            </label>
+
+            <label class="icon-preset-card">
+              <input type="radio" name="icon-theme" value="cute">
+              <div class="preset-emojis">🐱 🐶 🐰 🐻 🦄 🐾</div>
+              <div class="preset-name">Thú Cưng Siêu Dễ Thương</div>
+            </label>
+
+            <label class="icon-preset-card">
+              <input type="radio" name="icon-theme" value="magic">
+              <div class="preset-emojis">✨ ⭐ 🌟 🌙 🪄 💫</div>
+              <div class="preset-name">Ánh Sao & Phép Thuật</div>
+            </label>
+          </div>
+
+          <div class="form-group" style="margin-top: 15px;">
+            <label for="input-custom-icons">Hoặc tự nhập các icon theo ý muốn (cách nhau bởi dấu cách):</label>
+            <input type="text" id="input-custom-icons" class="form-control" placeholder="💖 🎂 ✨ 🌸 🎉 🧸">
+          </div>
+        </div>
+
+        <!-- SECTION 6: ALBUM ẢNH KỶ NIỆM (POLAROID) -->
+        <div class="form-section">
+          <div class="section-heading">
+            <span class="heading-icon">📸</span>
+            <div>
+              <h3>Album Ảnh Kỷ Niệm (Polaroid Photos)</h3>
+              <p>Thêm những bức ảnh đáng yêu kèm lời nhắn dưới mỗi khung ảnh</p>
+            </div>
+          </div>
+
+          <div id="polaroid-items-list" class="polaroid-list">
+            <!-- Render danh sách ảnh -->
+          </div>
+
+          <div class="photo-action-buttons">
+            <button type="button" class="btn btn-outline btn-sm" id="btn-add-photo-url">
+              ➕ Thêm ảnh bằng Link URL
+            </button>
+            <label class="btn btn-outline btn-sm upload-label">
+              📁 Tải ảnh từ thiết bị
+              <input type="file" id="input-photo-upload" accept="image/*" multiple style="display: none;">
+            </label>
+          </div>
+        </div>
+
+        <!-- NÚT HOÀN TẤT & TẠO LINK -->
+        <div class="submit-actions-panel">
+          <button type="button" class="btn btn-secondary btn-lg" id="btn-preview-card">
+            👁️ Xem Trước Thiệp
+          </button>
+          <button type="submit" class="btn btn-primary btn-lg" id="btn-create-share-link">
+            🚀 Tạo Link Thiệp & Sao Chép
+          </button>
+        </div>
+
+      </form>
+    </div>
   </main>
 
-  <!-- ========================================================= -->
-  <!-- LIGHTBOX MODAL (XEM ẢNH KỶ NIỆM)                          -->
-  <!-- ========================================================= -->
-  <div class="lovegift-lightbox-modal" id="lightbox-modal" style="display: none;">
-    <button type="button" class="lovegift-lightbox-close" id="lightbox-close-btn" title="Đóng">✕</button>
-    
-    <div class="lovegift-lightbox-card lovegift-lightbox-in">
-      <img src="" alt="Kỷ niệm" class="lovegift-lightbox-img" id="lightbox-img">
-      <div class="lovegift-lightbox-caption" id="lightbox-caption"></div>
-    </div>
+  <!-- MODAL KẾT QUẢ TẠO LINK CHIA SẺ -->
+  <div class="share-modal" id="share-modal">
+    <div class="modal-card">
+      <button type="button" class="modal-close" id="modal-close-btn">&times;</button>
+      <div class="modal-icon">🎉</div>
+      <h3 class="modal-title">Thiệp Đã Sẵn Sàng Gửi Đi!</h3>
+      <p class="modal-desc">Đường link dưới đây chứa trọn vẹn thiệp chúc mừng, nhạc, ảnh và vòng quay 6 món quà mà bạn vừa tạo:</p>
 
-    <!-- Navigation Arrows -->
-    <div style="display: flex; gap: 1.5rem; margin-top: 1.25rem;">
-      <button type="button" class="lovegift-btn-secondary" id="lightbox-prev-btn" style="padding: 0.5rem 1.25rem;">← Trước</button>
-      <button type="button" class="lovegift-btn-secondary" id="lightbox-next-btn" style="padding: 0.5rem 1.25rem;">Tiếp →</button>
-    </div>
-  </div>
-
-  <!-- ========================================================= -->
-  <!-- MODAL: VÒNG QUAY MAY MẮN (LUCKY SPIN WHEEL)               -->
-  <!-- ========================================================= -->
-  <div class="modal-backdrop" id="modal-lucky-wheel" style="display: none;">
-    <div class="modal-card wheel-modal-card">
-      <button type="button" class="modal-close-btn" id="btn-close-wheel">✕</button>
-      
-      <div class="modal-header">
-        <span class="modal-badge">🎡 Mini-Game May Mắn</span>
-        <h3 class="modal-title" id="wheel-modal-title">Vòng Quay May Mắn Sinh Nhật 🎁</h3>
-        <p class="modal-subtitle" id="wheel-modal-subtitle">Chạm nút QUAY NGAY để nhận một món quà bí mật!</p>
+      <div class="copy-url-group">
+        <input type="text" id="share-url-input" class="form-control url-input" readonly>
+        <button type="button" class="btn btn-primary" id="btn-copy-url">
+          📋 Sao chép
+        </button>
+      </div>
+      <div id="copy-success-msg" class="copy-success-badge" style="display: none;">
+        ✅ Đã sao chép link vào bộ nhớ tạm! Mau gửi cho người ấy nào!
       </div>
 
-      <div class="wheel-stage-wrapper">
-        <div class="wheel-pointer-arrow">🔻</div>
-        <div class="wheel-outer-glow"></div>
-        <canvas id="lucky-wheel-canvas" width="360" height="360" class="wheel-canvas"></canvas>
-        <button type="button" class="wheel-center-btn" id="btn-spin-wheel">
-          <span>QUAY</span>
+      
+      <div class="qr-frame-picker" style="margin-bottom: 10px; text-align: center;">
+        <label for="qr-frame-select" style="color: #fff; font-size: 0.9em; display: inline-block; margin-bottom: 5px;">Mẫu QR Code Cute:</label>
+        <select id="qr-frame-select" class="form-control form-select" style="max-width: 250px; margin: 0 auto;">
+          <option value="none" selected>Mặc định (Không khung)</option>
+          <option value="heart">💖 Trái Tim Ngọt Ngào</option>
+          <option value="teddy">🧸 Gấu Bông Đáng Yêu</option>
+          <option value="gift">🎁 Hộp Quà Sinh Nhật</option>
+        </select>
+      </div>
+      
+      <div id="qr-code-container" style="text-align:center; margin: 15px 0; min-height: 200px;">
+        <p style="font-size: 0.9em; color:#fff; margin-bottom:10px;">Hoặc quét mã QR Code để mở thiệp:</p>
+        <canvas id="qrcode" style="display: block; margin: 15px auto; width: 180px; height: 180px; background: #fff; border-radius: 12px; padding: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);"></canvas>
+      </div>
+<div class="modal-action-row">
+        <a href="#" target="_blank" class="btn btn-outline" id="btn-open-live-link">
+          🔗 Mở xem trực tiếp
+        </a>
+        <button type="button" class="btn btn-outline" id="btn-download-config">
+          💾 Tải file config.js (Cho GitHub)
         </button>
       </div>
 
-      <p class="wheel-bottom-hint">✨ Mỗi người nhận đều có 100% cơ hội trúng quà đặc biệt!</p>
-    </div>
-  </div>
-
-  <!-- POPUP CHÚC MỪNG TRÚNG THƯỞNG VÒNG QUAY -->
-  <div class="prize-popup-overlay" id="prize-popup-overlay" style="display: none;">
-    <div class="prize-popup-card">
-      <div class="prize-sparkles">✨🎉✨</div>
-      <h3 class="prize-title">Chúc Mừng Cậu! 🎁</h3>
-      <div class="prize-name-highlight" id="prize-name-display">1 Chầu Trà Sữa 🧋</div>
-      <p class="prize-message" id="prize-message-display">Được khao 1 ly trà sữa full topping bất kỳ lúc nào!</p>
-      <button type="button" class="btn-claim-prize" id="btn-claim-prize">
-        💖 Nhận Quà Ngay
-      </button>
-    </div>
-  </div>
-
-  <!-- ========================================================= -->
-  <!-- MODAL: PHOTOBOOTH SELFIE                                  -->
-  <!-- ========================================================= -->
-  <div class="modal-backdrop" id="modal-photobooth" style="display: none; z-index: 105;">
-    <div class="modal-card" style="padding: 1.5rem 1rem; max-height: 90vh; overflow-y: auto;">
-      <h3 class="modal-title" style="margin-bottom: 1rem;">Lưu Lại Khoảnh Khắc 📸</h3>
-      
-      <!-- Thông báo camera nhẹ nhàng khi bị chặn hoặc không hỗ trợ -->
-      <div id="selfie-camera-notice" style="display: none; background: rgba(201, 162, 75, 0.15); border: 1px dashed #ffd98e; border-radius: 10px; padding: 10px 14px; margin-bottom: 12px; font-size: 0.85rem; color: #ffd98e; text-align: center; line-height: 1.4;">
-        ⚠️ Trình duyệt đang chặn camera trực tiếp (cần chạy qua localhost/https). Hãy bấm 'Tải ảnh từ máy' hoặc 'Bỏ qua' để tiếp tục!
-      </div>
-
-      <div style="position: relative; width: 100%; border-radius: 12px; overflow: hidden; background: #000; aspect-ratio: 3/4;">
-        <video id="selfie-video" autoplay playsinline style="width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1);"></video>
-        <canvas id="selfie-canvas" style="display: none; width: 100%; height: 100%; object-fit: cover;"></canvas>
-        <div id="selfie-countdown-overlay" style="display: none; position: absolute; inset: 0; align-items: center; justify-content: center; font-size: 5rem; font-weight: bold; color: white; text-shadow: 0 0 20px rgba(0,0,0,0.8); z-index: 5;"></div>
-        <div id="selfie-flash-overlay" style="display: none; position: absolute; inset: 0; background: white; z-index: 10; opacity: 1; transition: opacity 0.5s ease;"></div>
-      </div>
-
-      <!-- Input file để người dùng tải ảnh từ máy nếu camera bị chặn -->
-      <input type="file" id="selfie-file-input" accept="image/*" capture="user" style="display: none;">
-
-      <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap;" id="selfie-initial-actions">
-        <button type="button" class="lovegift-btn-gold" id="btn-take-selfie" style="flex: 1; min-width: 120px;">📸 Chụp ảnh</button>
-        <button type="button" class="lovegift-btn-secondary" id="btn-upload-selfie" style="flex: 1; min-width: 120px;">📁 Tải ảnh từ máy</button>
-        <button type="button" class="lovegift-btn-secondary" id="btn-skip-selfie" style="flex: 1; min-width: 120px;">⏭️ Bỏ qua / Xem kết thúc</button>
-      </div>
-      <div style="margin-top: 1.5rem; display: none; gap: 0.75rem; justify-content: center; flex-wrap: wrap;" id="selfie-review-actions">
-        <button type="button" class="lovegift-btn-secondary" id="btn-retake-selfie" style="flex: 1; min-width: 120px;">🔄 Chụp lại</button>
-        <button type="button" class="lovegift-btn-gold" id="btn-confirm-selfie" style="flex: 1; min-width: 120px;">✅ Dùng ảnh này</button>
+      <div class="github-guide-card">
+        <strong>💡 Mách bạn cách up lên GitHub Pages:</strong>
+        <p>1. Đẩy toàn bộ thư mục này lên GitHub Repository của bạn.<br>
+        2. Vào <b>Settings > Pages > Branch 'main' > Save</b>.<br>
+        3. Web của bạn sẽ hoạt động vĩnh viễn và bạn có thể tạo vô số thiệp chỉ với một trang duy nhất!</p>
       </div>
     </div>
   </div>
 
-  <!-- ========================================================= -->
-  <!-- MODAL: TẢI ẢNH STORY TIKTOK / IG                          -->
-  <!-- ========================================================= -->
-  <div class="modal-backdrop" id="modal-story-export" style="display: none; z-index: 106;">
-    <div class="modal-card" style="padding: 1rem; width: 95%; max-width: 360px; background: transparent; box-shadow: none;">
-      <!-- Khung sẽ được render bởi html2canvas -->
-      <div id="story-export-frame" style="position: relative; width: 100%; aspect-ratio: 9/16; background: #2c1520; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 2.5rem 1.5rem; border: 2px solid rgba(201, 162, 75, 0.4);">
-        <!-- Background Twinkles -->
-        <div style="position: absolute; inset: 0; background: radial-gradient(circle at 50% 30%, rgba(201, 162, 75, 0.15), transparent 70%); z-index: 0;"></div>
-        
-        <h3 class="font-serif" style="color: var(--color-gold); font-size: 1.8rem; z-index: 1;">Happy Birthday</h3>
-        <p class="font-script" id="export-recipient" style="color: #fff; margin-top: -0.5rem; font-size: 1.5rem; z-index: 1;">Hương Giang</p>
-        
-        <div style="width: 160px; height: 160px; border-radius: 50%; overflow: hidden; border: 3px solid var(--color-gold); margin: 1rem 0; z-index: 1; box-shadow: 0 0 15px rgba(255,214,150,0.4); background: #1a0c13;">
-          <img id="export-selfie-img" src="" style="width: 100%; height: 100%; object-fit: cover; display: none; transform: none;">
-        </div>
+  <!-- Audio Element để thử nhạc -->
+  <audio id="creator-audio-player"></audio>
 
-        <div style="z-index: 1; text-align: center; background: rgba(0,0,0,0.5); border-radius: 12px; padding: 1rem; width: 100%; border: 1px solid rgba(255,255,255,0.1);">
-          <p style="font-size: 0.9rem; color: #aaa; margin-bottom: 0.3rem;">Quà Tặng Bí Mật</p>
-          <p id="export-prize-name" style="font-size: 1.2rem; color: #ffd98e; font-weight: bold;">Một Hộp Quà 🎁</p>
-        </div>
-        
-        <p class="font-sans" style="color: rgba(255,255,255,0.8); font-size: 0.95rem; margin-top: 1rem; z-index: 1; text-align: center;">Kỷ niệm ngày sinh nhật thật tuyệt vời ✨</p>
-      </div>
-
-      <div style="margin-top: 1.5rem; display: flex; flex-direction: column; gap: 0.8rem; width: 100%;">
-        <button type="button" class="lovegift-btn-gold" id="btn-download-story">📥 Tải Ảnh Story Về Máy</button>
-        <button type="button" class="lovegift-btn-secondary" id="btn-finish-experience">Hoàn Tất & Khép Lại</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- OUTRO FADE TO BLACK -->
-  <div id="outro-overlay" style="position: fixed; inset: 0; background: #000; opacity: 0; pointer-events: none; z-index: 200; transition: opacity 2.5s ease; display: flex; align-items: center; justify-content: center; text-align: center; padding: 2rem;">
-    <p class="font-script" style="color: #ffd98e; font-size: 2.2rem; opacity: 0; transition: opacity 2s ease 1s; line-height: 1.5;" id="outro-text">Chúc cậu một tuổi mới rực rỡ và luôn hạnh phúc! 🎂✨</p>
-  </div>
-
-  <!-- SCRIPTS -->
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-  <script src="js/confetti.min.js"></script>
+  <!-- Scripts -->
   <script src="config.js"></script>
   <script src="js/card-storage.js"></script>
-  <script src="js/audio.js"></script>
-  <script src="js/main.js"></script>
+  <script src="js/creator.js"></script>
 </body>
 </html>

@@ -802,9 +802,9 @@ function initFormSubmit() {
         // Điều này đảm bảo QR Code luôn chứa IP mạng LAN đúng khi test qua Wi-Fi
         const buildFallbackBase = () => {
           if (window.location.protocol.startsWith('http')) {
-            return `${window.location.origin}/index.html`;
+            return `${window.location.origin}/gift.html`;
           }
-          return 'http://localhost:3000/index.html';
+          return 'http://localhost:3000/gift.html';
         };
 
         if (isFileProtocol || isUrlTooLong) {
@@ -915,11 +915,11 @@ function initFormSubmit() {
     btnViewDemo.addEventListener("click", (e) => {
       e.preventDefault();
       try {
-        const viewUrl = `${window.location.origin}/index.html`;
+        const viewUrl = `${window.location.origin}/gift.html`;
         window.location.href = viewUrl;
       } catch (err) {
         console.error("Lỗi xem thiệp mẫu:", err);
-        window.location.href = "index.html"; // fallback
+        window.location.href = "gift.html"; // fallback
       }
     });
   }
