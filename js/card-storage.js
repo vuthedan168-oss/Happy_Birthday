@@ -78,8 +78,9 @@ const CardStorage = {
   // Tạo URL chia sẻ hoàn chỉnh
   createShareUrl(data) {
     const encodedData = this.encode(data);
-    const viewUrl = `${window.location.origin}/gift.html#card=${encodedData}`;
-    return viewUrl;
+    const baseUrl = new URL('gift.html', window.location.href).href;
+    const targetUrl = baseUrl + '#card=' + encodedData;
+    return targetUrl;
   }
 };
 
