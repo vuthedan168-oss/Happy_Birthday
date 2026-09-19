@@ -7,9 +7,9 @@
 
 const BIRTHDAY_CONFIG = {
   // 1. THÔNG TIN NGƯỜI NHẬN & NGƯỜI GỬI
-  recipientName: "Hương Giang", // Tên người nhận (ví dụ: Hương Giang, Cậu, Em, Bạn)
+  recipientName: "Thế Dân", // Tên người nhận (ví dụ: Hương Giang, Cậu, Em, Bạn)
   senderName: "Tớ", // Tên người gửi (ví dụ: Tớ, Anh, Bạn Thân)
-  nickname: "Cô bạn đáng yêu & rạng rỡ nhất ✨",
+  nickname: "Bạn đáng yêu & rạng rỡ nhất ✨",
 
   // 2. NGÀY SINH NHẬT (Kích hoạt vòng quay số Date Reel)
   birthDay: 17, // Ngày sinh (1 - 31)

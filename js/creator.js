@@ -4,6 +4,24 @@
  * =========================================================
  */
 
+const IMGBB_API_KEY = '6b1e627dfb25c1f8b76e06d59424fee6';
+async function uploadImageToCloud(file) {
+  const formData = new FormData();
+  formData.append('image', file);
+
+  const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+    method: 'POST',
+    body: formData
+  });
+
+  if (!response.ok) {
+    throw new Error('Upload failed');
+  }
+
+  const data = await response.json();
+  return data.data.url;
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   // 0. Auto-save nháp
   initAutoSaveDraft();
@@ -23,63 +41,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // 5. Xử lý tạo link & sao chép
   initFormSubmit();
 });
-
-/**
- * Quản lý IndexedDB cho lưu trữ ảnh không giới hạn
- */
-const PhotoDB = {
-  dbName: 'BirthdayCardDB',
-  storeName: 'uploaded_photos',
-  db: null,
-  
-  async init() {
-    if (this.db) return Promise.resolve();
-    return new Promise((resolve, reject) => {
-      const request = indexedDB.open(this.dbName, 1);
-      request.onupgradeneeded = (e) => {
-        const db = e.target.result;
-        if (!db.objectStoreNames.contains(this.storeName)) {
-          db.createObjectStore(this.storeName, { keyPath: 'id' });
-        }
-      };
-      request.onsuccess = (e) => {
-        this.db = e.target.result;
-        resolve();
-      };
-      request.onerror = () => reject(request.error);
-    });
-  },
-  
-  async savePhoto(id, url, caption) {
-    await this.init();
-    return new Promise((resolve, reject) => {
-      const tx = this.db.transaction(this.storeName, 'readwrite');
-      tx.objectStore(this.storeName).put({ id, url, caption });
-      tx.oncomplete = () => resolve();
-      tx.onerror = () => reject(tx.error);
-    });
-  },
-  
-  async getAllPhotos() {
-    await this.init();
-    return new Promise((resolve, reject) => {
-      const tx = this.db.transaction(this.storeName, 'readonly');
-      const req = tx.objectStore(this.storeName).getAll();
-      req.onsuccess = () => resolve(req.result);
-      req.onerror = () => reject(req.error);
-    });
-  },
-  
-  async deletePhoto(id) {
-    await this.init();
-    return new Promise((resolve, reject) => {
-      const tx = this.db.transaction(this.storeName, 'readwrite');
-      tx.objectStore(this.storeName).delete(id);
-      tx.oncomplete = () => resolve();
-      tx.onerror = () => reject(tx.error);
-    });
-  }
-};
 
 // State danh sách ảnh kỷ niệm
 let galleryPhotos = [
@@ -158,7 +119,7 @@ function initPhotoManager() {
       item.innerHTML = `
         <img src="${photo.url}" alt="Preview" class="polaroid-thumb" onerror="this.src='https://placehold.co/100x100?text=No+Image'">
         <div class="polaroid-inputs">
-          <input type="text" class="form-control form-control-sm photo-url-input" value="${photo.url.startsWith('data:') ? '(Ảnh đã tải lên)' : photo.url}" placeholder="Đường dẫn ảnh URL..." ${photo.url.startsWith('data:') ? 'readonly' : ''}>
+          <input type="text" class="form-control form-control-sm photo-url-input" value="${photo.url}" placeholder="Đường dẫn ảnh URL...">
           <input type="text" class="form-control form-control-sm photo-caption-input" value="${photo.caption}" placeholder="Chú thích cho ảnh...">
         </div>
         <button type="button" class="btn-remove-photo" title="Xóa ảnh này" data-index="${index}">&times;</button>
@@ -168,26 +129,18 @@ function initPhotoManager() {
       const captionInput = item.querySelector(".photo-caption-input");
       captionInput.addEventListener("input", (e) => {
         galleryPhotos[index].caption = e.target.value;
-        if (photo.id) {
-           PhotoDB.savePhoto(photo.id, photo.url, photo.caption);
-        }
       });
 
-      // Cập nhật url nếu không phải base64
+      // Cập nhật url
       const urlInput = item.querySelector(".photo-url-input");
-      if (!photo.url.startsWith("data:")) {
-        urlInput.addEventListener("change", (e) => {
-          galleryPhotos[index].url = e.target.value.trim();
-          renderList();
-        });
-      }
+      urlInput.addEventListener("change", (e) => {
+        galleryPhotos[index].url = e.target.value.trim();
+        renderList();
+      });
 
       // Xóa ảnh
       const btnRemove = item.querySelector(".btn-remove-photo");
-      btnRemove.addEventListener("click", async () => {
-        if (photo.id) {
-          await PhotoDB.deletePhoto(photo.id);
-        }
+      btnRemove.addEventListener("click", () => {
         galleryPhotos.splice(index, 1);
         renderList();
       });
@@ -201,85 +154,53 @@ function initPhotoManager() {
   // Nút thêm ảnh từ URL
   if (btnAddUrl) {
     btnAddUrl.addEventListener("click", () => {
-      const url = prompt("Nhập đường dẫn (URL) ảnh của bạn:\n(Ví dụ: https://i.imgur.com/example.jpg)");
+      const url = prompt("Nhập đường dẫn ảnh (URL):");
       if (url && url.trim()) {
         galleryPhotos.push({
           url: url.trim(),
-          caption: "Khoảnh khắc đáng nhớ 🌸"
+          caption: "Kỷ niệm mới ✨"
         });
         renderList();
       }
     });
   }
 
-  // Tải ảnh từ thiết bị (Nén max 800px & Lưu IndexedDB)
+  // Tải ảnh từ thiết bị (Upload lên mây)
   if (inputUpload) {
     inputUpload.addEventListener("change", async (e) => {
       const files = Array.from(e.target.files || []);
       if (files.length === 0) return;
 
-      for (const file of files) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          // Co tỉ lệ về độ phân giải tối ưu 800px, chất lượng 0.7
-          compressImage(event.target.result, 800, 0.7, async (compressedDataUrl) => {
-            const newId = 'img_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
-            const caption = file.name.replace(/\.[^/.]+$/, "") || "Kỷ niệm đẹp ✨";
-            
-            await PhotoDB.savePhoto(newId, compressedDataUrl, caption);
-            galleryPhotos.push({
-              id: newId,
-              url: compressedDataUrl,
-              caption: caption
-            });
-            renderList();
+      const uploadStatus = document.getElementById("upload-text-status");
+      const oldText = uploadStatus ? uploadStatus.textContent : "📁 Tải ảnh từ thiết bị";
+      if (uploadStatus) {
+        uploadStatus.textContent = "⏳ Đang tải ảnh lên máy chủ mây, vui lòng đợi...";
+      }
+      inputUpload.disabled = true;
+
+      try {
+        for (const file of files) {
+          const url = await uploadImageToCloud(file);
+          const caption = file.name.replace(/\\.[^/.]+$/, "") || "Kỷ niệm đẹp ✨";
+
+          galleryPhotos.push({
+            url: url,
+            caption: caption
           });
-        };
-        reader.readAsDataURL(file);
+        }
+        renderList();
+      } catch (error) {
+        console.error("Lỗi upload ảnh:", error);
+        alert("Đã có lỗi khi tải ảnh lên máy chủ. Vui lòng thử lại!");
+      } finally {
+        if (uploadStatus) {
+          uploadStatus.textContent = oldText;
+        }
+        inputUpload.disabled = false;
+        inputUpload.value = "";
       }
     });
   }
-
-  // Tải ảnh tự động từ IndexedDB khi khởi tạo
-  PhotoDB.getAllPhotos().then(photos => {
-    if (photos && photos.length > 0) {
-      photos.forEach(p => {
-        galleryPhotos.push({ id: p.id, url: p.url, caption: p.caption });
-      });
-      renderList();
-    }
-  }).catch(err => console.error("Lỗi tải ảnh IDB:", err));
-}
-
-/**
- * Nén ảnh canvas nhỏ gọn để tiết kiệm URL
- */
-function compressImage(src, maxDim, quality, callback) {
-  const img = new Image();
-  img.onload = () => {
-    let width = img.width;
-    let height = img.height;
-
-    if (width > height) {
-      if (width > maxDim) {
-        height = Math.round((height * maxDim) / width);
-        width = maxDim;
-      }
-    } else {
-      if (height > maxDim) {
-        width = Math.round((width * maxDim) / height);
-        height = maxDim;
-      }
-    }
-
-    const canvas = document.createElement("canvas");
-    canvas.width = width;
-    canvas.height = height;
-    const ctx = canvas.getContext("2d");
-    ctx.drawImage(img, 0, 0, width, height);
-    callback(canvas.toDataURL("image/jpeg", quality));
-  };
-  img.src = src;
 }
 
 // State danh sách câu hỏi Quiz động
@@ -660,7 +581,7 @@ function collectFormData() {
 
   // LỖI 5 FIX: Thêm color mặc định cho từng gift item (dùng palette hài hòa)
   // và đổi tên từ "gifts" sang "prizes" để viewer (main.js drawLuckyWheel) đọc đúng priority
-  const DEFAULT_WHEEL_COLORS = ['#FF6B6B','#4ECDC4','#FFD93D','#FF8E72','#6C5CE7','#FFAAA6','#A29BFE','#FD79A8','#55EFC4','#FDCB6E'];
+  const DEFAULT_WHEEL_COLORS = ['#FF6B6B', '#4ECDC4', '#FFD93D', '#FF8E72', '#6C5CE7', '#FFAAA6', '#A29BFE', '#FD79A8', '#55EFC4', '#FDCB6E'];
   const prizes = gifts.map((g, idx) => ({
     ...g,
     color: g.color || DEFAULT_WHEEL_COLORS[idx % DEFAULT_WHEEL_COLORS.length]
@@ -704,31 +625,26 @@ function collectFormData() {
 }
 
 /**
- * Lưu backup vào storage bỏ qua ảnh Base64 (Ảnh Base64 đã lưu vào IndexedDB)
+ * Lưu backup vào storage
  */
 function saveToStorage(key, data) {
   try {
-    const textOnlyData = { ...data, gallery: [] };
-    
-    // Chỉ giữ lại các link URL dạng http/https để backup
-    if (data.gallery) {
-      textOnlyData.gallery = data.gallery.filter(p => !p.url.startsWith('data:'));
-    }
-    
+    const textOnlyData = { ...data };
+
     // Loại bỏ Base64 Audio
     if (textOnlyData.sceneMusic) {
       for (const stage in textOnlyData.sceneMusic) {
-         if (textOnlyData.sceneMusic[stage] && textOnlyData.sceneMusic[stage].src && textOnlyData.sceneMusic[stage].src.startsWith('data:')) {
-           textOnlyData.sceneMusic[stage].src = '';
-         }
+        if (textOnlyData.sceneMusic[stage] && textOnlyData.sceneMusic[stage].src && textOnlyData.sceneMusic[stage].src.startsWith('data:')) {
+          textOnlyData.sceneMusic[stage].src = '';
+        }
       }
     }
     if (textOnlyData.music && textOnlyData.music.src && textOnlyData.music.src.startsWith('data:')) {
-       textOnlyData.music.src = '';
+      textOnlyData.music.src = '';
     }
-    
+
     localStorage.setItem(key, JSON.stringify(textOnlyData));
-  } catch(finalErr) {
+  } catch (finalErr) {
     console.error("Lưu backup cấu hình text thất bại:", finalErr);
   }
 }
@@ -753,29 +669,20 @@ function initFormSubmit() {
       const data = collectFormData();
       // Lưu vào Storage làm bản sao lưu với fallback
       saveToStorage("custom_birthday_card", data);
-      
-      let base64PhotoCount = 0;
-      if (data.gallery) {
-        base64PhotoCount = data.gallery.filter(p => p.url.startsWith('data:')).length;
-      }
-      
-      if (base64PhotoCount > 3) {
-        alert("⚠️ Cảnh báo: Bạn đã tải lên hơn 3 ảnh từ thiết bị.\n\nĐường link chia sẻ trực tiếp (URL Hash) sẽ quá dài và có thể bị trình duyệt từ chối.\n\n💡 Lời khuyên: Hãy nhấn nút 'Tải file config.js' và làm theo hướng dẫn để đẩy lên GitHub Pages, giúp lưu trữ ảnh không giới hạn!");
-      }
 
       // Sinh Link chia sẻ 100% Client-side
       const viewUrl = window.CardStorage.createShareUrl(data);
       if (shareInput) shareInput.value = viewUrl;
       if (btnOpenLive) btnOpenLive.href = viewUrl;
       if (copyMsg) copyMsg.style.display = "none";
-      
+
       // Generate Fancy QR Code
       const qrCanvas = document.getElementById('qrcode');
       const qrFrameSelect = document.getElementById('qr-frame-select');
-      
+
       const drawQR = () => {
         if (!qrCanvas) return;
-        
+
         // Đảm bảo Canvas luôn được hiển thị với kích thước chuẩn
         qrCanvas.style.setProperty('display', 'block', 'important');
         qrCanvas.style.setProperty('margin', '15px auto', 'important');
@@ -792,7 +699,7 @@ function initFormSubmit() {
         }
 
         const frameType = qrFrameSelect ? qrFrameSelect.value : 'none';
-        
+
         // Xác định link render QR: nếu URL quá dài hoặc dính file:///, fallback về URL hợp lệ ngắn gọn
         let qrRenderUrl = viewUrl;
         const isFileProtocol = !qrRenderUrl || qrRenderUrl.startsWith('file:') || window.location.protocol === 'file:';
@@ -813,8 +720,8 @@ function initFormSubmit() {
 
         const safeRenderCanvas = (targetUrl) => {
           try {
-            QRCode.toCanvas(qrCanvas, targetUrl, { 
-              width: 220, 
+            QRCode.toCanvas(qrCanvas, targetUrl, {
+              width: 220,
               margin: 2,
               errorCorrectionLevel: frameType !== 'none' ? 'H' : 'M',
               color: { dark: '#000000', light: '#ffffff' }
@@ -828,36 +735,36 @@ function initFormSubmit() {
                 }
                 return;
               }
-              
+
               // Vẽ tiếp icon/khung (Trái Tim 💖, Gấu 🧸, Hộp Quà 🎁) vào tâm Canvas
               if (frameType !== 'none') {
                 try {
                   const ctx = qrCanvas.getContext('2d');
                   const center = qrCanvas.width / 2;
                   const iconSize = 46;
-                  
+
                   // Vẽ nền tròn trắng ở giữa
                   ctx.fillStyle = '#ffffff';
                   ctx.beginPath();
                   ctx.arc(center, center, iconSize / 2 + 2, 0, Math.PI * 2);
                   ctx.fill();
-                  
+
                   // Chèn icon Cute
                   ctx.font = '32px Arial';
                   ctx.textAlign = 'center';
                   ctx.textBaseline = 'middle';
-                  
+
                   let emoji = '';
                   if (frameType === 'heart') emoji = '💖';
                   else if (frameType === 'teddy') emoji = '🧸';
                   else if (frameType === 'gift') emoji = '🎁';
-                  
+
                   ctx.fillText(emoji, center, center + 3);
                 } catch (iconErr) {
                   console.error("Lỗi vẽ icon QR:", iconErr);
                 }
               }
-              
+
               // Ép Canvas hiển thị ngay lập tức, không để bị ẩn CSS display: none hay chiều cao 0px
               qrCanvas.style.setProperty('display', 'block', 'important');
               qrCanvas.style.setProperty('margin', '15px auto', 'important');
@@ -931,7 +838,7 @@ function initFormSubmit() {
         const data = collectFormData();
         saveToStorage("custom_birthday_card", data);
         const viewUrl = window.CardStorage.createShareUrl(data);
-        
+
         window.open(viewUrl, "_blank");
       } catch (err) {
         console.error("Lỗi xem trước thiệp:", err);
@@ -953,9 +860,9 @@ function initFormSubmit() {
         }
         saveToStorage("custom_birthday_card", data);
         const viewUrl = window.CardStorage.createShareUrl(data);
-        
-        const previewCdUrl = viewUrl.includes("?") 
-          ? `${viewUrl}&countdown=preview` 
+
+        const previewCdUrl = viewUrl.includes("?")
+          ? `${viewUrl}&countdown=preview`
           : viewUrl.replace("#", "?countdown=preview#");
         window.open(previewCdUrl, "_blank");
       } catch (err) {
@@ -971,7 +878,7 @@ function initFormSubmit() {
     btnQuickSetBday.addEventListener("click", () => {
       const day = parseInt(document.getElementById("input-birth-day")?.value, 10) || 17;
       const month = parseInt(document.getElementById("input-birth-month")?.value, 10) || 7;
-      
+
       const now = new Date();
       let targetYear = now.getFullYear();
       let targetDate = new Date(targetYear, month - 1, day, 0, 0, 0);
@@ -979,12 +886,12 @@ function initFormSubmit() {
         targetYear++;
         targetDate = new Date(targetYear, month - 1, day, 0, 0, 0);
       }
-      
+
       const yyyy = targetDate.getFullYear();
       const mm = String(targetDate.getMonth() + 1).padStart(2, "0");
       const dd = String(targetDate.getDate()).padStart(2, "0");
       const formatted = `${yyyy}-${mm}-${dd}T00:00`;
-      
+
       const startInput = document.getElementById("input-start-date");
       if (startInput) {
         startInput.value = formatted;
@@ -1054,10 +961,10 @@ function initAutoSaveDraft() {
   try {
     const form = document.getElementById("creator-form");
     if (!form) return;
-    
+
     // Chọn tất cả các input text, number, textarea, date
     const inputs = form.querySelectorAll('input[type="text"], input[type="number"], input[type="datetime-local"], textarea');
-    
+
     // 1. Khôi phục từ draft (nếu có)
     const draftStr = localStorage.getItem("birthday_card_draft");
     if (draftStr) {
@@ -1068,7 +975,7 @@ function initAutoSaveDraft() {
         }
       });
     }
-    
+
     // 2. Lắng nghe thay đổi và lưu nhẹ (chỉ văn bản)
     const saveDraft = () => {
       try {
@@ -1083,7 +990,7 @@ function initAutoSaveDraft() {
         console.error("Lỗi auto-save draft:", e);
       }
     };
-    
+
     inputs.forEach(input => {
       input.addEventListener("input", saveDraft);
       input.addEventListener("change", saveDraft);
