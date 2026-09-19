@@ -1,0 +1,92 @@
+.lovegift-stage-bg{background:radial-gradient(58% 46% at 50% 40%,#783a3c8c 0%,#5a2c3440 42%,#2c152000 72%),linear-gradient(#3a1e27 0%,#2c1520 52%,#1e0e16 100%)}
+.lovegift-kicker{font-family:var(--font-sans), sans-serif;text-transform:uppercase;letter-spacing:.28em;color:var(--color-rose);font-size:.72rem;font-weight:600}
+@keyframes lovegiftFlicker{0%,to{opacity:1;transform:scale(1)rotate(-1deg)}25%{opacity:.92;transform:scale(1.06,.96)rotate(1.5deg)}50%{opacity:1;transform:scale(.96,1.05)rotate(-1.5deg)}75%{opacity:.95;transform:scale(1.03,.98)rotate(1deg)}}
+.lovegift-flame{transform-origin:50% 90%;animation:1.6s ease-in-out infinite lovegiftFlicker}
+@keyframes lovegiftBlowing{0%{opacity:1;transform:scale(1)rotate(-3deg)}15%{opacity:.82;transform:scale(.82,1.2)rotate(10deg)}30%{opacity:1;transform:scale(1.16,.84)rotate(-9deg)}45%{opacity:.78;transform:scale(.86,1.14)rotate(12deg)}60%{opacity:.96;transform:scale(1.12,.9)rotate(-11deg)}75%{opacity:.8;transform:scale(.84,1.16)rotate(8deg)}to{opacity:1;transform:scale(1)rotate(-3deg)}}
+.lovegift-blowing{transform-origin:50% 90%;animation:.34s ease-in-out infinite lovegiftBlowing}
+@keyframes lovegiftBlowOut{0%{opacity:1;transform:rotate(0)scaleX(1)scaleY(1)}18%{opacity:1;transform:rotate(-22deg)scaleX(.85)scaleY(1.2)}36%{opacity:.95;transform:rotate(18deg)scaleX(1.18)scaleY(.8)}54%{opacity:.78;transform:rotate(-14deg)scaleX(.9)scaleY(1.15)}72%{opacity:.45;transform:rotate(10deg)scaleX(1.1)scaleY(.5)}to{opacity:0;transform:rotate(-4deg)scaleX(.55)scaleY(.03)}}
+.lovegift-blowout{transform-origin:50% 100%;animation:.8s ease-in forwards lovegiftBlowOut}
+@keyframes lovegiftSmoke{0%{opacity:0;transform:translate(-50%)scaleX(.5)scaleY(.6)}22%{opacity:.45}to{opacity:0;transform:translate(-50%,-66px)scaleX(1.9)scaleY(2.6)}}
+.lovegift-smoke{filter:blur(2px);transform-origin:50% 100%;pointer-events:none;background:linear-gradient(#d4d4d400,#d4d4d48c);border-radius:50%;width:7px;height:18px;animation:1.7s ease-out .5s forwards lovegiftSmoke}
+@keyframes lovegiftMatchLight{0%{opacity:0;transform:translate(110px)}14%{opacity:1}50%{opacity:1;transform:translate(0)}70%{opacity:1;transform:translate(0)}to{opacity:0;transform:translate(110px)}}
+.lovegift-match{will-change:transform, opacity;animation:3.4s ease-in-out forwards lovegiftMatchLight}
+@keyframes lovegiftSway{0%,to{transform:rotate(-.6deg)translateY(0)}50%{transform:rotate(.6deg)translateY(-4px)}}
+.lovegift-sway{transform-origin:50% 100%;animation:6s ease-in-out infinite lovegiftSway}
+@keyframes lovegiftMote{0%{opacity:0;transform:translateY(0)translate(0)}15%{opacity:.8}85%{opacity:.7}to{opacity:0;transform:translateY(-140px)translate(12px)}}
+.lovegift-mote{background:radial-gradient(circle,#ffce8cf2,#ff9a3d00);border-radius:9999px;width:4px;height:4px;animation:4.5s ease-in-out infinite lovegiftMote;position:absolute}
+@keyframes lovegiftPetalFall{0%{opacity:0;transform:translateY(-10vh)rotate(0)}10%{opacity:.95}90%{opacity:.9}to{opacity:0;transform:translateY(110vh)rotate(360deg)}}
+.lovegift-petal{will-change:transform;animation:linear infinite lovegiftPetalFall}
+@keyframes lovegiftWishFly{0%{opacity:1;transform:translateY(0)scale(1)rotate(0)}16%{opacity:1;transform:translateY(-10px)scale(1.15)rotate(0)}32%{opacity:1;transform:translateY(-2px)scale(1.08)rotate(-1.5deg)}72%{opacity:.92}to{opacity:0;transform:translateY(-250px)scale(.7)rotate(3deg)}}
+.lovegift-wish-fly{will-change:transform, opacity;animation:2.4s cubic-bezier(.22,.61,.36,1) forwards lovegiftWishFly}
+@keyframes lovegiftFadeUp{0%{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.lovegift-fade-up{animation:.8s forwards lovegiftFadeUp}
+.lovegift-scroll-soft{scrollbar-width:none;-ms-overflow-style:none}
+.lovegift-scroll-soft::-webkit-scrollbar{width:0;height:0}
+.lovegift-letter-paper{aspect-ratio:978/1300;width:min(340px,86vw)}
+.lovegift-letter-paper{height:min(452px,114.3vw)}
+.lovegift-letter-paper{width:min(340px,86vw,max(240px,75.2308dvh - 12.7892rem))}
+.lovegift-letter-scroll{scrollbar-width:thin;scrollbar-color:#4a352759 transparent}
+.lovegift-letter-scroll::-webkit-scrollbar{width:6px}
+.lovegift-letter-scroll::-webkit-scrollbar-track{background:0 0}
+.lovegift-letter-scroll::-webkit-scrollbar-thumb{background:#4a352752;border-radius:999px}
+@keyframes lovegiftFadeIn{0%{opacity:0}to{opacity:1}}
+.lovegift-fade-in{animation:.9s forwards lovegiftFadeIn}
+@keyframes lovegiftTileSpiral{0%{transform:rotate(var(--spin,200deg)) scale(var(--sc,1.7));opacity:0;filter:blur(5px)}22%{opacity:1}to{opacity:1;filter:blur();transform:rotate(0)scale(1)}}
+.lovegift-tile-spiral{will-change:transform, opacity, filter;animation:1.2s cubic-bezier(.28,.66,.24,1) both lovegiftTileSpiral}
+@keyframes lovegiftHeartBurst{0%{opacity:0;transform:translate(-50%,-50%)scale(.15)}40%{opacity:.95}to{opacity:0;transform:translate(-50%,-50%)scale(2.6)}}
+.lovegift-heart-burst{animation:.95s ease-out 1.55s both lovegiftHeartBurst}
+@keyframes lovegiftHeartRing{0%{opacity:0;transform:translate(-50%,-50%)scale(.3)}30%{opacity:.85}to{opacity:0;transform:translate(-50%,-50%)scale(2.2)}}
+.lovegift-heart-ring{animation:.9s ease-out 1.6s both lovegiftHeartRing}
+@keyframes lovegiftHeartSpark{0%{opacity:0;transform:translate(0)scale(.3)}25%{opacity:1}to{transform:translate(var(--sx,0), var(--sy,0)) scale(.4);opacity:0}}
+.lovegift-heart-spark{animation:.8s ease-out both lovegiftHeartSpark}
+@keyframes lovegiftHeartBeat{0%,42%,to{transform:scale(1)}12%{transform:scale(1.06)}22%{transform:scale(1.005)}32%{transform:scale(1.04)}}
+.lovegift-heartbeat{transform-origin:50% 52%;will-change:transform;animation:2.8s ease-in-out 1.9s infinite lovegiftHeartBeat}
+@keyframes lovegiftHeartGlow{0%,to{opacity:.7;transform:translate(-50%,-50%)scale(1)}50%{opacity:1;transform:translate(-50%,-50%)scale(1.05)}}
+.lovegift-heart-glow{will-change:transform, opacity;animation:3.6s ease-in-out infinite lovegiftHeartGlow}
+@keyframes lovegiftLightboxIn{0%{opacity:0;transform:scale(.7)}to{opacity:1;transform:scale(1)}}
+.lovegift-lightbox-in{animation:.5s cubic-bezier(.22,.61,.36,1) both lovegiftLightboxIn}
+@keyframes lovegiftKenBurns{0%{transform:scale(1.04)translate(0)}to{transform:scale(1.22)translate(-2%,-3%)}}
+@keyframes lovegiftTwinkle{0%,to{opacity:.3;transform:scale(.85)}50%{opacity:1;transform:scale(1.1)}}
+.lovegift-twinkle{will-change:transform, opacity;animation:2.6s ease-in-out infinite lovegiftTwinkle}
+@keyframes lovegiftLaunch{0%{transform:translate(0)scale(1)}to{transform:translate(48px,-26vh)scale(.38)}}
+.lovegift-launch{will-change:transform;animation:1.5s cubic-bezier(.33,.6,.3,1) forwards lovegiftLaunch}
+.lovegift-launch:after{content:"";background:linear-gradient(#ffe6aad9,#ffe6aa00);border-radius:9999px;width:3px;height:110px;position:absolute;top:82%;left:50%;transform:translate(-50%)}
+@keyframes lovegiftMeteorUp{0%{opacity:0;transform:rotate(-50deg)translate(0)}15%{opacity:1}to{opacity:0;transform:rotate(-50deg)translate(190px)}}
+.lovegift-meteor-wrap{position:absolute}
+.lovegift-meteor{transform-origin:0;will-change:transform, opacity;pointer-events:none;background:linear-gradient(90deg,#ffe6aa00,#ffebb4f2);border-radius:9999px;width:90px;height:2px;animation:1s ease-out both lovegiftMeteorUp;position:absolute;top:0;left:0;box-shadow:0 0 6px #ffe0968c}
+@keyframes lovegiftMeteorSparkle{0%,to{opacity:.45;transform:translateY(-50%)scale(.8)}50%{opacity:1;transform:translateY(-50%)scale(1.6)}}
+.lovegift-meteor:after{content:"";background:radial-gradient(circle,#fffffffa 0%,#ffebb4e6 40%,#ffd68200 72%);border-radius:9999px;width:8px;height:8px;animation:.3s ease-in-out infinite lovegiftMeteorSparkle;position:absolute;top:50%;right:-2px;box-shadow:0 0 12px 3px #ffe096e6}
+@keyframes lovegiftStarLand{0%{opacity:0;transform:translate(-50%,-50%)scale(0)}55%{opacity:1;transform:translate(-50%,-50%)scale(1.7)}75%{transform:translate(-50%,-50%)scale(.85)}to{opacity:1;transform:translate(-50%,-50%)scale(1)}}
+@keyframes lovegiftStarTwinkle{0%,to{opacity:.35}50%{opacity:1}}
+@keyframes lovegiftStarGlow{0%,to{opacity:.4;transform:translate(-50%,-50%)scale(.85)rotate(0)}50%{opacity:.9;transform:translate(-50%,-50%)scale(1.2)rotate(45deg)}}
+.lovegift-landed-star{pointer-events:none;background:radial-gradient(circle,#fff 0%,#ffe8b0 45%,#ffd68200 72%);border-radius:9999px;width:7px;height:7px;animation:.8s ease-out both lovegiftStarLand;position:absolute;top:-145px;left:122px;box-shadow:0 0 10px 2px #ffe096e6,0 0 26px 8px #ffd68259}
+.lovegift-landed-star:before{content:"";background:linear-gradient(90deg,#ffecb800 0%,#ffecb8d9 50%,#ffecb800 100%) 50%/100% 1.5px no-repeat,linear-gradient(#ffecb800 0%,#ffecb8d9 50%,#ffecb800 100%) 50%/1.5px 100% no-repeat;width:34px;height:34px;animation:2.4s ease-in-out infinite lovegiftStarTwinkle;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}
+.lovegift-landed-star:after{content:"";background:radial-gradient(circle,#fff6d68c 0%,#ffd68200 70%);border-radius:9999px;width:16px;height:16px;animation:2.8s ease-in-out infinite lovegiftStarGlow;position:absolute;top:50%;left:50%}
+@keyframes lovegiftBurst{0%{opacity:0;transform:translate(-50%,-50%)scale(.15)}12%{opacity:.95}to{opacity:0;transform:translate(-50%,-50%)scale(1)}}
+.lovegift-burst{pointer-events:none;border:2px solid #ffe6aae6;border-radius:9999px;width:190px;height:190px;animation:.9s ease-out 1.3s both lovegiftBurst;position:absolute;box-shadow:0 0 42px 12px #ffd68280,inset 0 0 32px #ffd68266}
+@keyframes lovegiftSkyGlow{0%{opacity:0}to{opacity:1}}
+.lovegift-sky-glow{pointer-events:none;background:radial-gradient(60% 42% at 50% 10%,#ffcd7829,#ffcd7800 70%);animation:1.4s 1.3s both lovegiftSkyGlow;position:absolute;inset:0}
+@keyframes lovegiftReelSpin{0%{transform:translateY(var(--reel-from));filter:blur(8px)}35%{filter:blur(4px)}60%{filter:blur()}to{transform:translateY(var(--reel-to));filter:blur()}}
+.lovegift-reel{will-change:transform;backface-visibility:hidden;animation:2.1s cubic-bezier(.16,.84,.24,1) forwards lovegiftReelSpin;transform:translateZ(0)}
+@keyframes lovegiftRevealPop{0%{opacity:0;transform:scale(.4)}60%{opacity:1;transform:scale(1.16)}to{opacity:1;transform:scale(1)}}
+.lovegift-reveal-pop{animation:.7s cubic-bezier(.22,.61,.36,1) 2.05s both lovegiftRevealPop}
+@keyframes lovegiftRevealGlow{0%{opacity:0;transform:translate(-50%,-50%)scale(.4)}60%{opacity:1;transform:translate(-50%,-50%)scale(1.15)}to{opacity:.85;transform:translate(-50%,-50%)scale(1)}}
+.lovegift-reveal-glow{animation:.85s ease-out 2.05s both lovegiftRevealGlow}
+@keyframes lovegiftArrowSlide{0%{opacity:0;transform:translate(-22px)}to{opacity:1;transform:translate(0)}}
+.lovegift-arrow-in{animation:.6s cubic-bezier(.22,.61,.36,1) 2.3s both lovegiftArrowSlide}
+@keyframes lovegiftMonthIn{0%{opacity:0;transform:translate(16px)}to{opacity:1;transform:translate(0)}}
+.lovegift-month-in{animation:.6s 2.4s both lovegiftMonthIn}
+@keyframes lovegiftScriptIn{0%{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.lovegift-script-in{animation:.9s 2.55s both lovegiftScriptIn}
+@keyframes lovegiftBalloonFloat{0%,to{transform:translateY(0)rotate(-2deg)}50%{transform:translateY(-6px)rotate(2deg)}}
+.lovegift-balloon{transform-origin:50% 100%;animation:4s ease-in-out infinite lovegiftBalloonFloat}
+.lovegift-reveal-late{animation:.9s 2.8s both lovegiftFadeIn}
+@keyframes lovegiftOpeningOut{to{opacity:0}}
+.lovegift-opening-out{animation:.7s forwards lovegiftOpeningOut}
+.lovegift-reel{transform:translateY(var(--reel-to));filter:blur(.4px);animation:none}
+.lovegift-reveal-pop,.lovegift-reveal-glow,.lovegift-arrow-in,.lovegift-month-in,.lovegift-script-in,.lovegift-reveal-late{animation-duration:.4s;animation-delay:.1s}
+@keyframes lovegiftLoadGlow{0%,to{opacity:.5;transform:scale(.88)}50%{opacity:1;transform:scale(1.14)}}
+.lovegift-load-glow{will-change:transform, opacity;animation:2.4s ease-in-out infinite lovegiftLoadGlow}
+@keyframes lovegiftLoadText{0%,to{opacity:.5}50%{opacity:.95}}
+.lovegift-load-text{animation:2s ease-in-out infinite lovegiftLoadText}
+.lovegift-no-select{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}

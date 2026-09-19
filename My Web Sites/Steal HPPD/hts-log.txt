@@ -1,0 +1,21 @@
+HTTrack3.50-2 launched on Thu, 17 Sep 2026 23:22:10 at https://birthday-gift-cake.netlify.app/?isPreview=true&autoplay=0&muted=1 +*.css +*.js -ad.doubleclick.net/* -mime:application/foobar +*.mov +*.mpg +*.mpeg +*.avi +*.asf +*.mp3 +*.mp2 +*.rm +*.wav +*.vob +*.qt +*.vid +*.ac3 +*.wma +*.wmv +*.gif +*.jpg +*.jpeg +*.png +*.tif +*.bmp+*.json +*.woff +*.woff2 +*.ttf +*.svg
+(winhttrack -qwr20C2%Pns2u1%s%uN0%I0p3DaK0H0%kf2%f#f -F "Mozilla/5.0 (compatible; HTTrack; +https://www.httrack.com/)" -%F "<!-- Mirrored from {url} by HTTrack Website Copier/3.x [XR&CO], {date} -->" -%l "en, *" https://birthday-gift-cake.netlify.app/?isPreview=true&autoplay=0&muted=1 -O1 "C:\My Web Sites\Steal HPPD" +*.css +*.js -ad.doubleclick.net/* -mime:application/foobar +*.mov +*.mpg +*.mpeg +*.avi +*.asf +*.mp3 +*.mp2 +*.rm +*.wav +*.vob +*.qt +*.vid +*.ac3 +*.wma +*.wmv +*.gif +*.jpg +*.jpeg +*.png +*.tif +*.bmp+*.json +*.woff +*.woff2 +*.ttf +*.svg )
+
+Information, Warnings and Errors reported for this mirror:
+note:	the hts-log.txt file, and hts-cache folder, may contain sensitive information,
+	such as username/password authentication for websites mirrored in this project
+	do not share these files/folders if you want these information to remain private
+
+23:22:28	Info: 	Retry after error -4 (Connect Error) at link localhost:3000/images/lovegift-candle/props/cake-hero-02.png (from https://birthday-gift-cake.netlify.app/?isPreview=true&autoplay=0&muted=1)
+23:22:28	Warning: 	Permanent Redirect for https://birthday-gift-cake.netlify.app/ROOT/node_modules/next/dist/compiled/process/
+23:22:28	Warning: 	File has moved from https://birthday-gift-cake.netlify.app/ROOT/node_modules/next/dist/compiled/process/ to /ROOT/node_modules/next/dist/compiled/process
+23:22:32	Warning: 	Permanent Redirect for https://birthday-gift-cake.netlify.app/_next/
+23:22:32	Warning: 	File has moved from https://birthday-gift-cake.netlify.app/_next/ to /_next
+23:22:33	Error: 	"Not Found" (404) at link https://birthday-gift-cake.netlify.app/static/chunks/0p5.qr0b94vxo.js (from https://birthday-gift-cake.netlify.app/_next/static/chunks/turbopack-0mbyzpf8xm.r7.js)
+23:22:33	Info: 	Retry after error -4 (Connect Error) at link localhost:3000/images/lovegift-candle/props/cake-hero-02.png (from https://birthday-gift-cake.netlify.app/?isPreview=true&autoplay=0&muted=1)
+23:22:33	Error: 	"Not Found" (404) at link https://birthday-gift-cake.netlify.app/ROOT/node_modules/next/dist/compiled/process (from https://birthday-gift-cake.netlify.app/ROOT/node_modules/next/dist/compiled/process/)
+23:22:33	Error: 	"Not Found" (404) at link https://birthday-gift-cake.netlify.app/_next (from https://birthday-gift-cake.netlify.app/_next/)
+23:22:37	Error: 	"Connect Error" (-4) after 2 retries at link localhost:3000/images/lovegift-candle/props/cake-hero-02.png (from https://birthday-gift-cake.netlify.app/?isPreview=true&autoplay=0&muted=1)
+
+HTTrack Website Copier/3.50-2 mirror complete in 27 seconds : 31 links scanned, 22 files written (3230157 bytes overall) [2674342 bytes received at 99049 bytes/sec], 867184 bytes transferred using HTTP compression in 13 files, ratio 28%
+(4 errors, 4 warnings, 2 messages)

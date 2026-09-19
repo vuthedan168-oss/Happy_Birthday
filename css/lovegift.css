@@ -1,0 +1,1321 @@
+/* =========================================================
+   CINEMATIC LOVEGIFT & BIRTHDAY STYLING SYSTEM
+   Enhanced for Interactive Birthday Card & Studio
+   ========================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+/* Local Calligraphic & Romantic Fonts */
+@font-face {
+  font-family: 'fzAghita';
+  src: url('../assets/fonts/FzAghita-s.p.0twig7otq-0_g.woff2') format('woff2');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Dancing Script Local';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('../assets/fonts/32fe63294b6cd18c-s.p.090h5ho-armea.woff2') format('woff2');
+  unicode-range: U+102-103, U+110-111, U+128-129, U+168-169, U+1A0-1A1, U+1AF-1B0, U+300-301, U+303-304, U+308-309, U+323, U+329, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Dancing Script Local';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('../assets/fonts/406d3fc8d5ec9f59-s.p.06_5xv2ritwv5.woff2') format('woff2');
+}
+
+:root {
+  --font-fz: 'fzAghita', 'Dancing Script Local', 'Dancing Script', cursive;
+  --font-hand: 'Dancing Script Local', 'Dancing Script', cursive;
+  --font-serif: 'Playfair Display', 'fzAghita', serif;
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-script: var(--font-fz);
+
+  --color-rose: #c98b76;
+  --color-gold: #c9a24b;
+  --color-gold-light: #ffd98e;
+  --color-cream: #f6ead8;
+  --color-bg-deep: #1e0e16;
+}
+
+/* Base Stage */
+.lovegift-stage-bg {
+  background: radial-gradient(58% 46% at 50% 40%, rgba(120, 58, 60, 0.55) 0%, rgba(90, 44, 52, 0.25) 42%, rgba(44, 21, 32, 0) 72%),
+              linear-gradient(180deg, #3a1e27 0%, #2c1520 52%, #1e0e16 100%);
+  color: var(--color-cream);
+  min-height: 100dvh;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.lovegift-no-select {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.font-hand { font-family: var(--font-hand); }
+.font-script { font-family: var(--font-script); }
+.font-serif { font-family: var(--font-serif); }
+.font-sans { font-family: var(--font-sans); }
+
+.text-cream { color: var(--color-cream); }
+.text-gold { color: var(--color-gold); }
+.text-gold-light { color: var(--color-gold-light); }
+
+.lovegift-kicker {
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  letter-spacing: 0.28em;
+  color: var(--color-rose);
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+/* =========================================================
+   STAGE 1: OPENING DATE REEL
+   ========================================================= */
+.lovegift-reel-container {
+  position: relative;
+  height: 304px;
+  width: min(360px, 92vw);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 26%, #000 74%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 26%, #000 74%, transparent 100%);
+  margin: 0 auto;
+}
+
+@keyframes lovegiftReelSpin {
+  0% { transform: translateY(var(--reel-from)); filter: blur(8px); }
+  35% { filter: blur(4px); }
+  60% { filter: blur(0); }
+  100% { transform: translateY(var(--reel-to)); filter: blur(0); }
+}
+
+.lovegift-reel {
+  will-change: transform;
+  backface-visibility: hidden;
+  animation: 2.3s cubic-bezier(0.16, 0.84, 0.24, 1) forwards lovegiftReelSpin;
+  transform: translateZ(0);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+.lovegift-reel-item {
+  height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: clamp(38px, 11vw, 60px);
+  color: rgba(246, 234, 216, 0.8);
+}
+
+@keyframes lovegiftRevealPop {
+  0% { opacity: 0; transform: scale(0.4); }
+  60% { opacity: 1; transform: scale(1.16); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.lovegift-reveal-pop {
+  animation: 0.7s cubic-bezier(0.22, 0.61, 0.36, 1) 2.1s both lovegiftRevealPop;
+}
+
+@keyframes lovegiftRevealGlow {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.4); }
+  60% { opacity: 1; transform: translate(-50%, -50%) scale(1.15); }
+  100% { opacity: 0.85; transform: translate(-50%, -50%) scale(1); }
+}
+.lovegift-reveal-glow {
+  animation: 0.85s ease-out 2.1s both lovegiftRevealGlow;
+  pointer-events: none;
+}
+
+@keyframes lovegiftArrowSlide {
+  0% { opacity: 0; transform: translate(-22px); }
+  100% { opacity: 1; transform: translate(0); }
+}
+.lovegift-arrow-in {
+  animation: 0.6s cubic-bezier(0.22, 0.61, 0.36, 1) 2.3s both lovegiftArrowSlide;
+}
+
+@keyframes lovegiftMonthIn {
+  0% { opacity: 0; transform: translate(16px); }
+  100% { opacity: 1; transform: translate(0); }
+}
+.lovegift-month-in {
+  animation: 0.6s 2.4s both lovegiftMonthIn;
+}
+
+@keyframes lovegiftScriptIn {
+  0% { opacity: 0; transform: translateY(12px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.lovegift-script-in {
+  animation: 0.9s 0.2s both lovegiftScriptIn;
+}
+
+@keyframes lovegiftBalloonFloat {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-8px) rotate(2deg); }
+}
+.lovegift-balloon {
+  transform-origin: 50% 100%;
+  animation: 4s ease-in-out infinite lovegiftBalloonFloat;
+}
+
+.lovegift-twinkle {
+  will-change: transform, opacity;
+  animation: 2.6s ease-in-out infinite lovegiftTwinkle;
+}
+@keyframes lovegiftTwinkle {
+  0%, 100% { opacity: 0.3; transform: scale(0.85); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+
+/* =========================================================
+   STAGE 2: REALISTIC CAKE & CANDLE BLOWOUT
+   ========================================================= */
+.lovegift-cake-wrap {
+  position: relative;
+  width: clamp(230px, 66vw, 310px);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.lovegift-cake-img {
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 18px 30px rgba(0, 0, 0, 0.45));
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+  display: block;
+}
+
+/* =========================================================
+   CANDLE & FLAME (CHUẨN 100% TỪ DỰ ÁN GỐC HAPPY_BIRTHDAY)
+   ========================================================= */
+.lovegift-candle-holder {
+  position: absolute;
+  top: -82px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  cursor: pointer;
+  touch-action: none;
+  width: 104px;
+  height: 94px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+/* Bụi vàng phát sáng lơ lửng quanh ngọn nến (Chuẩn Happy_Birthday) */
+@keyframes lovegiftMote {
+  0% { opacity: 0; transform: translateY(0) translate(0); }
+  15% { opacity: 0.85; }
+  85% { opacity: 0.75; }
+  100% { opacity: 0; transform: translateY(-140px) translate(12px); }
+}
+.lovegift-mote {
+  background: radial-gradient(circle, #ffe399 0%, #ff9a3d 60%, rgba(255, 154, 61, 0) 100%);
+  border-radius: 50%;
+  width: 4px;
+  height: 4px;
+  animation: 4.5s ease-in-out infinite lovegiftMote;
+  position: absolute;
+  pointer-events: none;
+  filter: drop-shadow(0 0 4px rgba(255, 200, 100, 0.8));
+}
+
+/* Hào quang ấm áp bao quanh ngọn nến */
+.lovegift-flame-halo {
+  position: absolute;
+  left: 50%;
+  top: 6px;
+  transform: translate(-50%, -50%);
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 180, 90, 0.55) 0%, rgba(255, 150, 60, 0.22) 32%, rgba(255, 140, 50, 0) 68%);
+  opacity: 0.75;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+/* Vòng tròn tiến trình giữ nến 104x104 chuẩn Happy_Birthday */
+.lovegift-hold-progress-svg {
+  position: absolute;
+  left: 50%;
+  top: 6px;
+  transform: translate(-50%, -50%) rotate(-90deg);
+  opacity: 0.28;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+/* Khung ngọn lửa */
+.lovegift-flame-wrapper {
+  position: relative;
+  width: 17px;
+  height: 30px;
+  margin: 0 auto;
+  transform-origin: 50% 100%;
+  transition: opacity 0.45s ease;
+}
+
+@keyframes lovegiftFlicker {
+  0%, 100% { opacity: 1; transform: scale(1) rotate(-1deg); }
+  25% { opacity: 0.92; transform: scale(1.06, 0.96) rotate(1.5deg); }
+  50% { opacity: 1; transform: scale(0.96, 1.05) rotate(-1.5deg); }
+  75% { opacity: 0.95; transform: scale(1.03, 0.98) rotate(1deg); }
+}
+.lovegift-flame {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 90%;
+  animation: 1.6s ease-in-out infinite lovegiftFlicker;
+}
+
+.lovegift-flame-inner {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(60% 55% at 50% 68%, #fff3c4 0%, #ffb347 45%, #ff7a1a 78%, rgba(255, 90, 10, 0.2) 100%);
+  border-radius: 50% 50% 50% 50% / 62% 62% 40% 40%;
+  box-shadow: 0 0 14px 4px rgba(255, 150, 60, 0.6);
+}
+
+.lovegift-flame-blue {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 7px;
+  height: 12px;
+  background: radial-gradient(50% 60% at 50% 70%, #7db6ff 0%, rgba(125, 182, 255, 0) 75%);
+  border-radius: 50%;
+}
+
+/* Hoạt ảnh khi đang giữ thổi nến */
+@keyframes lovegiftBlowing {
+  0% { opacity: 1; transform: scale(1) rotate(-3deg); }
+  15% { opacity: 0.82; transform: scale(0.82, 1.2) rotate(10deg); }
+  30% { opacity: 1; transform: scale(1.16, 0.84) rotate(-9deg); }
+  45% { opacity: 0.78; transform: scale(0.86, 1.14) rotate(12deg); }
+  60% { opacity: 0.96; transform: scale(1.12, 0.9) rotate(-11deg); }
+  75% { opacity: 0.8; transform: scale(0.84, 1.16) rotate(8deg); }
+  100% { opacity: 1; transform: scale(1) rotate(-3deg); }
+}
+.lovegift-blowing {
+  animation: 0.34s ease-in-out infinite lovegiftBlowing !important;
+}
+
+/* Hoạt ảnh khi nến vụt tắt */
+@keyframes lovegiftBlowOut {
+  0% { opacity: 1; transform: rotate(0) scaleX(1) scaleY(1); }
+  18% { opacity: 1; transform: rotate(-22deg) scaleX(0.85) scaleY(1.2); }
+  36% { opacity: 0.95; transform: rotate(18deg) scaleX(1.18) scaleY(0.8); }
+  54% { opacity: 0.78; transform: rotate(-14deg) scaleX(0.9) scaleY(1.15); }
+  72% { opacity: 0.45; transform: rotate(10deg) scaleX(1.1) scaleY(0.5); }
+  100% { opacity: 0; transform: rotate(-4deg) scaleX(0.55) scaleY(0.03); }
+}
+.lovegift-blowout {
+  transform-origin: 50% 100%;
+  animation: 0.8s ease-in forwards lovegiftBlowOut !important;
+}
+
+/* Thân nến xoắn ánh kim Happy_Birthday */
+.lovegift-candle-body {
+  position: relative;
+  margin: 2px auto 0;
+  width: 16px;
+  height: 56px;
+  clip-path: polygon(30% 0, 70% 0, 92% 100%, 8% 100%);
+  background: repeating-linear-gradient(-58deg, rgba(201,162,75,0.75) 0 2px, rgba(201,162,75,0) 2px 7px),
+              linear-gradient(90deg, #c9ad78 0%, #f6ecd4 32%, #fffaf0 50%, #ead6ac 76%, #c3a670 100%);
+  box-shadow: inset -2px 0 4px rgba(120,90,40,0.28), inset 2px 0 3px rgba(255,250,235,0.55);
+  transition: filter 1.1s ease;
+}
+
+/* Tim nến nhỏ ở chóp nến */
+.lovegift-candle-wick {
+  position: absolute;
+  left: 50%;
+  top: -5px;
+  height: 6px;
+  width: 2px;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: #3a2a1a;
+}
+
+/* Làn khói bay lượn sau khi thổi nến */
+@keyframes lovegiftSmoke {
+  0% { opacity: 0; transform: translate(-50%, 0) scaleX(0.5) scaleY(0.6); }
+  22% { opacity: 0.45; }
+  100% { opacity: 0; transform: translate(-50%, -66px) scaleX(1.9) scaleY(2.6); }
+}
+.lovegift-smoke {
+  filter: blur(2px);
+  transform-origin: 50% 100%;
+  pointer-events: none;
+  background: linear-gradient(rgba(212, 212, 212, 0), rgba(212, 212, 212, 0.55));
+  border-radius: 50%;
+  width: 7px;
+  height: 18px;
+  animation: 1.7s ease-out 0.5s forwards lovegiftSmoke;
+  position: absolute;
+  top: 22px;
+  left: 50%;
+}
+
+/* Hiệu ứng đung đưa nhẹ nhàng cả bánh kem */
+@keyframes lovegiftSway {
+  0%, 100% { transform: rotate(-0.6deg) translateY(0); }
+  50% { transform: rotate(0.6deg) translateY(-4px); }
+}
+.lovegift-sway {
+  transform-origin: 50% 100%;
+  animation: 6s ease-in-out infinite lovegiftSway;
+}
+
+/* =========================================================
+   STAGE 3: 4 WISH CARDS (CHỌN ĐIỀU ƯỚC)
+   ========================================================= */
+.lovegift-wish-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem 1.5rem;
+  width: min(340px, 90vw);
+  margin: 1.5rem auto 0;
+  position: relative;
+  z-index: 10;
+}
+
+.lovegift-wish-card {
+  position: relative;
+  aspect-ratio: 351 / 760;
+  width: 100%;
+  max-width: 124px;
+  margin: 0 auto;
+  cursor: pointer;
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.4s ease;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 0;
+  pointer-events: auto;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.lovegift-wish-card:hover:not(:disabled) {
+  transform: translateY(-5px) scale(1.04);
+}
+.lovegift-wish-card:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.lovegift-wish-tag-svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.4));
+  transition: filter 0.3s ease;
+  pointer-events: none;
+}
+
+.lovegift-wish-card-text {
+  position: absolute;
+  inset-inline: 14%;
+  top: 36%;
+  bottom: 14%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-family: var(--font-sans);
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: #4a2a1c;
+  pointer-events: none;
+}
+
+@keyframes lovegiftWishFly {
+  0% { opacity: 1; transform: translateY(0) scale(1) rotate(0); }
+  16% { opacity: 1; transform: translateY(-12px) scale(1.15) rotate(0); }
+  32% { opacity: 1; transform: translateY(-4px) scale(1.08) rotate(-1.5deg); }
+  72% { opacity: 0.92; }
+  100% { opacity: 0; transform: translateY(-280px) scale(0.65) rotate(4deg); }
+}
+.lovegift-wish-fly {
+  will-change: transform, opacity;
+  animation: 2.4s cubic-bezier(0.22, 0.61, 0.36, 1) forwards lovegiftWishFly !important;
+  z-index: 20;
+}
+
+/* =========================================================
+   STAGE 4: HEART PHOTO MOSAIC & PETALS
+   ========================================================= */
+.lovegift-heart-container {
+  position: relative;
+  margin: 0 auto;
+  width: min(340px, 86vw);
+}
+
+.lovegift-heart-grid {
+  display: grid;
+  grid-template-columns: repeat(11, 1fr);
+  gap: clamp(1.5px, 0.6vw, 3.5px);
+  position: relative;
+  z-index: 5;
+}
+
+@keyframes lovegiftTileSpiral {
+  0% { transform: rotate(var(--spin, 200deg)) scale(var(--sc, 1.7)); opacity: 0; filter: blur(5px); }
+  22% { opacity: 1; }
+  100% { opacity: 1; filter: blur(0); transform: rotate(0) scale(1); }
+}
+.lovegift-tile-spiral {
+  will-change: transform, opacity, filter;
+  animation: 1.2s cubic-bezier(0.28, 0.66, 0.24, 1) both lovegiftTileSpiral;
+  aspect-ratio: 1;
+  border-radius: 3px;
+  background-size: cover;
+  background-position: center;
+  cursor: pointer;
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgba(255, 235, 235, 0.22), 0 2px 4px rgba(0, 0, 0, 0.35);
+  transition: transform 0.25s ease;
+  border: none;
+}
+.lovegift-tile-spiral:hover {
+  transform: scale(1.15);
+  z-index: 10;
+}
+
+@keyframes lovegiftHeartBeat {
+  0%, 42%, 100% { transform: scale(1); }
+  12% { transform: scale(1.05); }
+  22% { transform: scale(1.01); }
+  32% { transform: scale(1.04); }
+}
+.lovegift-heartbeat {
+  transform-origin: 50% 52%;
+  will-change: transform;
+  animation: 2.8s ease-in-out 1.9s infinite lovegiftHeartBeat;
+}
+
+@keyframes lovegiftHeartGlow {
+  0%, 100% { opacity: 0.7; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.06); }
+}
+.lovegift-heart-glow {
+  will-change: transform, opacity;
+  animation: 3.6s ease-in-out infinite lovegiftHeartGlow;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 138%;
+  height: 128%;
+  background: radial-gradient(circle, rgba(226, 140, 150, 0.5) 0%, rgba(201, 132, 150, 0.22) 45%, rgba(201, 132, 150, 0) 72%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes lovegiftHeartBurst {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.15); }
+  40% { opacity: 0.95; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(2.6); }
+}
+.lovegift-heart-burst {
+  animation: 0.95s ease-out 1.55s both lovegiftHeartBurst;
+  position: absolute;
+  left: 50%;
+  top: 44%;
+  transform: translate(-50%, -50%);
+  width: 72%;
+  height: 72%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 246, 214, 0.95) 0%, rgba(255, 214, 140, 0.6) 32%, rgba(255, 200, 110, 0) 70%);
+  pointer-events: none;
+  z-index: 2;
+}
+
+@keyframes lovegiftHeartRing {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.3); }
+  30% { opacity: 0.85; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(2.2); }
+}
+.lovegift-heart-ring {
+  animation: 0.9s ease-out 1.6s both lovegiftHeartRing;
+  position: absolute;
+  left: 50%;
+  top: 44%;
+  transform: translate(-50%, -50%);
+  width: 48%;
+  height: 48%;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 224, 160, 0.9);
+  pointer-events: none;
+  z-index: 2;
+}
+
+@keyframes lovegiftHeartSpark {
+  0% { opacity: 0; transform: translate(0) scale(0.3); }
+  25% { opacity: 1; }
+  100% { transform: translate(var(--sx, 0), var(--sy, 0)) scale(0.4); opacity: 0; }
+}
+.lovegift-heart-spark {
+  animation: 0.8s ease-out both lovegiftHeartSpark;
+  position: absolute;
+  left: 50%;
+  top: 44%;
+  border-radius: 50%;
+  background: #ffe9bd;
+  width: 5px;
+  height: 5px;
+  margin-left: -2.5px;
+  margin-top: -2.5px;
+  box-shadow: 0 0 8px 2px rgba(255, 214, 130, 0.8);
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* Floating Flower Petals */
+@keyframes lovegiftPetalFall {
+  0% { opacity: 0; transform: translateY(-10vh) rotate(0); }
+  10% { opacity: 0.95; }
+  90% { opacity: 0.9; }
+  100% { opacity: 0; transform: translateY(110vh) rotate(360deg); }
+}
+.lovegift-petal {
+  will-change: transform;
+  animation: linear infinite lovegiftPetalFall;
+  position: fixed;
+  pointer-events: none;
+  user-select: none;
+  z-index: 10;
+}
+
+/* =========================================================
+   STAGE 5: VINTAGE LETTER CARD
+   ========================================================= */
+.lovegift-letter-paper {
+  aspect-ratio: 978 / 1300;
+  width: min(340px, 86vw);
+  background: linear-gradient(135deg, #fdf8ee 0%, #faefe0 60%, #f4e2ca 100%);
+  border-radius: 12px;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.55), inset 0 0 35px rgba(180, 140, 95, 0.25);
+  border: 1px solid rgba(201, 162, 75, 0.4);
+  padding: 1.8rem 1.6rem;
+  color: #3b281c;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  margin: 0 auto;
+}
+
+.lovegift-letter-scroll {
+  overflow-y: auto;
+  max-height: 380px;
+  padding-right: 6px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(74, 53, 39, 0.35) transparent;
+}
+.lovegift-letter-scroll::-webkit-scrollbar { width: 4px; }
+.lovegift-letter-scroll::-webkit-scrollbar-thumb { background: rgba(74, 53, 39, 0.35); border-radius: 4px; }
+
+.lovegift-letter-body {
+  font-family: var(--font-sans);
+  font-size: 14.5px;
+  line-height: 1.7;
+  color: #4a3527;
+  white-space: pre-line;
+  text-align: left;
+}
+
+.lovegift-letter-sign {
+  font-family: var(--font-hand);
+  font-size: 24px;
+  color: #8c4e28;
+  text-align: right;
+  margin-top: 1.25rem;
+}
+
+@keyframes pulseGlow {
+  0% { transform: scale(1.2); box-shadow: 0 4px 10px rgba(0,0,0,0.4), inset 0 0 6px rgba(255,255,255,0.3), 0 0 0 0 rgba(255, 100, 100, 0.7); }
+  50% { transform: scale(1.25); box-shadow: 0 4px 10px rgba(0,0,0,0.4), inset 0 0 6px rgba(255,255,255,0.3), 0 0 20px 10px rgba(255, 100, 100, 0); }
+  100% { transform: scale(1.2); box-shadow: 0 4px 10px rgba(0,0,0,0.4), inset 0 0 6px rgba(255,255,255,0.3), 0 0 0 0 rgba(255, 100, 100, 0); }
+}
+
+/* Wax Seal on Letter */
+.lovegift-wax-seal {
+  position: absolute;
+  top: -16px;
+  right: 20px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #b53838 0%, #7d1f1f 70%, #520f0f 100%);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.4), inset 0 0 6px rgba(255,255,255,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffd682;
+  font-size: 18px;
+  animation: pulseGlow 2s infinite ease-in-out;
+  cursor: pointer;
+  z-index: 10;
+}
+
+
+/* =========================================================
+   STAGE 6: FINAL CARD & ACTION BUTTONS
+   ========================================================= */
+.lovegift-final-card {
+  position: relative;
+  width: min(360px, 90vw);
+  border-radius: 24px;
+  border: 1px solid rgba(201, 162, 75, 0.45);
+  background: rgba(0, 0, 0, 0.45);
+  padding: 2.2rem 1.8rem;
+  text-align: center;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+  margin: 0 auto;
+}
+
+.lovegift-corner-border {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-left: 2px solid rgba(201, 162, 75, 0.8);
+  border-top: 2px solid rgba(201, 162, 75, 0.8);
+  pointer-events: none;
+}
+.lovegift-corner-border.tl { top: 10px; left: 10px; }
+.lovegift-corner-border.tr { top: 10px; right: 10px; transform: rotate(90deg); }
+.lovegift-corner-border.br { bottom: 10px; right: 10px; transform: rotate(180deg); }
+.lovegift-corner-border.bl { bottom: 10px; left: 10px; transform: rotate(-90deg); }
+
+.lovegift-btn-gold {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1.75rem;
+  border-radius: 9999px;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, #ffd98e 0%, #c9a24b 100%);
+  color: #1e0e16;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 8px 25px rgba(201, 162, 75, 0.35);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.lovegift-btn-gold:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 12px 30px rgba(201, 162, 75, 0.5);
+}
+
+.lovegift-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  border-radius: 9999px;
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-cream);
+  border: 1px solid rgba(246, 234, 216, 0.2);
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+.lovegift-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+/* =========================================================
+   STAGE 7: STARLIGHT SHOOTING STARS & SKY
+   ========================================================= */
+@keyframes lovegiftLaunch {
+  0% { transform: translate(0) scale(1); }
+  100% { transform: translate(48px, -30vh) scale(0.35); opacity: 0; }
+}
+.lovegift-launch {
+  will-change: transform;
+  animation: 1.5s cubic-bezier(0.33, 0.6, 0.3, 1) forwards lovegiftLaunch;
+  position: relative;
+}
+.lovegift-launch:after {
+  content: "";
+  background: linear-gradient(#ffe6aad9, #ffe6aa00);
+  border-radius: 9999px;
+  width: 3px;
+  height: 120px;
+  position: absolute;
+  top: 80%;
+  left: 50%;
+  transform: translate(-50%);
+}
+
+@keyframes lovegiftMeteorUp {
+  0% { opacity: 0; transform: rotate(-50deg) translate(0); }
+  15% { opacity: 1; }
+  100% { opacity: 0; transform: rotate(-50deg) translate(220px); }
+}
+.lovegift-meteor-wrap {
+  position: absolute;
+  pointer-events: none;
+}
+.lovegift-meteor {
+  transform-origin: 0;
+  will-change: transform, opacity;
+  pointer-events: none;
+  background: linear-gradient(90deg, #ffe6aa00, #ffebb4f2);
+  border-radius: 9999px;
+  width: 95px;
+  height: 2px;
+  animation: 1s ease-out both lovegiftMeteorUp;
+  position: absolute;
+  top: 0;
+  left: 0;
+  box-shadow: 0 0 6px #ffe0968c;
+}
+.lovegift-meteor:after {
+  content: "";
+  background: radial-gradient(circle, #fffffffa 0%, #ffebb4e6 40%, #ffd68200 72%);
+  border-radius: 9999px;
+  width: 8px;
+  height: 8px;
+  position: absolute;
+  top: 50%;
+  right: -2px;
+  transform: translateY(-50%);
+  box-shadow: 0 0 12px 3px #ffe096e6;
+}
+
+@keyframes lovegiftSkyGlow {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+.lovegift-sky-glow {
+  pointer-events: none;
+  background: radial-gradient(60% 42% at 50% 10%, rgba(255, 205, 120, 0.16), rgba(255, 205, 120, 0) 70%);
+  animation: 1.4s 1.2s both lovegiftSkyGlow;
+  position: absolute;
+  inset: 0;
+}
+
+/* =========================================================
+   LIGHTBOX MODAL FOR MEMORY PHOTOS
+   ========================================================= */
+.lovegift-lightbox-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 5, 8, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+@keyframes lovegiftLightboxIn {
+  0% { opacity: 0; transform: scale(0.7); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.lovegift-lightbox-in {
+  animation: 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) both lovegiftLightboxIn;
+}
+
+.lovegift-lightbox-card {
+  position: relative;
+  max-width: min(92vw, 480px);
+  max-height: 80vh;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.15);
+  background: #1a0e14;
+}
+
+.lovegift-lightbox-img {
+  width: 100%;
+  height: auto;
+  max-height: 70vh;
+  object-fit: contain;
+  display: block;
+}
+
+.lovegift-lightbox-caption {
+  padding: 1rem 1.25rem;
+  background: rgba(26, 14, 20, 0.9);
+  color: var(--color-cream);
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  text-align: center;
+}
+
+.lovegift-lightbox-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  cursor: pointer;
+  z-index: 105;
+}
+
+/* Common Fades */
+.lovegift-fade-in {
+  animation: 0.8s forwards lovegiftFadeIn;
+}
+@keyframes lovegiftFadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.lovegift-fade-up {
+  animation: 0.8s forwards lovegiftFadeUp;
+}
+@keyframes lovegiftFadeUp {
+  0% { opacity: 0; transform: translateY(16px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Floating Audio Toggle & Creator Button */
+.lovegift-audio-btn {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(26, 14, 20, 0.75);
+  border: 1px solid rgba(201, 162, 75, 0.4);
+  color: var(--color-cream);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+  z-index: 50;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+.lovegift-audio-btn:hover {
+  transform: scale(1.08);
+  background: rgba(26, 14, 20, 0.95);
+}
+
+.lovegift-creator-btn {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  background: rgba(26, 14, 20, 0.75);
+  border: 1px solid rgba(201, 162, 75, 0.4);
+  color: var(--color-gold-light);
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  text-decoration: none;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+  z-index: 50;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+.lovegift-creator-btn:hover {
+  transform: translateY(-2px);
+  background: rgba(26, 14, 20, 0.95);
+}
+
+/* Bottom Reaction Dock */
+.lovegift-dock {
+  position: fixed;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(26, 14, 20, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(201, 162, 75, 0.35);
+  border-radius: 9999px;
+  padding: 0.4rem 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  z-index: 50;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.lovegift-dock-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  font-size: 1.35rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.lovegift-dock-btn:hover {
+  transform: scale(1.3) translateY(-4px);
+}
+.lovegift-dock-btn:active {
+  transform: scale(0.95);
+}
+
+/* Floating Lucky Gift Button */
+.floating-lucky-gift-btn {
+  position: fixed;
+  bottom: 4.8rem;
+  right: 1.25rem;
+  background: linear-gradient(135deg, #ffd98e 0%, #c9a24b 100%);
+  color: #1e0e16;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 9999px;
+  padding: 0.55rem 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  font-weight: 700;
+  box-shadow: 0 8px 24px rgba(201, 162, 75, 0.45);
+  cursor: pointer;
+  z-index: 50;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  animation: pulseGift 3.2s infinite;
+}
+@keyframes pulseGift {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.06); box-shadow: 0 10px 28px rgba(201, 162, 75, 0.65); }
+}
+.floating-lucky-gift-btn:hover {
+  transform: translateY(-3px) scale(1.08);
+}
+
+/* Modal: Lucky Spin Wheel */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 5, 8, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 110;
+  padding: 1rem;
+}
+
+.wheel-modal-card {
+  position: relative;
+  width: min(420px, 94vw);
+  background: #1a0e16;
+  border: 1px solid rgba(201, 162, 75, 0.45);
+  border-radius: 24px;
+  padding: 2.2rem 1.5rem 1.75rem;
+  text-align: center;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85);
+  color: var(--color-cream);
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  transition: background 0.2s;
+}
+.modal-close-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.modal-badge {
+  display: inline-block;
+  padding: 0.3rem 0.85rem;
+  border-radius: 9999px;
+  background: rgba(201, 162, 75, 0.18);
+  border: 1px solid rgba(201, 162, 75, 0.4);
+  color: #ffd98e;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 0.6rem;
+}
+
+.modal-title {
+  font-family: var(--font-serif);
+  font-size: 1.45rem;
+  color: var(--color-cream);
+  margin-bottom: 0.35rem;
+}
+.modal-subtitle {
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  color: rgba(246, 234, 216, 0.75);
+}
+
+.wheel-stage-wrapper {
+  position: relative;
+  width: 310px;
+  height: 310px;
+  margin: 1.5rem auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wheel-pointer-arrow {
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 26px;
+  color: #ffd98e;
+  z-index: 15;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.7));
+}
+
+.wheel-canvas {
+  width: 310px;
+  height: 310px;
+  border-radius: 50%;
+  box-shadow: 0 0 25px rgba(201, 162, 75, 0.35);
+}
+
+.wheel-center-btn {
+  position: absolute;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ffd98e 0%, #c9a24b 100%);
+  color: #1e0e16;
+  font-weight: 800;
+  font-size: 13px;
+  border: 3px solid #fff;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  z-index: 12;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease;
+}
+.wheel-center-btn:hover {
+  transform: scale(1.08);
+}
+.wheel-center-btn:active {
+  transform: scale(0.95);
+}
+
+.wheel-bottom-hint {
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  color: #ffd98e;
+  margin-top: 0.5rem;
+}
+
+/* Prize Popup Overlay */
+.prize-popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  z-index: 150;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.prize-popup-card {
+  background: linear-gradient(135deg, #2c1520 0%, #1e0e16 100%);
+  border: 1px solid rgba(201, 162, 75, 0.65);
+  border-radius: 22px;
+  padding: 2.2rem 1.8rem;
+  text-align: center;
+  max-width: 380px;
+  width: 100%;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9);
+  color: var(--color-cream);
+  animation: lovegiftRevealPop 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.prize-sparkles {
+  font-size: 2.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.prize-title {
+  font-family: var(--font-serif);
+  font-size: 1.6rem;
+  color: var(--color-cream);
+  margin-bottom: 0.75rem;
+}
+
+.prize-name-highlight {
+  font-family: var(--font-sans);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #ffd98e;
+  padding: 0.6rem 1.25rem;
+  border-radius: 9999px;
+  background: rgba(201, 162, 75, 0.2);
+  border: 1px solid rgba(201, 162, 75, 0.4);
+  display: inline-block;
+  margin-bottom: 1rem;
+}
+
+.prize-message {
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: rgba(246, 234, 216, 0.85);
+}
+
+.btn-claim-prize {
+  margin-top: 1.5rem;
+  padding: 0.8rem 2rem;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #ffd98e 0%, #c9a24b 100%);
+  color: #1e0e16;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  box-shadow: 0 8px 20px rgba(201, 162, 75, 0.4);
+  transition: transform 0.2s;
+}
+.btn-claim-prize:hover {
+  transform: translateY(-2px) scale(1.04);
+}
+
+/* =========================================================
+   NEW ADVANCED FEATURES: CAMERA, EXPORT, OUTRO
+   ========================================================= */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-card {
+  width: 90%;
+  max-width: 400px;
+  background: rgba(30, 14, 22, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(201, 162, 75, 0.3);
+  border-radius: 24px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), inset 0 0 15px rgba(255,255,255,0.05);
+  text-align: center;
+  animation: modal-fade-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes modal-fade-up {
+  0% { opacity: 0; transform: translateY(20px) scale(0.95); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.modal-title {
+  font-family: var(--font-serif);
+  font-size: 1.4rem;
+  color: var(--color-gold);
+}
+
+/* Nút phụ mờ */
+.lovegift-btn-secondary {
+  padding: 0.8rem 1.5rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.lovegift-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Typewriter cursor */
+#letter-body-text {
+  position: relative;
+  display: inline-block;
+  text-align: left;
+}
+#letter-body-text::after {
+  content: '|';
+  position: absolute;
+  right: -10px;
+  animation: blink 0.8s infinite;
+  color: var(--color-rose);
+  opacity: 0;
+}
+#letter-body-text:not(:empty)::after {
+  opacity: 1;
+}
+@keyframes blink {
+  50% { opacity: 0; }
+}

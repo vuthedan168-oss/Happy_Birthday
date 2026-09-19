@@ -1,0 +1,8 @@
+-qwr20C2%Pns2u1%s%uN0%I0p3DaK0H0%kf2%f#f -F "Mozilla/5.0 (compatible; HTTrack; +https://www.httrack.com/)" -%F "<!-- Mirrored from {url} by HTTrack Website Copier/3.x [XR&CO], {date} -->" -%l "en, *" https://birthday-gift-cake.netlify.app/?isPreview=true&autoplay=0&muted=1 -O1 "\"C:\\My Web Sites\\Steal HPPD\"" +*.css +*.js -ad.doubleclick.net/* -mime:application/foobar +*.mov +*.mpg +*.mpeg +*.avi +*.asf +*.mp3 +*.mp2 +*.rm +*.wav +*.vob +*.qt +*.vid +*.ac3 +*.wma +*.wmv +*.gif +*.jpg +*.jpeg +*.png +*.tif +*.bmp+*.json +*.woff +*.woff2 +*.ttf +*.svg
+File generated automatically on Thu, 17 Sep 2026 23:22:10, do NOT edit
+
+To update a mirror, just launch httrack without any parameters
+The existing cache will be used (and modified)
+To have other options, retype all parameters and launch HTTrack
+To continue an interrupted mirror, just launch httrack without any parameters
+
