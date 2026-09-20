@@ -410,18 +410,28 @@ class SoundEffects {
     this.initContext();
     this.stopSynthMelody();
 
+    // Dọn dẹp mọi interval fade-out đang chạy dở
+    if (this.fadeOutInterval) {
+      clearInterval(this.fadeOutInterval);
+      this.fadeOutInterval = null;
+    }
+
     if (!this.bgAudio) {
       this.bgAudio = new Audio();
       this.bgAudio.loop = true;
-      this.bgAudio.volume = 0;
+      this.bgAudio.volume = 1.0;
     }
 
-    const targetVolume = 0.7;
+    // Bắt buộc gọi pause và reset currentTime trước khi gán src mới
+    this.bgAudio.pause();
+    this.bgAudio.currentTime = 0;
+
+    const targetVolume = 1.0;
 
     const startNewTrack = () => {
       this.bgAudio.src = newSrc;
       this.bgAudio.currentTime = 0;
-      this.bgAudio.volume = 0;
+      this.bgAudio.volume = targetVolume; // Cố định volume = 1.0
       
       const playPromise = this.bgAudio.play();
       if (playPromise !== undefined) {
@@ -429,16 +439,7 @@ class SoundEffects {
           .then(() => {
             this.isPlaying = true;
             this.updateMusicUI(true);
-            // Fade In
-            let vol = 0;
-            const fadeInInterval = setInterval(() => {
-              if (vol < targetVolume) {
-                vol = Math.min(targetVolume, vol + 0.05);
-                this.bgAudio.volume = vol;
-              } else {
-                clearInterval(fadeInInterval);
-              }
-            }, 50);
+            this.bgAudio.volume = targetVolume;
           })
           .catch(() => {
             this.playSynthMelody();
@@ -448,22 +449,7 @@ class SoundEffects {
       }
     };
 
-    // Fade out cũ rồi mới chuyển track
-    if (this.bgAudio && !this.bgAudio.paused && this.bgAudio.volume > 0) {
-      let vol = this.bgAudio.volume;
-      const fadeOutInterval = setInterval(() => {
-        if (vol > 0.05) {
-          vol -= 0.05;
-          this.bgAudio.volume = vol;
-        } else {
-          clearInterval(fadeOutInterval);
-          this.bgAudio.pause();
-          startNewTrack();
-        }
-      }, 50);
-    } else {
-      startNewTrack();
-    }
+    startNewTrack();
   }
 
   fadeOutAudio(duration = 2000) {

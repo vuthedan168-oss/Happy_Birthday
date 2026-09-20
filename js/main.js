@@ -564,6 +564,23 @@ async function initCardConfiguration() {
  */
 function switchStage(stageName) {
   CURRENT_STAGE = stageName;
+
+  // Đổi nhạc theo scene NGAY LẬP TỨC khi chuyển stage
+  if (window.BirthdayAudio && typeof window.BirthdayAudio.switchAudioTrack === 'function') {
+    let trackUrl = null;
+    if (["countdown", "opening"].includes(stageName)) {
+      trackUrl = ACTIVE_CONFIG.sceneMusic?.intro;
+    } else if (["intro", "beats", "wish"].includes(stageName)) {
+      trackUrl = ACTIVE_CONFIG.sceneMusic?.cake;
+    } else if (["heart", "letter", "final", "starlight"].includes(stageName)) {
+      trackUrl = ACTIVE_CONFIG.sceneMusic?.letter;
+    }
+    
+    if (trackUrl) {
+      window.BirthdayAudio.switchAudioTrack(trackUrl);
+    }
+  }
+
   const stages = [
     "stage-countdown", "stage-opening", "stage-intro", "stage-beats", "stage-wish",
     "stage-heart", "stage-letter", "stage-final", "stage-starlight"
@@ -580,22 +597,6 @@ function switchStage(stageName) {
       }
     }
   });
-
-  // Đổi nhạc theo scene khi chuyển stage
-  if (window.BirthdayAudio && typeof window.BirthdayAudio.switchAudioTrack === 'function') {
-    let trackUrl = null;
-    if (["countdown", "opening"].includes(stageName)) {
-      trackUrl = ACTIVE_CONFIG.sceneMusic?.intro;
-    } else if (["intro", "beats", "wish"].includes(stageName)) {
-      trackUrl = ACTIVE_CONFIG.sceneMusic?.cake;
-    } else if (["heart", "letter", "final", "starlight"].includes(stageName)) {
-      trackUrl = ACTIVE_CONFIG.sceneMusic?.letter;
-    }
-    
-    if (trackUrl) {
-      window.BirthdayAudio.switchAudioTrack(trackUrl);
-    }
-  }
 
   // Tự động kích hoạt cánh hoa rơi ở các màn lãng mạn (chỉ khi không bị khóa)
   const petalsWrap = document.getElementById("petals-container");
@@ -737,11 +738,11 @@ function initStageOpening() {
     reelScroller.style.setProperty("--reel-to", `${reelTo}px`);
   }
 
-  // Tự động chuyển sang stage 2 sau khi hiệu ứng mở đầu hoàn tất (5.2s theo chuẩn thư thả Happy_Birthday)
+  // Tự động chuyển sang stage 2 sau khi hiệu ứng mở đầu hoàn tất (tăng lên 6.7s để số quay đủ lâu)
   if (OPENING_TIMER) clearTimeout(OPENING_TIMER);
   OPENING_TIMER = setTimeout(() => {
     switchStage("intro");
-  }, 5200);
+  }, 6700);
 
   if (skipBtn) {
     skipBtn.addEventListener("click", () => {
@@ -975,44 +976,13 @@ function initStageWish() {
   const replyEl = document.getElementById("wish-reply");
   if (!container) return;
 
-  const wishList = ACTIVE_CONFIG.wishes || [
-    "Hạnh phúc hơn",
-    "Trúng Vietlott",
-    "Khỏe mạnh hơn",
-    "Bình yên hơn"
-  ];
+  const textArea = document.getElementById("free-wish-input");
+  const submitBtn = document.getElementById("btn-submit-wish");
 
-  container.innerHTML = "";
-  wishList.forEach((wish, idx) => {
-    const card = document.createElement("button");
-    card.type = "button";
-    card.className = "lovegift-wish-card";
-    card.innerHTML = `
-      <svg viewBox="0 0 351 760" class="lovegift-wish-tag-svg">
-        <defs>
-          <linearGradient id="woodGrad-${idx}" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#fff6e5"/>
-            <stop offset="25%" stop-color="#faebd2"/>
-            <stop offset="75%" stop-color="#e2c89f"/>
-            <stop offset="100%" stop-color="#b8935c"/>
-          </linearGradient>
-        </defs>
-        <!-- Hanging string loop -->
-        <path d="M 175,10 C 140,40 140,80 175,110 C 210,80 210,40 175,10" fill="none" stroke="#d44b36" stroke-width="6"/>
-        <circle cx="175" cy="110" r="14" fill="#a82315"/>
-        <!-- Plaque body -->
-        <polygon points="175,130 330,190 330,730 20,730 20,190" fill="url(#woodGrad-${idx})" stroke="#c9a24b" stroke-width="4" rx="10"/>
-        <!-- Ribbon knot at top -->
-        <rect x="40" y="210" width="270" height="6" fill="#c9a24b" opacity="0.6"/>
-        <!-- Lotus or Wish crest -->
-        <circle cx="175" cy="270" r="28" fill="none" stroke="#c9a24b" stroke-width="2"/>
-        <text x="175" y="278" font-size="22" text-anchor="middle" fill="#8c4e28">✦</text>
-      </svg>
-      <div class="lovegift-wish-card-text">${wish}</div>
-    `;
-
-    card.addEventListener("click", () => {
-      // Lưu lại điều ước được chọn
+  if (submitBtn && textArea) {
+    submitBtn.addEventListener("click", () => {
+      const wish = textArea.value.trim() || "Một điều ước bí mật";
+      
       SELECTED_WISH = wish;
       const chosenStarText = document.getElementById("starlight-chosen-wish");
       if (chosenStarText) chosenStarText.textContent = `“${wish}”`;
@@ -1029,32 +999,21 @@ function initStageWish() {
         console.warn("Audio chime error:", e);
       }
 
-      // Card bay lên trời
-      card.classList.add("lovegift-wish-fly");
-
-      // Các card khác mờ dần
-      const allCards = container.querySelectorAll(".lovegift-wish-card");
-      allCards.forEach(c => {
-        if (c !== card) {
-          c.style.opacity = "0";
-          c.style.transform = "scale(0.85)";
-          c.disabled = true;
-        }
-      });
+      textArea.style.opacity = "0";
+      submitBtn.style.opacity = "0";
+      textArea.style.pointerEvents = "none";
+      submitBtn.style.pointerEvents = "none";
 
       if (replyEl) replyEl.style.display = "block";
 
-      // Pháo hoa giấy confetti chúc mừng
       triggerConfettiBurst();
 
-      // Chuyển sang màn Trái Tim Kỷ Niệm sau 2.2s
+      // Chuyển trực tiếp sang màn Sao băng như yêu cầu
       setTimeout(() => {
-        switchStage("heart");
+        switchStage("starlight");
       }, 2200);
     });
-
-    container.appendChild(card);
-  });
+  }
 }
 
 /**
@@ -1285,8 +1244,6 @@ function initStageStarlight() {
 function createShootingStarAt(x, y) {
   const sky = document.getElementById("meteor-sky-container");
   if (!sky) return;
-
-  if (window.BirthdayAudio) window.BirthdayAudio.playMeteorDrop();
 
   const meteorWrap = document.createElement("span");
   meteorWrap.className = "lovegift-meteor-wrap";
