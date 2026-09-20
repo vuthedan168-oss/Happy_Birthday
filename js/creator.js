@@ -652,6 +652,19 @@ function saveToStorage(key, data) {
 /**
  * Xử lý Tạo Link, Xem trước & Tải Config
  */
+async function shortenUrl(longUrl) {
+    try {
+        const reqUrl = 'https://tinyurl.com/api-create.php?url=' + encodeURIComponent(longUrl);
+        const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(reqUrl);
+        const response = await fetch(proxyUrl);
+        const data = await response.json();
+        if (data.contents) return data.contents; // Trả về link ngắn
+        return longUrl;
+    } catch (e) {
+        return longUrl; // Fallback an toàn
+    }
+}
+
 function initFormSubmit() {
   const form = document.getElementById("creator-form");
   const modal = document.getElementById("share-modal");
@@ -664,7 +677,7 @@ function initFormSubmit() {
   const btnPreview = document.getElementById("btn-preview-card");
   const btnQuick = document.getElementById("btn-quick-generate");
 
-  const openShareModal = () => {
+  const openShareModal = async (triggerBtn = null) => {
     try {
       const data = collectFormData();
       // Lưu vào Storage làm bản sao lưu với fallback
@@ -672,8 +685,22 @@ function initFormSubmit() {
 
       // Sinh Link chia sẻ 100% Client-side
       const viewUrl = window.CardStorage.createShareUrl(data);
-      if (shareInput) shareInput.value = viewUrl;
-      if (btnOpenLive) btnOpenLive.href = viewUrl;
+
+      if (triggerBtn) {
+        triggerBtn.dataset.originalHtml = triggerBtn.innerHTML;
+        triggerBtn.disabled = true;
+        triggerBtn.innerHTML = "⏳ Đang rút gọn link...";
+      }
+
+      const targetShareUrl = await shortenUrl(viewUrl);
+
+      if (triggerBtn) {
+        triggerBtn.disabled = false;
+        triggerBtn.innerHTML = triggerBtn.dataset.originalHtml || "Tạo & Lấy Link";
+      }
+
+      if (shareInput) shareInput.value = targetShareUrl;
+      if (btnOpenLive) btnOpenLive.href = targetShareUrl;
       if (copyMsg) copyMsg.style.display = "none";
 
       // Generate Fancy QR Code
@@ -701,7 +728,7 @@ function initFormSubmit() {
         const frameType = qrFrameSelect ? qrFrameSelect.value : 'none';
 
         // Xác định link render QR: nếu URL quá dài hoặc dính file:///, fallback về URL hợp lệ ngắn gọn
-        let qrRenderUrl = viewUrl;
+        let qrRenderUrl = targetShareUrl;
         const isFileProtocol = !qrRenderUrl || qrRenderUrl.startsWith('file:') || window.location.protocol === 'file:';
         const isUrlTooLong = qrRenderUrl && qrRenderUrl.length > 1200;
 
@@ -799,7 +826,7 @@ function initFormSubmit() {
     form.addEventListener("submit", (e) => {
       e.preventDefault();
       try {
-        openShareModal();
+        openShareModal(e.submitter || form.querySelector('button[type="submit"]'));
       } catch (err) {
         console.error("Lỗi submit form:", err);
       }
@@ -809,7 +836,7 @@ function initFormSubmit() {
   if (btnQuick) {
     btnQuick.addEventListener("click", () => {
       try {
-        openShareModal();
+        openShareModal(btnQuick);
       } catch (err) {
         console.error("Lỗi tạo nhanh:", err);
       }
