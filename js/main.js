@@ -625,37 +625,21 @@ function switchStage(stageName) {
  * Khởi tạo hệ thống âm thanh & nhạc nền
  */
 function initAudioSystem() {
-  const audioEl = document.getElementById("bg-audio");
   const audioBtn = document.getElementById("btn-audio-toggle");
   const audioIcon = document.getElementById("audio-icon");
 
-  if (!audioEl) return;
+  if (window.currentAudio) {
+    window.currentAudio.volume = 0.6;
+  }
 
-  const musicSrc = ACTIVE_CONFIG.backgroundMusic || "assets/audio/birthday.mp3";
-  audioEl.src = musicSrc;
-  audioEl.volume = 0.6;
-
-  let hasStarted = false;
-  const startAudioOnFirstUserTouch = () => {
-    if (hasStarted) return;
-    hasStarted = true;
-    audioEl.play().then(() => {
-      if (audioIcon) audioIcon.textContent = "🔊";
-    }).catch(() => {
-      hasStarted = false;
-    });
-    document.removeEventListener("pointerdown", startAudioOnFirstUserTouch);
-  };
-  document.addEventListener("pointerdown", startAudioOnFirstUserTouch, { once: true });
-
-  if (audioBtn) {
+  if (audioBtn && window.currentAudio) {
     audioBtn.addEventListener("click", () => {
-      if (audioEl.paused) {
-        audioEl.play().then(() => {
+      if (window.currentAudio.paused) {
+        window.currentAudio.play().then(() => {
           if (audioIcon) audioIcon.textContent = "🔊";
         });
       } else {
-        audioEl.pause();
+        window.currentAudio.pause();
         if (audioIcon) audioIcon.textContent = "🔇";
       }
     });
@@ -750,6 +734,12 @@ function initStageOpening() {
 
     reelScroller.style.setProperty("--reel-from", `${reelFrom}px`);
     reelScroller.style.setProperty("--reel-to", `${reelTo}px`);
+    
+    // Khôi phục logic .rolling
+    reelScroller.classList.add("rolling");
+    setTimeout(() => {
+      if (reelScroller) reelScroller.classList.remove("rolling");
+    }, 3500);
   }
 
   // Tự động chuyển sang stage 2 sau khi hiệu ứng mở đầu hoàn tất (tăng lên 6.7s để số quay đủ lâu)

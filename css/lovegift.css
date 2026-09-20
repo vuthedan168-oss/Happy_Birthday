@@ -1528,3 +1528,11 @@
     100% { transform: translate(-800px, 800px) rotate(-45deg); opacity: 0; }
 }
 
+
+@keyframes rollingInfinite {
+  0% { transform: translateY(var(--reel-from)); filter: blur(6px); }
+  100% { transform: translateY(var(--reel-to)); filter: blur(6px); }
+}
+.rolling {
+  animation: rollingInfinite 0.8s linear infinite !important;
+}
