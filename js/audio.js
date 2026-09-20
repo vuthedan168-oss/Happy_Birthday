@@ -413,32 +413,77 @@ class SoundEffects {
     if (!this.bgAudio) {
       this.bgAudio = new Audio();
       this.bgAudio.loop = true;
-      this.bgAudio.volume = 0.7;
+      this.bgAudio.volume = 0;
     }
 
-    // Fade out nhanh roi doi src
-    if (this.bgAudio && !this.bgAudio.paused) {
-      try {
-        this.bgAudio.pause();
-      } catch (e) {}
+    const targetVolume = 0.7;
+
+    const startNewTrack = () => {
+      this.bgAudio.src = newSrc;
+      this.bgAudio.currentTime = 0;
+      this.bgAudio.volume = 0;
+      
+      const playPromise = this.bgAudio.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            this.isPlaying = true;
+            this.updateMusicUI(true);
+            // Fade In
+            let vol = 0;
+            const fadeInInterval = setInterval(() => {
+              if (vol < targetVolume) {
+                vol = Math.min(targetVolume, vol + 0.05);
+                this.bgAudio.volume = vol;
+              } else {
+                clearInterval(fadeInInterval);
+              }
+            }, 50);
+          })
+          .catch(() => {
+            this.playSynthMelody();
+            this.isPlaying = true;
+            this.updateMusicUI(true);
+          });
+      }
+    };
+
+    // Fade out cũ rồi mới chuyển track
+    if (this.bgAudio && !this.bgAudio.paused && this.bgAudio.volume > 0) {
+      let vol = this.bgAudio.volume;
+      const fadeOutInterval = setInterval(() => {
+        if (vol > 0.05) {
+          vol -= 0.05;
+          this.bgAudio.volume = vol;
+        } else {
+          clearInterval(fadeOutInterval);
+          this.bgAudio.pause();
+          startNewTrack();
+        }
+      }, 50);
+    } else {
+      startNewTrack();
     }
+  }
 
-    this.bgAudio.src = newSrc;
-    this.bgAudio.currentTime = 0;
-
-    const playPromise = this.bgAudio.play();
-    if (playPromise !== undefined) {
-      playPromise
-        .then(() => {
-          this.isPlaying = true;
-          this.updateMusicUI(true);
-        })
-        .catch(() => {
-          // Neu loi hoac bi chan, dung synth thay the
-          this.playSynthMelody();
-          this.isPlaying = true;
-          this.updateMusicUI(true);
-        });
+  fadeOutAudio(duration = 2000) {
+    if (this.bgAudio && !this.bgAudio.paused && this.bgAudio.volume > 0) {
+      const startVolume = this.bgAudio.volume;
+      const steps = 20;
+      const stepTime = duration / steps;
+      const volumeStep = startVolume / steps;
+      
+      let currentStep = 0;
+      const fadeOutInterval = setInterval(() => {
+        currentStep++;
+        if (currentStep < steps) {
+          this.bgAudio.volume = Math.max(0, startVolume - (volumeStep * currentStep));
+        } else {
+          clearInterval(fadeOutInterval);
+          this.bgAudio.volume = 0;
+          this.bgAudio.pause();
+        }
+      }, stepTime);
     }
   }
 
@@ -605,6 +650,29 @@ class SoundEffects {
     if (this.synthTimeout) {
       clearTimeout(this.synthTimeout);
       this.synthTimeout = null;
+    }
+  }
+
+  // TIENG SWOOSH / VUUT BAY QUA (SAO BANG)
+  playSwoosh() {
+    try {
+      const swooshAudio = new Audio("assets/audio/swoosh.mp3");
+      swooshAudio.volume = 0.8;
+      swooshAudio.play().catch(e => console.warn("Cannot play swoosh.mp3:", e));
+      this.playSparkle(); // Mix với tiếng lấp lánh
+    } catch (e) {
+      console.warn("Audio swoosh error:", e);
+    }
+  }
+
+  // TIENG VO TAY (APPLAUSE)
+  playApplause() {
+    try {
+      const applauseAudio = new Audio("assets/audio/applause.mp3");
+      applauseAudio.volume = 0.9;
+      applauseAudio.play().catch(e => console.warn("Cannot play applause.mp3:", e));
+    } catch (e) {
+      console.warn("Audio applause error:", e);
     }
   }
 

@@ -179,10 +179,11 @@
 .lovegift-twinkle {
   will-change: transform, opacity;
   animation: 2.6s ease-in-out infinite lovegiftTwinkle;
+  filter: drop-shadow(0 0 8px white); /* Lấp lánh hơn */
 }
 @keyframes lovegiftTwinkle {
-  0%, 100% { opacity: 0.3; transform: scale(0.85); }
-  50% { opacity: 1; transform: scale(1.1); }
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.5); }
 }
 
 /* =========================================================
@@ -633,6 +634,25 @@
   margin: 0 auto;
 }
 
+/* Decor góc thư */
+.lovegift-letter-paper::before,
+.lovegift-letter-paper::after {
+  content: '🌿';
+  position: absolute;
+  font-size: 26px;
+  opacity: 0.5;
+  color: #8c4e28;
+  pointer-events: none;
+}
+.lovegift-letter-paper::before {
+  top: 15px; left: 15px;
+  transform: rotate(-45deg);
+}
+.lovegift-letter-paper::after {
+  bottom: 15px; right: 15px;
+  transform: rotate(135deg);
+}
+
 .lovegift-letter-scroll {
   overflow-y: auto;
   max-height: 380px;
@@ -644,8 +664,8 @@
 .lovegift-letter-scroll::-webkit-scrollbar-thumb { background: rgba(74, 53, 39, 0.35); border-radius: 4px; }
 
 .lovegift-letter-body {
-  font-family: var(--font-sans);
-  font-size: 14.5px;
+  font-family: 'Dancing Script', cursive;
+  font-size: 22px;
   line-height: 1.7;
   color: #4a3527;
   white-space: pre-line;
@@ -653,8 +673,8 @@
 }
 
 .lovegift-letter-sign {
-  font-family: var(--font-hand);
-  font-size: 24px;
+  font-family: 'Dancing Script', cursive;
+  font-size: 28px;
   color: #8c4e28;
   text-align: right;
   margin-top: 1.25rem;
@@ -828,6 +848,20 @@
   animation: 1.4s 1.2s both lovegiftSkyGlow;
   position: absolute;
   inset: 0;
+}
+
+/* Meteor Shower Dark Overlay */
+#stage-starlight::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: -1;
+  opacity: 0;
+  animation: fadeToDark 2s forwards;
+}
+@keyframes fadeToDark {
+  to { opacity: 1; }
 }
 
 /* =========================================================

@@ -11,7 +11,10 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎂</text></svg>">
 
-  <!-- Stylesheets -->
+  <!-- Stylesheets & Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/lovegift.css">
   <link rel="stylesheet" href="css/style.css">
 </head>
@@ -133,7 +136,7 @@
     </div>
 
     <!-- Thanh tác vụ nút bấm theo phong cách Happy_Birthday -->
-    <div class="countdown-actions-bar">
+    <div class="countdown-actions-bar" style="display: none !important;">
       <a href="#" target="_blank" rel="noopener noreferrer" class="btn-lovegift-pill" id="btn-add-calendar" style="display: none;">
         📅 Đặt lời nhắc Google Calendar
       </a>
@@ -533,8 +536,15 @@
         ⚠️ Trình duyệt đang chặn camera trực tiếp (cần chạy qua localhost/https). Hãy bấm 'Tải ảnh từ máy' hoặc 'Bỏ qua' để tiếp tục!
       </div>
 
-      <div style="position: relative; width: 100%; border-radius: 12px; overflow: hidden; background: #000; aspect-ratio: 3/4;">
-        <video id="selfie-video" autoplay playsinline style="width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1);"></video>
+      <div style="position: relative; width: 100%; border-radius: 16px; overflow: hidden; background: #000; aspect-ratio: 3/4; border: 4px solid #ffd98e; box-shadow: 0 0 15px rgba(255, 217, 142, 0.4);">
+        <!-- Decor Sinh Nhật Photobooth -->
+        <span style="position:absolute; top: 12px; left: 12px; font-size: 26px; z-index: 10; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));">🕯️</span>
+        <span style="position:absolute; top: 12px; right: 12px; font-size: 26px; z-index: 10; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));">🎂</span>
+        <div style="position:absolute; bottom: 20px; left: 0; right: 0; text-align: center; z-index: 10;">
+          <span style="background: rgba(0,0,0,0.65); border-radius: 20px; padding: 6px 18px; color: #ffd98e; font-family: 'Dancing Script', cursive; font-size: 1.6rem; box-shadow: 0 4px 10px rgba(0,0,0,0.6); letter-spacing: 1px;">Happy Birthday</span>
+        </div>
+
+        <video id="selfie-video" autoplay playsinline style="width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); filter: brightness(1.1) contrast(1.1) saturate(1.2) sepia(0.1);"></video>
         <canvas id="selfie-canvas" style="display: none; width: 100%; height: 100%; object-fit: cover;"></canvas>
         <div id="selfie-countdown-overlay" style="display: none; position: absolute; inset: 0; align-items: center; justify-content: center; font-size: 5rem; font-weight: bold; color: white; text-shadow: 0 0 20px rgba(0,0,0,0.8); z-index: 5;"></div>
         <div id="selfie-flash-overlay" style="display: none; position: absolute; inset: 0; background: white; z-index: 10; opacity: 1; transition: opacity 0.5s ease;"></div>
@@ -590,6 +600,15 @@
   <!-- OUTRO FADE TO BLACK -->
   <div id="outro-overlay" style="position: fixed; inset: 0; background: #000; opacity: 0; pointer-events: none; z-index: 200; transition: opacity 2.5s ease; display: flex; align-items: center; justify-content: center; text-align: center; padding: 2rem;">
     <p class="font-script" style="color: #ffd98e; font-size: 2.2rem; opacity: 0; transition: opacity 2s ease 1s; line-height: 1.5;" id="outro-text">Chúc cậu một tuổi mới rực rỡ và luôn hạnh phúc! 🎂✨</p>
+  </div>
+
+  <!-- CURTAIN ENDING SEQUENCE -->
+  <div id="curtain-container" style="position: fixed; inset: 0; pointer-events: none; z-index: 300; display: flex; justify-content: space-between; overflow: hidden;">
+    <div id="curtain-left" style="width: 50%; background: linear-gradient(90deg, #600000 0%, #aa0000 60%, #4a0000 100%); transform: translateX(-100%); transition: transform 2.5s cubic-bezier(0.25, 1, 0.5, 1); border-right: 8px solid #d4af37; box-shadow: 5px 0 25px rgba(0,0,0,0.8);"></div>
+    <div id="curtain-right" style="width: 50%; background: linear-gradient(270deg, #600000 0%, #aa0000 60%, #4a0000 100%); transform: translateX(100%); transition: transform 2.5s cubic-bezier(0.25, 1, 0.5, 1); border-left: 8px solid #d4af37; box-shadow: -5px 0 25px rgba(0,0,0,0.8);"></div>
+    <div id="curtain-text" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #ffd98e; font-family: 'Dancing Script', cursive; font-size: 4rem; text-align: center; opacity: 0; transition: opacity 1.5s ease 2.5s; text-shadow: 0 4px 15px rgba(0,0,0,0.9); z-index: 301; width: 100%;">
+      The End<br><span style="font-size: 2.2rem;">Chúc mừng sinh nhật!</span>
+    </div>
   </div>
 
   <!-- SCRIPTS -->

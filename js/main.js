@@ -170,12 +170,12 @@ function openSelfieModal() {
       })
       .catch(err => {
         console.warn('Camera error/permission denied:', err);
-        if (err.name === 'NotAllowedError') {
-          showCameraNotice("📸 Bạn chưa cấp quyền Camera. Hãy bấm vào biểu tượng ổ khóa 🔒 trên thanh địa chỉ để cho phép, hoặc chọn 'Mở bằng trình duyệt' nếu đang dùng Zalo/Messenger!");
+        if (err.name === 'NotAllowedError' || err.name === 'SecurityError') {
+          showCameraNotice("⚠️ Trình duyệt đang chặn Camera. Vui lòng tắt bong bóng chat, hoặc ấn dấu 3 chấm góc phải chọn 'Mở bằng trình duyệt' (Chrome/Safari)!");
         } else if (err.name === 'NotFoundError') {
           showCameraNotice("📸 Không tìm thấy Camera. Hãy dùng nút 'Tải ảnh từ máy' bên dưới nhé!");
         } else {
-          showCameraNotice("⚠️ Không thể mở Camera. Nếu đang dùng Zalo/FB, hãy nhấn dấu 3 chấm góc phải và chọn 'Mở bằng Safari/Chrome'!");
+          showCameraNotice("⚠️ Trình duyệt đang chặn Camera. Vui lòng tắt bong bóng chat, hoặc ấn dấu 3 chấm góc phải chọn 'Mở bằng trình duyệt' (Chrome/Safari)!");
         }
         if (btnTake) {
           btnTake.disabled = true;
@@ -185,7 +185,7 @@ function openSelfieModal() {
       });
   } catch(e) {
     console.warn('Lỗi khi mở camera:', e);
-    showCameraNotice("⚠️ Không thể mở Camera. Nếu đang dùng Zalo/FB, hãy nhấn dấu 3 chấm góc phải và chọn 'Mở bằng Safari/Chrome'!");
+    showCameraNotice("⚠️ Trình duyệt đang chặn Camera. Vui lòng tắt bong bóng chat, hoặc ấn dấu 3 chấm góc phải chọn 'Mở bằng trình duyệt' (Chrome/Safari)!");
     if (btnTake) {
       btnTake.disabled = true;
       btnTake.style.opacity = '0.6';
@@ -277,6 +277,10 @@ function triggerOutro() {
   if (window.BirthdayAudio && typeof window.BirthdayAudio.fadeOutAudio === 'function') {
     window.BirthdayAudio.fadeOutAudio(2500);
   }
+
+  if (window.BirthdayAudio && typeof window.BirthdayAudio.playApplause === 'function') {
+    window.BirthdayAudio.playApplause();
+  }
   
   const outro = document.getElementById('outro-overlay');
   const text = document.getElementById('outro-text');
@@ -286,6 +290,18 @@ function triggerOutro() {
   }
   if (text) {
     text.style.opacity = '1';
+  }
+
+  const curtainLeft = document.getElementById('curtain-left');
+  const curtainRight = document.getElementById('curtain-right');
+  const curtainText = document.getElementById('curtain-text');
+  
+  if (curtainLeft && curtainRight && curtainText) {
+    setTimeout(() => {
+      curtainLeft.style.transform = 'translateX(0)';
+      curtainRight.style.transform = 'translateX(0)';
+      curtainText.style.opacity = '1';
+    }, 1500);
   }
 }
 
