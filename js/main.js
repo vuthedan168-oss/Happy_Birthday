@@ -581,22 +581,19 @@ function switchStage(stageName) {
     }
   });
 
-  // LỖI 1 FIX: Đổi nhạc theo scene khi chuyển stage
-  if (window.BirthdayAudio && typeof window.BirthdayAudio.playSceneMusic === 'function') {
-    // Map stage name sang scene key mà audio.js hiểu
-    const stageToScene = {
-      "opening": "intro",
-      "intro": "cake",
-      "beats": "cake",
-      "wish": "cake",
-      "heart": "intro",
-      "letter": "intro",
-      "final": "galaxy",
-      "starlight": "galaxy"
-    };
-    const sceneKey = stageToScene[stageName];
-    if (sceneKey && ACTIVE_CONFIG.sceneMusic && ACTIVE_CONFIG.sceneMusic[sceneKey]) {
-      window.BirthdayAudio.playSceneMusic(sceneKey);
+  // Đổi nhạc theo scene khi chuyển stage
+  if (window.BirthdayAudio && typeof window.BirthdayAudio.switchAudioTrack === 'function') {
+    let trackUrl = null;
+    if (["countdown", "opening"].includes(stageName)) {
+      trackUrl = ACTIVE_CONFIG.sceneMusic?.intro;
+    } else if (["intro", "beats", "wish"].includes(stageName)) {
+      trackUrl = ACTIVE_CONFIG.sceneMusic?.cake;
+    } else if (["heart", "letter", "final", "starlight"].includes(stageName)) {
+      trackUrl = ACTIVE_CONFIG.sceneMusic?.letter;
+    }
+    
+    if (trackUrl) {
+      window.BirthdayAudio.switchAudioTrack(trackUrl);
     }
   }
 
@@ -1478,6 +1475,10 @@ function openLuckyWheelModal() {
   if (modal) {
     modal.style.display = "flex";
     drawLuckyWheel(WHEEL_ROTATION);
+    
+    if (window.BirthdayAudio && typeof window.BirthdayAudio.switchAudioTrack === 'function' && ACTIVE_CONFIG.sceneMusic?.wheel) {
+      window.BirthdayAudio.switchAudioTrack(ACTIVE_CONFIG.sceneMusic.wheel);
+    }
   }
 }
 

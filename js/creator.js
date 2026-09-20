@@ -347,25 +347,6 @@ function initQuizManager() {
 }
 
 // Cấu hình âm nhạc theo từng giai đoạn
-let sceneMusicConfig = {
-  intro: {
-    title: "Happy Birthday Piano Melody",
-    src: "assets/audio/happy-birthday.mp3"
-  },
-  cake: {
-    title: "Happy Birthday Piano Melody",
-    src: "assets/audio/happy-birthday.mp3"
-  },
-  wheel: {
-    title: "Upbeat Birthday Celebration",
-    src: "https://cdn.pixabay.com/download/audio/2022/10/14/audio_9939f792cb.mp3?filename=happy-birthday-party-124632.mp3"
-  },
-  galaxy: {
-    title: "Romantic Sweet Harp & Strings",
-    src: "https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=romantic-piano-10738.mp3"
-  }
-};
-
 let currentPlayingStage = null;
 
 /**
@@ -373,74 +354,77 @@ let currentPlayingStage = null;
  */
 function initMusicManager() {
   const audioPlayer = document.getElementById("creator-audio-player");
-  const stages = ["intro", "cake", "wheel", "galaxy"];
+  const previewBtns = document.querySelectorAll(".audio-preview-btn");
 
-  stages.forEach((stage) => {
-    const card = document.querySelector(`.scene-music-card[data-stage="${stage}"]`);
-    if (!card) return;
+  previewBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const targetId = btn.getAttribute("data-target");
+      const selectEl = document.getElementById(targetId);
+      if (!selectEl) return;
+      
+      const trackUrl = selectEl.value;
 
-    const select = card.querySelector(`.select-stage-music[data-stage="${stage}"]`);
-    const uploadBox = card.querySelector(`.stage-upload-box[data-stage="${stage}"]`);
-    const urlBox = card.querySelector(`.stage-url-box[data-stage="${stage}"]`);
-    const fileInput = card.querySelector(`.stage-file-input[data-stage="${stage}"]`);
-    const urlInput = card.querySelector(`.stage-url-input[data-stage="${stage}"]`);
-    const previewBtn = card.querySelector(`.audio-preview-btn[data-stage="${stage}"]`);
-    const statusBadge = card.querySelector(`.audio-status-badge[data-stage="${stage}"]`);
-
-    const updateStageSelection = () => {
-      const val = select.value;
-      if (val === "custom-upload") {
-        uploadBox.style.display = "block";
-        urlBox.style.display = "none";
-      } else if (val === "custom-url") {
-        uploadBox.style.display = "none";
-        urlBox.style.display = "block";
-        if (urlInput.value.trim()) {
-          sceneMusicConfig[stage] = {
-            title: "Nhạc link tùy chỉnh",
-            src: urlInput.value.trim()
-          };
-          if (statusBadge) statusBadge.textContent = "Link MP3";
-        }
+      if (btn.classList.contains("playing")) {
+        audioPlayer.pause();
+        btn.textContent = "▶️ Nghe thử";
+        btn.classList.remove("playing");
       } else {
-        uploadBox.style.display = "none";
-        urlBox.style.display = "none";
-        const preset = MUSIC_PRESETS[val];
-        if (preset) {
-          sceneMusicConfig[stage] = {
-            title: preset.title,
-            src: preset.src
-          };
-          if (statusBadge) statusBadge.textContent = preset.title;
+        previewBtns.forEach(b => {
+          b.textContent = "▶️ Nghe thử";
+          b.classList.remove("playing");
+        });
+
+        if (!trackUrl || trackUrl.startsWith("custom")) {
+          alert("Vui lòng chọn nhạc hợp lệ (chọn file tải lên hoặc điền URL)!");
+          return;
         }
+
+        audioPlayer.src = trackUrl;
+        audioPlayer.play().then(() => {
+          btn.textContent = "⏸️ Dừng lại";
+          btn.classList.add("playing");
+        }).catch(e => {
+          console.error("Play error", e);
+          alert("Không thể phát nhạc: " + e.message);
+        });
       }
-    };
+    });
+  });
+
+  const stages = ["intro", "cake", "wheel", "letter"];
+  stages.forEach(stage => {
+    const select = document.getElementById(`music-${stage}`);
+    const fileInput = document.querySelector(`.stage-file-input[data-stage="${stage}"]`);
+    const urlInput = document.querySelector(`.stage-url-input[data-stage="${stage}"]`);
+    const uploadBox = document.querySelector(`.stage-upload-box[data-stage="${stage}"]`);
+    const urlBox = document.querySelector(`.stage-url-box[data-stage="${stage}"]`);
+    const statusBadge = document.querySelector(`.audio-status-badge[data-stage="${stage}"]`);
 
     if (select) {
-      select.addEventListener("change", updateStageSelection);
-    }
-
-    if (urlInput) {
-      urlInput.addEventListener("input", () => {
-        const url = urlInput.value.trim();
-        sceneMusicConfig[stage] = {
-          title: "Nhạc link tùy chỉnh",
-          src: url
-        };
-        if (statusBadge) statusBadge.textContent = url ? "Link MP3 đã nhập" : "Chưa có link";
+      select.addEventListener("change", () => {
+        const val = select.value;
+        if (val === "custom-upload") {
+          uploadBox.style.display = "block";
+          urlBox.style.display = "none";
+        } else if (val === "custom-url") {
+          uploadBox.style.display = "none";
+          urlBox.style.display = "block";
+        } else {
+          uploadBox.style.display = "none";
+          urlBox.style.display = "none";
+          if (statusBadge) statusBadge.textContent = "Đã chọn nhạc có sẵn";
+        }
       });
     }
 
-    if (fileInput) {
-      fileInput.addEventListener("change", (e) => {
+    if (fileInput && select) {
+      fileInput.addEventListener("change", e => {
         const file = e.target.files[0];
         if (file) {
           const reader = new FileReader();
-          reader.onload = (ev) => {
-            sceneMusicConfig[stage] = {
-              title: file.name,
-              src: ev.target.result
-            };
+          reader.onload = ev => {
+            const opt = select.options[select.selectedIndex];
+            opt.value = ev.target.result;
             if (statusBadge) statusBadge.textContent = file.name;
           };
           reader.readAsDataURL(file);
@@ -448,47 +432,21 @@ function initMusicManager() {
       });
     }
 
-    if (previewBtn && audioPlayer) {
-      previewBtn.addEventListener("click", () => {
-        if (currentPlayingStage === stage && !audioPlayer.paused) {
-          audioPlayer.pause();
-          previewBtn.textContent = "▶️ Nghe thử";
-          previewBtn.classList.remove("playing");
-          currentPlayingStage = null;
-        } else {
-          document.querySelectorAll(".audio-preview-btn").forEach((btn) => {
-            btn.textContent = "▶️ Nghe thử";
-            btn.classList.remove("playing");
-          });
-
-          const track = sceneMusicConfig[stage];
-          if (!track || !track.src) {
-            alert("Vui lòng chọn hoặc tải file nhạc trước khi nghe thử!");
-            return;
-          }
-
-          audioPlayer.src = track.src;
-          audioPlayer.play()
-            .then(() => {
-              previewBtn.textContent = "⏸️ Dừng lại";
-              previewBtn.classList.add("playing");
-              currentPlayingStage = stage;
-            })
-            .catch(() => {
-              alert("Không thể phát file nhạc này trực tiếp trong trình duyệt. Hãy kiểm tra lại file hoặc link MP3.");
-            });
-        }
+    if (urlInput && select) {
+      urlInput.addEventListener("input", () => {
+        const opt = select.options[select.selectedIndex];
+        opt.value = urlInput.value.trim();
+        if (statusBadge) statusBadge.textContent = "Link MP3 đã nhập";
       });
     }
   });
 
   if (audioPlayer) {
     audioPlayer.addEventListener("ended", () => {
-      document.querySelectorAll(".audio-preview-btn").forEach((btn) => {
-        btn.textContent = "▶️ Nghe thử";
-        btn.classList.remove("playing");
+      previewBtns.forEach(b => {
+        b.textContent = "▶️ Nghe thử";
+        b.classList.remove("playing");
       });
-      currentPlayingStage = null;
     });
   }
 }
@@ -599,17 +557,22 @@ function collectFormData() {
     wishes: wishList,
     letterBody: wishesText,
     letterSignature: signature,
-    musicUrl: sceneMusicConfig.intro?.src || "assets/audio/birthday.mp3",
+    musicUrl: document.getElementById('music-intro')?.value || "assets/audio/birthday.mp3",
     slug: customSlug,
     unlockDateTime: startDate,
     startDate,
     endDate,
-    music: sceneMusicConfig.intro || {
+    music: {
       title: "Món Quà Sinh Nhật Lãng Mạn",
-      src: "assets/audio/birthday.mp3",
+      src: document.getElementById('music-intro')?.value || "assets/audio/birthday.mp3",
       autoplayOnOpen: true
     },
-    sceneMusic: sceneMusicConfig,
+    sceneMusic: {
+      intro: document.getElementById('music-intro')?.value || "assets/audio/birthday.mp3",
+      cake: document.getElementById('music-cake')?.value || "assets/audio/happy-birthday.mp3",
+      wheel: document.getElementById('music-wheel')?.value || "https://cdn.pixabay.com/download/audio/2022/10/14/audio_9939f792cb.mp3?filename=happy-birthday-party-124632.mp3",
+      letter: document.getElementById('music-letter')?.value || "https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=romantic-piano-10738.mp3"
+    },
     luckyWheel: {
       enabled: true,
       spinLimit,
