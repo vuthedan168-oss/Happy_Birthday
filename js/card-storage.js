@@ -78,8 +78,17 @@ const CardStorage = {
   // Tạo URL chia sẻ hoàn chỉnh
   createShareUrl(data) {
     const encodedData = this.encode(data);
-    const baseUrl = new URL('gift.html', window.location.href).href;
-    const targetUrl = baseUrl + '#card=' + encodedData;
+    const urlObj = new URL(window.location.href);
+    let path = urlObj.pathname;
+    // Đảm bảo lấy đúng thư mục gốc, không bị mất đuôi /Happy_Birthday/
+    if (!path.endsWith('/')) {
+        if (path.includes('.html')) {
+            path = path.substring(0, path.lastIndexOf('/') + 1);
+        } else {
+            path = path + '/';
+        }
+    }
+    const targetUrl = urlObj.origin + path + 'gift.html#card=' + encodedData;
     return targetUrl;
   }
 };

@@ -158,7 +158,8 @@ function openSelfieModal() {
   }
 
   try {
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
+    const constraints = { video: { facingMode: "user" }, audio: false };
+    navigator.mediaDevices.getUserMedia(constraints)
       .then(stream => {
         selfieStream = stream;
         if (video) {
@@ -169,7 +170,13 @@ function openSelfieModal() {
       })
       .catch(err => {
         console.warn('Camera error/permission denied:', err);
-        showCameraNotice("⚠️ Trình duyệt đang chặn camera trực tiếp (cần chạy qua localhost/https). Hãy bấm 'Tải ảnh từ máy' hoặc 'Bỏ qua' để tiếp tục!");
+        if (err.name === 'NotAllowedError') {
+          showCameraNotice("📸 Bạn chưa cấp quyền Camera. Hãy bấm vào biểu tượng ổ khóa 🔒 trên thanh địa chỉ để cho phép, hoặc chọn 'Mở bằng trình duyệt' nếu đang dùng Zalo/Messenger!");
+        } else if (err.name === 'NotFoundError') {
+          showCameraNotice("📸 Không tìm thấy Camera. Hãy dùng nút 'Tải ảnh từ máy' bên dưới nhé!");
+        } else {
+          showCameraNotice("⚠️ Không thể mở Camera. Nếu đang dùng Zalo/FB, hãy nhấn dấu 3 chấm góc phải và chọn 'Mở bằng Safari/Chrome'!");
+        }
         if (btnTake) {
           btnTake.disabled = true;
           btnTake.style.opacity = '0.6';
@@ -178,7 +185,7 @@ function openSelfieModal() {
       });
   } catch(e) {
     console.warn('Lỗi khi mở camera:', e);
-    showCameraNotice("⚠️ Trình duyệt đang chặn camera trực tiếp (cần chạy qua localhost/https). Hãy bấm 'Tải ảnh từ máy' hoặc 'Bỏ qua' để tiếp tục!");
+    showCameraNotice("⚠️ Không thể mở Camera. Nếu đang dùng Zalo/FB, hãy nhấn dấu 3 chấm góc phải và chọn 'Mở bằng Safari/Chrome'!");
     if (btnTake) {
       btnTake.disabled = true;
       btnTake.style.opacity = '0.6';
