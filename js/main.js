@@ -565,21 +565,7 @@ async function initCardConfiguration() {
 function switchStage(stageName) {
   CURRENT_STAGE = stageName;
 
-  // Đổi nhạc theo scene NGAY LẬP TỨC khi chuyển stage
-  if (window.BirthdayAudio && typeof window.BirthdayAudio.switchAudioTrack === 'function') {
-    let trackUrl = null;
-    if (["countdown", "opening"].includes(stageName)) {
-      trackUrl = ACTIVE_CONFIG.sceneMusic?.intro;
-    } else if (["intro", "beats", "wish"].includes(stageName)) {
-      trackUrl = ACTIVE_CONFIG.sceneMusic?.cake;
-    } else if (["heart", "letter", "final", "starlight"].includes(stageName)) {
-      trackUrl = ACTIVE_CONFIG.sceneMusic?.letter;
-    }
-    
-    if (trackUrl) {
-      window.BirthdayAudio.switchAudioTrack(trackUrl);
-    }
-  }
+
 
   const stages = [
     "stage-countdown", "stage-opening", "stage-intro", "stage-beats", "stage-wish",
@@ -617,7 +603,7 @@ function initAudioSystem() {
 
   if (!audioEl) return;
 
-  const musicSrc = ACTIVE_CONFIG.musicUrl || "assets/audio/birthday.mp3";
+  const musicSrc = ACTIVE_CONFIG.backgroundMusic || "assets/audio/birthday.mp3";
   audioEl.src = musicSrc;
   audioEl.volume = 0.6;
 
@@ -1217,7 +1203,7 @@ function initStageStarlight() {
         if (actionsWrap) actionsWrap.style.display = "flex";
         // Bắn vài loạt sao băng tự động
         spawnMeteorsBatch(10);
-        create3DShootingStars();
+        createShootingStars();
       }, 1500);
     });
   }
@@ -1280,28 +1266,43 @@ function spawnMeteorsBatch(count) {
 /**
  * Hàng trăm sao băng 3D
  */
-function create3DShootingStars() {
-  const sky = document.getElementById("meteor-sky-container");
-  if (!sky) return;
+function createShootingStars() {
+    const sky = document.getElementById('stage-starlight');
+    
+    // Giữ lại nội dung cũ của stage-starlight (các class khác như starlight-actions-wrap...) 
+    // và chỉ dọn dẹp các sao hiện có (nếu muốn, nhưng tốt nhất là tạo một container riêng 
+    // hoặc thêm vào cuối để không xóa đè nút bấm).
+    // Vì prompt nói sky.innerHTML = ''; nên nếu áp dụng thẳng sẽ xóa mất nút UI!
+    // Vậy ta sẽ tìm meteor-sky-container để an toàn hơn, hoặc theo prompt.
+    // Dựa vào prompt, tôi sẽ chèn trực tiếp, nhưng để không bị mất UI, tôi sẽ chọn background element.
+    let starBg = document.getElementById('meteor-sky-container');
+    if (!starBg) return;
+    starBg.innerHTML = ''; 
+    
+    // 1. Tạo 150 ngôi sao tĩnh nhấp nháy làm phông nền vũ trụ
+    for(let i = 0; i < 150; i++) {
+        let staticStar = document.createElement('div');
+        staticStar.className = 'static-star';
+        staticStar.style.left = Math.random() * 100 + 'vw';
+        staticStar.style.top = Math.random() * 100 + 'vh';
+        let size = Math.random() * 3 + 1; // Kích thước từ 1px đến 4px
+        staticStar.style.width = size + 'px';
+        staticStar.style.height = size + 'px';
+        staticStar.style.animationDelay = (Math.random() * 5) + 's';
+        starBg.appendChild(staticStar);
+    }
 
-  const count = 30 + Math.floor(Math.random() * 20); // 30-50
-  for (let i = 0; i < count; i++) {
-    const star = document.createElement("div");
-    star.className = "shooting-star-3d";
-    
-    // Vị trí ngẫu nhiên
-    const left = Math.random() * 100;
-    const top = Math.random() * 100 - 50; // Tránh bay từ quá thấp
-    const delay = Math.random() * 3;
-    const duration = 1 + Math.random() * 1.5;
-    
-    star.style.left = `${left}vw`;
-    star.style.top = `${top}vh`;
-    star.style.animationDelay = `${delay}s`;
-    star.style.animationDuration = `${duration}s`;
-    
-    sky.appendChild(star);
-  }
+    // 2. Tạo 15-20 vệt sao băng lớn bay xẹt qua
+    for(let j = 0; j < 20; j++) {
+        let meteor = document.createElement('div');
+        meteor.className = 'shooting-star-3d';
+        // Phân bổ vị trí ngẫu nhiên tập trung ở nửa trên và bên phải màn hình
+        meteor.style.left = (Math.random() * 150) + 'vw'; 
+        meteor.style.top = (Math.random() * 50 - 20) + 'vh';
+        meteor.style.animationDelay = (Math.random() * 10) + 's';
+        meteor.style.animationDuration = (Math.random() * 2 + 2) + 's'; // Tốc độ bay ngẫu nhiên
+        starBg.appendChild(meteor);
+    }
 }
 
 /**
@@ -1462,10 +1463,7 @@ function openLuckyWheelModal() {
   if (modal) {
     modal.style.display = "flex";
     drawLuckyWheel(WHEEL_ROTATION);
-    
-    if (window.BirthdayAudio && typeof window.BirthdayAudio.switchAudioTrack === 'function' && ACTIVE_CONFIG.sceneMusic?.wheel) {
-      window.BirthdayAudio.switchAudioTrack(ACTIVE_CONFIG.sceneMusic.wheel);
-    }
+
   }
 }
 

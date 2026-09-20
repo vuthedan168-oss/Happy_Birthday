@@ -207,155 +207,48 @@ Chúc cậu tuổi mới ngập tràn niềm vui, nụ cười rạng rỡ và l
           <div class="section-heading">
             <span class="heading-icon">🎵</span>
             <div>
-              <h3>Âm Nhạc Riêng Cho Từng Giai Đoạn</h3>
-              <p>Chủ động chọn hoặc tải nhạc từ máy tính (.mp3, .wav, .m4a) riêng cho từng màn để tăng cảm xúc!</p>
+              <h3>Âm Nhạc Nền Toàn Bộ Thiệp</h3>
+              <p>Chọn hoặc tải nhạc nền (.mp3, .wav) xuyên suốt toàn bộ quá trình xem thiệp để tăng cảm xúc!</p>
             </div>
           </div>
 
           <div class="scene-music-grid">
-            <!-- Giai đoạn 1: Mở đầu & Quiz -->
-            <div class="scene-music-card stage-intro" data-stage="intro">
+            <!-- Nhạc Nền Chung -->
+            <div class="scene-music-card stage-bg" data-stage="bg">
               <div class="scene-music-header">
-                <span class="scene-music-icon">💡</span>
+                <span class="scene-music-icon">🎵</span>
                 <div>
-                  <div class="scene-music-title">1. Mở Đầu & Thử Thách Quiz</div>
-                  <div class="scene-music-desc">Phát khi bật đèn & làm câu hỏi</div>
+                  <div class="scene-music-title">Nhạc Nền Toàn Bộ Thiệp</div>
+                  <div class="scene-music-desc">Phát xuyên suốt từ đầu đến cuối</div>
                 </div>
               </div>
               <div class="form-group mb-2">
-                <select id="music-intro" class="form-control form-select select-stage-music" data-stage="intro">
+                <select id="music-bg" class="form-control form-select select-stage-music" data-stage="bg">
+                  <option value="assets/audio/birthday.mp3" selected>Birthday - Somi (Gốc)</option>
                   <option value="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3">🎧 Sweet Lofi Memories</option>
                   <option value="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=romantic-piano-10738.mp3">🎻 Romantic Harp & Strings</option>
                   <option value="https://cdn.pixabay.com/download/audio/2022/10/14/audio_9939f792cb.mp3?filename=happy-birthday-party-124632.mp3">🎉 Upbeat Celebration</option>
-                  <option value="">🔔 Web Audio Chimes</option>
+                  <option value="">🔔 Không có nhạc</option>
                   <option value="assets/audio/ngan-nam-anh-sang.mp3">Ngàn Năm Ánh Sáng</option>
-                  <option value="assets/audio/nhac-vong-quay.mp3">Nhạc Vòng Quay May Mắn</option>
-                  <option value="assets/audio/birthday.mp3" selected>Birthday - Somi</option>
                   <option value="assets/audio/happy birthday.mp3">Happy Birthday (Bản chuẩn)</option>
                   <option value="custom-upload">📁 Tải file từ máy tính...</option>
                   <option value="custom-url">🔗 Nhập link MP3 tùy chỉnh...</option>
                 </select>
               </div>
-              <div class="stage-upload-box mb-2" style="display:none;" data-stage="intro">
-                <input type="file" class="form-control form-control-sm stage-file-input" accept="audio/*" data-stage="intro">
+              <div class="stage-upload-box mb-2" style="display:none;" data-stage="bg">
+                <input type="file" class="form-control form-control-sm stage-file-input" accept="audio/*" data-stage="bg">
                 <small class="field-hint">Hỗ trợ file .mp3, .wav, .m4a từ máy</small>
               </div>
-              <div class="stage-url-box mb-2" style="display:none;" data-stage="intro">
-                <input type="url" class="form-control form-control-sm stage-url-input" placeholder="https://.../music.mp3" data-stage="intro">
+              <div class="stage-url-box mb-2" style="display:none;" data-stage="bg">
+                <input type="url" class="form-control form-control-sm stage-url-input" placeholder="https://.../music.mp3" data-stage="bg">
               </div>
               <div class="scene-music-actions">
-                <button type="button" class="audio-preview-btn" data-target="music-intro">▶️ Nghe thử</button>
-                <span class="audio-status-badge" data-stage="intro">Món Quà Sinh Nhật Lãng Mạn</span>
+                <button type="button" class="audio-preview-btn" data-target="music-bg">▶️ Nghe thử</button>
+                <span class="audio-status-badge" data-stage="bg">Birthday - Somi</span>
               </div>
             </div>
 
-            <!-- Giai đoạn 2: Bánh kem & Thổi nến -->
-            <div class="scene-music-card stage-cake" data-stage="cake">
-              <div class="scene-music-header">
-                <span class="scene-music-icon">🎂</span>
-                <div>
-                  <div class="scene-music-title">2. Bánh Kem & Thổi Nến</div>
-                  <div class="scene-music-desc">Khoảnh khắc ước nguyện ngọt ngào</div>
-                </div>
-              </div>
-              <div class="form-group mb-2">
-                <select id="music-cake" class="form-control form-select select-stage-music" data-stage="cake">
-                  <option value="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3">🎧 Sweet Lofi Memories</option>
-                  <option value="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=romantic-piano-10738.mp3">🎻 Romantic Harp & Strings</option>
-                  <option value="https://cdn.pixabay.com/download/audio/2022/10/14/audio_9939f792cb.mp3?filename=happy-birthday-party-124632.mp3">🎉 Upbeat Celebration</option>
-                  <option value="">🔔 Web Audio Chimes</option>
-                  <option value="assets/audio/ngan-nam-anh-sang.mp3">Ngàn Năm Ánh Sáng</option>
-                  <option value="assets/audio/nhac-vong-quay.mp3">Nhạc Vòng Quay May Mắn</option>
-                  <option value="assets/audio/birthday.mp3">Birthday - Somi</option>
-                  <option value="assets/audio/happy birthday.mp3" selected>Happy Birthday (Bản chuẩn)</option>
-                  <option value="custom-upload">📁 Tải file từ máy tính...</option>
-                  <option value="custom-url">🔗 Nhập link MP3 tùy chỉnh...</option>
-                </select>
-              </div>
-              <div class="stage-upload-box mb-2" style="display:none;" data-stage="cake">
-                <input type="file" class="form-control form-control-sm stage-file-input" accept="audio/*" data-stage="cake">
-                <small class="field-hint">Hỗ trợ file .mp3, .wav, .m4a từ máy</small>
-              </div>
-              <div class="stage-url-box mb-2" style="display:none;" data-stage="cake">
-                <input type="url" class="form-control form-control-sm stage-url-input" placeholder="https://.../music.mp3" data-stage="cake">
-              </div>
-              <div class="scene-music-actions">
-                <button type="button" class="audio-preview-btn" data-target="music-cake">▶️ Nghe thử</button>
-                <span class="audio-status-badge" data-stage="cake">Happy Birthday Piano</span>
-              </div>
-            </div>
 
-            <!-- Giai đoạn 3: Vòng quay may mắn -->
-            <div class="scene-music-card stage-wheel" data-stage="wheel">
-              <div class="scene-music-header">
-                <span class="scene-music-icon">🎡</span>
-                <div>
-                  <div class="scene-music-title">3. Vòng Quay May Mắn</div>
-                  <div class="scene-music-desc">Sôi nổi, hào hứng quay nhận quà</div>
-                </div>
-              </div>
-              <div class="form-group mb-2">
-                <select id="music-wheel" class="form-control form-select select-stage-music" data-stage="wheel">
-                  <option value="https://cdn.pixabay.com/download/audio/2022/10/14/audio_9939f792cb.mp3?filename=happy-birthday-party-124632.mp3" selected>🎉 Upbeat Celebration (Vui tươi)</option>
-                  <option value="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3">🎧 Sweet Lofi Memories</option>
-                  <option value="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=romantic-piano-10738.mp3">🎻 Romantic Harp & Strings</option>
-                  <option value="">🔔 Web Audio Chimes</option>
-                  <option value="assets/audio/ngan-nam-anh-sang.mp3">Ngàn Năm Ánh Sáng</option>
-                  <option value="assets/audio/nhac-vong-quay.mp3">Nhạc Vòng Quay May Mắn</option>
-                  <option value="assets/audio/birthday.mp3">Birthday - Somi</option>
-                  <option value="assets/audio/happy birthday.mp3">Happy Birthday (Bản chuẩn)</option>
-                  <option value="custom-upload">📁 Tải file từ máy tính...</option>
-                  <option value="custom-url">🔗 Nhập link MP3 tùy chỉnh...</option>
-                </select>
-              </div>
-              <div class="stage-upload-box mb-2" style="display:none;" data-stage="wheel">
-                <input type="file" class="form-control form-control-sm stage-file-input" accept="audio/*" data-stage="wheel">
-                <small class="field-hint">Hỗ trợ file .mp3, .wav, .m4a từ máy</small>
-              </div>
-              <div class="stage-url-box mb-2" style="display:none;" data-stage="wheel">
-                <input type="url" class="form-control form-control-sm stage-url-input" placeholder="https://.../music.mp3" data-stage="wheel">
-              </div>
-              <div class="scene-music-actions">
-                <button type="button" class="audio-preview-btn" data-target="music-wheel">▶️ Nghe thử</button>
-                <span class="audio-status-badge" data-stage="wheel">Upbeat Celebration</span>
-              </div>
-            </div>
-
-            <!-- Giai đoạn 4: Thư & Album ảnh -->
-            <div class="scene-music-card stage-letter" data-stage="letter">
-              <div class="scene-music-header">
-                <span class="scene-music-icon">💌</span>
-                <div>
-                  <div class="scene-music-title">4. Bức Thư & Kỷ Niệm 3D</div>
-                  <div class="scene-music-desc">Lắng đọng, cảm xúc và ngọt ngào</div>
-                </div>
-              </div>
-              <div class="form-group mb-2">
-                <select id="music-letter" class="form-control form-select select-stage-music" data-stage="letter">
-                  <option value="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=romantic-piano-10738.mp3" selected>🎻 Romantic Harp & Strings</option>
-                  <option value="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3">🎧 Sweet Lofi Memories</option>
-                  <option value="https://cdn.pixabay.com/download/audio/2022/10/14/audio_9939f792cb.mp3?filename=happy-birthday-party-124632.mp3">🎉 Upbeat Celebration</option>
-                  <option value="">🔔 Web Audio Chimes</option>
-                  <option value="assets/audio/ngan-nam-anh-sang.mp3">Ngàn Năm Ánh Sáng</option>
-                  <option value="assets/audio/nhac-vong-quay.mp3">Nhạc Vòng Quay May Mắn</option>
-                  <option value="assets/audio/birthday.mp3">Birthday - Somi</option>
-                  <option value="assets/audio/happy birthday.mp3">Happy Birthday (Bản chuẩn)</option>
-                  <option value="custom-upload">📁 Tải file từ máy tính...</option>
-                  <option value="custom-url">🔗 Nhập link MP3 tùy chỉnh...</option>
-                </select>
-              </div>
-              <div class="stage-upload-box mb-2" style="display:none;" data-stage="letter">
-                <input type="file" class="form-control form-control-sm stage-file-input" accept="audio/*" data-stage="letter">
-                <small class="field-hint">Hỗ trợ file .mp3, .wav, .m4a từ máy</small>
-              </div>
-              <div class="stage-url-box mb-2" style="display:none;" data-stage="letter">
-                <input type="url" class="form-control form-control-sm stage-url-input" placeholder="https://.../music.mp3" data-stage="letter">
-              </div>
-              <div class="scene-music-actions">
-                <button type="button" class="audio-preview-btn" data-target="music-letter">▶️ Nghe thử</button>
-                <span class="audio-status-badge" data-stage="letter">Romantic Harp & Strings</span>
-              </div>
-            </div>
           </div>
         </div>
 

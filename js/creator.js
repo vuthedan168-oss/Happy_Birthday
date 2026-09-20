@@ -391,7 +391,7 @@ function initMusicManager() {
     });
   });
 
-  const stages = ["intro", "cake", "wheel", "letter"];
+  const stages = ["bg"];
   stages.forEach(stage => {
     const select = document.getElementById(`music-${stage}`);
     const fileInput = document.querySelector(`.stage-file-input[data-stage="${stage}"]`);
@@ -562,17 +562,7 @@ function collectFormData() {
     unlockDateTime: startDate,
     startDate,
     endDate,
-    music: {
-      title: "Món Quà Sinh Nhật Lãng Mạn",
-      src: document.getElementById('music-intro')?.value || "assets/audio/birthday.mp3",
-      autoplayOnOpen: true
-    },
-    sceneMusic: {
-      intro: document.getElementById('music-intro')?.value || "assets/audio/birthday.mp3",
-      cake: document.getElementById('music-cake')?.value || "assets/audio/happy-birthday.mp3",
-      wheel: document.getElementById('music-wheel')?.value || "https://cdn.pixabay.com/download/audio/2022/10/14/audio_9939f792cb.mp3?filename=happy-birthday-party-124632.mp3",
-      letter: document.getElementById('music-letter')?.value || "https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=romantic-piano-10738.mp3"
-    },
+    backgroundMusic: document.getElementById('music-bg')?.value || "assets/audio/birthday.mp3",
     luckyWheel: {
       enabled: true,
       spinLimit,
@@ -595,15 +585,8 @@ function saveToStorage(key, data) {
     const textOnlyData = { ...data };
 
     // Loại bỏ Base64 Audio
-    if (textOnlyData.sceneMusic) {
-      for (const stage in textOnlyData.sceneMusic) {
-        if (textOnlyData.sceneMusic[stage] && textOnlyData.sceneMusic[stage].src && textOnlyData.sceneMusic[stage].src.startsWith('data:')) {
-          textOnlyData.sceneMusic[stage].src = '';
-        }
-      }
-    }
-    if (textOnlyData.music && textOnlyData.music.src && textOnlyData.music.src.startsWith('data:')) {
-      textOnlyData.music.src = '';
+    if (textOnlyData.backgroundMusic && textOnlyData.backgroundMusic.startsWith('data:')) {
+      textOnlyData.backgroundMusic = '';
     }
 
     localStorage.setItem(key, JSON.stringify(textOnlyData));

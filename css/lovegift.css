@@ -1477,3 +1477,54 @@
   90% { opacity: 1; }
   100% { opacity: 0; transform: translate3d(-100vw, 100vh, 0) rotate(-45deg) scale(1.5); }
 }
+
+/* N?n vu tr? gradient sâu th?m */
+#stage-starlight { 
+    background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%) !important; 
+    overflow: hidden; 
+    position: relative; 
+    z-index: 1;
+}
+
+/* Các ngôi sao tinh l?p lánh ? phông n?n */
+.static-star {
+    position: absolute;
+    background: #ffffff;
+    border-radius: 50%;
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+    animation: twinkle 4s infinite alternate;
+}
+@keyframes twinkle {
+    0% { opacity: 0.2; transform: scale(0.8); }
+    100% { opacity: 1; transform: scale(1.2); box-shadow: 0 0 10px #fff, 0 0 20px #87ceeb; }
+}
+
+/* V?t sao bang kh?ng l? l?p lánh (Mô ph?ng ?nh m?u) */
+.shooting-star-3d {
+    position: absolute;
+    width: 150px !important; /* Chi?u dài v?t duôi */
+    height: 2px !important;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1)) !important;
+    box-shadow: none !important;
+    transform: rotate(-45deg) !important;
+    opacity: 0 !important;
+    animation: shootingStar 3s linear infinite !important;
+}
+/* Ph?n d?u phát sáng r?c r? c?a sao bang */
+.shooting-star-3d::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 15px 5px #87ceeb, 0 0 30px 10px #00bfff, 0 0 50px 15px #ffffff;
+}
+@keyframes shootingStar {
+    0% { transform: translate(100px, -100px) rotate(-45deg); opacity: 1; }
+    100% { transform: translate(-800px, 800px) rotate(-45deg); opacity: 0; }
+}
+

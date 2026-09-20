@@ -362,9 +362,8 @@ class SoundEffects {
     } catch (e) {}
   }
 
-  // 11. NHAC NEN (BACKGROUND MUSIC) & THEO PHAN DOAN (SCENE MUSIC)
+  // 11. NHAC NEN (BACKGROUND MUSIC)
   initBackgroundMusic(src) {
-    this.sceneMusicMap = {};
     this.currentTrackSrc = src || "";
     if (src) {
       this.bgAudio = new Audio(src);
@@ -373,84 +372,7 @@ class SoundEffects {
     }
   }
 
-  setSceneMusicConfig(sceneConfig) {
-    if (!sceneConfig) return;
-    this.sceneMusicMap = sceneConfig;
-  }
 
-  playSceneMusic(stageName) {
-    if (!this.sceneMusicMap) return;
-    const stageKeyMap = {
-      "scene-dark-room": "intro",
-      "scene-quiz": "intro",
-      "scene-cake": "cake",
-      "scene-wheel": "wheel",
-      "scene-vortex-portal": "galaxy",
-      "scene-galaxy": "galaxy"
-    };
-
-    const targetKey = stageKeyMap[stageName] || stageName;
-    const track = this.sceneMusicMap[targetKey];
-    if (!track || !track.src) return;
-
-    // Neu dang phat dung bai nay thi tiep tuc
-    if (this.currentTrackSrc === track.src && this.isPlaying && this.bgAudio && !this.bgAudio.paused) {
-      this.updateTrackLabel(track.title);
-      return;
-    }
-
-    this.currentTrackSrc = track.src;
-    this.updateTrackLabel(track.title);
-
-    // Chuyen nhac em diu
-    this.switchAudioTrack(track.src);
-  }
-
-  switchAudioTrack(newSrc) {
-    this.initContext();
-    this.stopSynthMelody();
-
-    // Dọn dẹp mọi interval fade-out đang chạy dở
-    if (this.fadeOutInterval) {
-      clearInterval(this.fadeOutInterval);
-      this.fadeOutInterval = null;
-    }
-
-    if (!this.bgAudio) {
-      this.bgAudio = new Audio();
-      this.bgAudio.loop = true;
-      this.bgAudio.volume = 1.0;
-    }
-
-    // Bắt buộc gọi pause và reset currentTime trước khi gán src mới
-    this.bgAudio.pause();
-    this.bgAudio.currentTime = 0;
-
-    const targetVolume = 1.0;
-
-    const startNewTrack = () => {
-      this.bgAudio.src = newSrc;
-      this.bgAudio.currentTime = 0;
-      this.bgAudio.volume = targetVolume; // Cố định volume = 1.0
-      
-      const playPromise = this.bgAudio.play();
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            this.isPlaying = true;
-            this.updateMusicUI(true);
-            this.bgAudio.volume = targetVolume;
-          })
-          .catch(() => {
-            this.playSynthMelody();
-            this.isPlaying = true;
-            this.updateMusicUI(true);
-          });
-      }
-    };
-
-    startNewTrack();
-  }
 
   fadeOutAudio(duration = 2000) {
     if (this.bgAudio && !this.bgAudio.paused && this.bgAudio.volume > 0) {
@@ -672,11 +594,13 @@ class SoundEffects {
       const step = startVolume / (duration / 50);
       
       const fadeInterval = setInterval(() => {
-        if (this.bgAudio.volume > step) {
+        if (this.bgAudio && this.bgAudio.volume > step) {
           this.bgAudio.volume -= step;
         } else {
-          this.bgAudio.volume = 0;
-          this.bgAudio.pause();
+          if (this.bgAudio) {
+            this.bgAudio.volume = 0;
+            this.bgAudio.pause();
+          }
           clearInterval(fadeInterval);
         }
       }, 50);
