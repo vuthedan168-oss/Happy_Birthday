@@ -652,19 +652,6 @@ function saveToStorage(key, data) {
 /**
  * Xử lý Tạo Link, Xem trước & Tải Config
  */
-async function shortenUrl(longUrl) {
-    try {
-        const reqUrl = 'https://tinyurl.com/api-create.php?url=' + encodeURIComponent(longUrl);
-        const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(reqUrl);
-        const response = await fetch(proxyUrl);
-        const data = await response.json();
-        if (data.contents) return data.contents; // Trả về link ngắn
-        return longUrl;
-    } catch (e) {
-        return longUrl; // Fallback an toàn
-    }
-}
-
 function initFormSubmit() {
   const form = document.getElementById("creator-form");
   const modal = document.getElementById("share-modal");
@@ -683,16 +670,17 @@ function initFormSubmit() {
       // Lưu vào Storage làm bản sao lưu với fallback
       saveToStorage("custom_birthday_card", data);
 
-      // Sinh Link chia sẻ 100% Client-side
-      const viewUrl = window.CardStorage.createShareUrl(data);
-
       if (triggerBtn) {
         triggerBtn.dataset.originalHtml = triggerBtn.innerHTML;
         triggerBtn.disabled = true;
-        triggerBtn.innerHTML = "⏳ Đang rút gọn link...";
+        triggerBtn.innerHTML = "⏳ Đang khởi tạo dữ liệu đám mây...";
       }
 
-      const targetShareUrl = await shortenUrl(viewUrl);
+      // Lưu lên Cloud Database
+      const recordId = await window.CardStorage.saveToCloud(data);
+
+      // Sinh Link chia sẻ 100% Client-side qua ID
+      const targetShareUrl = window.CardStorage.createShareUrl(recordId);
 
       if (triggerBtn) {
         triggerBtn.disabled = false;
@@ -864,8 +852,8 @@ function initFormSubmit() {
       try {
         const data = collectFormData();
         saveToStorage("custom_birthday_card", data);
-        const viewUrl = window.CardStorage.createShareUrl(data);
-
+        // Khi xem trước, ta dùng localStorage fallback để nhanh, không cần gọi Cloud
+        const viewUrl = new URL('gift.html', window.location.href).href;
         window.open(viewUrl, "_blank");
       } catch (err) {
         console.error("Lỗi xem trước thiệp:", err);
@@ -886,11 +874,12 @@ function initFormSubmit() {
           data.unlockDateTime = data.startDate;
         }
         saveToStorage("custom_birthday_card", data);
-        const viewUrl = window.CardStorage.createShareUrl(data);
+        // Khi xem trước, ta dùng localStorage fallback để nhanh, không cần gọi Cloud
+        const viewUrl = new URL('gift.html', window.location.href).href;
 
         const previewCdUrl = viewUrl.includes("?")
           ? `${viewUrl}&countdown=preview`
-          : viewUrl.replace("#", "?countdown=preview#");
+          : `${viewUrl}?countdown=preview`;
         window.open(previewCdUrl, "_blank");
       } catch (err) {
         console.error("Lỗi xem thử màn hình khóa:", err);

@@ -5,26 +5,10 @@
  * Giúp chia sẻ thiệp 100% tĩnh qua GitHub Pages mà không cần Backend Database!
  */
 
-const CardStorage = {
-  // Nén JSON thành chuỗi URL-Safe Base64
-  encode(data) {
-    try {
-      const jsonStr = JSON.stringify(data);
-      // Mã hóa UTF-8 an toàn sang base64
-      const utf8Bytes = new TextEncoder().encode(jsonStr);
-      let binary = "";
-      const chunkSize = 8192;
-      for (let i = 0; i < utf8Bytes.length; i += chunkSize) {
-        binary += String.fromCharCode.apply(null, utf8Bytes.subarray(i, i + chunkSize));
-      }
-      return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-    } catch (e) {
-      console.error("Lỗi mã hóa card data:", e);
-      return "";
-    }
-  },
+const JSONBIN_KEY = '$2a$10$9UrD.pyl/tW.yznI0vX3ge5.u7USfVKfz/iy/RCFCQMboP1lHtj52';
 
-  // Giải mã chuỗi URL-Safe Base64 thành JSON Object
+const CardStorage = {
+  // Giải mã chuỗi URL-Safe Base64 thành JSON Object (Giữ lại để tương thích ngược các link cũ)
   decode(safeBase64) {
     try {
       if (!safeBase64) return null;
@@ -40,15 +24,64 @@ const CardStorage = {
       const jsonStr = new TextDecoder().decode(bytes);
       return JSON.parse(jsonStr);
     } catch (e) {
-      console.error("Lỗi giải mã card data:", e);
+      console.error("Lỗi giải mã card data cũ:", e);
       return null;
     }
   },
 
-  // Lấy dữ liệu thiệp hiện tại từ URL (Hash hoặc Query Param)
-  getFromUrl() {
+  // Lưu dữ liệu lên Cloud Database
+  async saveToCloud(cardData) {
     try {
-      // 1. Kiểm tra hash: #card=...
+      const response = await fetch('https://api.jsonbin.io/v3/b', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Master-Key': JSONBIN_KEY,
+          'X-Bin-Private': 'false'
+        },
+        body: JSON.stringify(cardData)
+      });
+      if (!response.ok) {
+        throw new Error('Không thể kết nối đến máy chủ Cloud');
+      }
+      const data = await response.json();
+      return data.metadata.id; // Trả về ID của bản ghi
+    } catch (e) {
+      console.error("Lỗi khi lưu dữ liệu thiệp lên cloud:", e);
+      throw e;
+    }
+  },
+
+  // Tải dữ liệu từ Cloud Database dựa trên ID
+  async loadFromCloud(id) {
+    try {
+      const response = await fetch(`https://api.jsonbin.io/v3/b/${id}`, {
+        method: 'GET',
+        headers: {
+          'X-Master-Key': JSONBIN_KEY
+        }
+      });
+      if (!response.ok) return null;
+      const data = await response.json();
+      return data.record;
+    } catch (e) {
+      console.error("Lỗi khi tải dữ liệu thiệp từ cloud:", e);
+      return null;
+    }
+  },
+
+  // Lấy dữ liệu thiệp hiện tại từ URL (ID Cloud hoặc Hash Fallback)
+  async getFromUrl() {
+    try {
+      // 1. Ưu tiên kiểm tra ID từ tham số URL (?id=...)
+      const params = new URLSearchParams(window.location.search);
+      const binId = params.get("id");
+      if (binId) {
+        const cloudData = await this.loadFromCloud(binId);
+        if (cloudData) return cloudData;
+      }
+
+      // 2. Fallback: Kiểm tra hash #card=... (Dành cho thiệp cũ chưa dùng cloud)
       const hash = window.location.hash;
       if (hash && hash.includes("card=")) {
         const token = hash.split("card=")[1]?.split("&")[0];
@@ -56,31 +89,29 @@ const CardStorage = {
         if (data) return data;
       }
 
-      // 2. Kiểm tra query: ?card=...
-      const params = new URLSearchParams(window.location.search);
+      // 3. Fallback: Kiểm tra query ?card=...
       const cardParam = params.get("card");
       if (cardParam) {
         const data = this.decode(cardParam);
         if (data) return data;
       }
 
-      // 3. Kiểm tra localStorage backup
+      // 4. Fallback cuối cùng: localStorage backup
       const localData = localStorage.getItem("custom_birthday_card");
       if (localData) {
         return JSON.parse(localData);
       }
     } catch (e) {
-      console.warn("Không tìm thấy dữ liệu thiệp trên URL:", e);
+      console.warn("Không tìm thấy dữ liệu thiệp hợp lệ:", e);
     }
     return null;
   },
 
-  // Tạo URL chia sẻ hoàn chỉnh
-  createShareUrl(data) {
-    const encodedData = this.encode(data);
+  // Tạo URL chia sẻ thông qua ID trên Cloud
+  createShareUrl(recordId) {
     const urlObj = new URL(window.location.href);
     let path = urlObj.pathname;
-    // Đảm bảo lấy đúng thư mục gốc, không bị mất đuôi /Happy_Birthday/
+    // Đảm bảo lấy đúng thư mục gốc
     if (!path.endsWith('/')) {
         if (path.includes('.html')) {
             path = path.substring(0, path.lastIndexOf('/') + 1);
@@ -88,7 +119,8 @@ const CardStorage = {
             path = path + '/';
         }
     }
-    const targetUrl = urlObj.origin + path + 'gift.html#card=' + encodedData;
+    // Gắn tham số ?id=... để tải thiệp từ Cloud
+    const targetUrl = urlObj.origin + path + 'gift.html?id=' + recordId;
     return targetUrl;
   }
 };

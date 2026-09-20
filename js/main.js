@@ -436,9 +436,29 @@ let OPENING_TIMER = null;
 let IS_CARD_LOCKED = false;
 let IS_JOURNEY_STARTED = false;
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  // Hiển thị giao diện Loading
+  const appContainer = document.getElementById("app-container");
+  const loadingOverlay = document.createElement("div");
+  loadingOverlay.id = "global-loading-overlay";
+  loadingOverlay.style.cssText = "position: fixed; inset: 0; background: #2c1520; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #ffd98e; font-family: var(--font-sans, sans-serif); transition: opacity 0.5s ease;";
+  loadingOverlay.innerHTML = `
+    <style>
+      @keyframes cdPulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(0.9); opacity: 0.7; } }
+      .cd-pulse-anim { animation: cdPulse 1.5s infinite; }
+    </style>
+    <div class="cd-pulse-anim" style="font-size: 3rem; margin-bottom: 1rem;">⏳</div>
+    <div style="font-size: 1.2rem; font-weight: 500;">Đang tải dữ liệu thiệp...</div>
+  `;
+  if (appContainer) appContainer.appendChild(loadingOverlay);
+  else document.body.appendChild(loadingOverlay);
+
   // 1. Khởi tạo cấu hình (URL > LocalStorage > config.js)
-  initCardConfiguration();
+  await initCardConfiguration();
+
+  // Ẩn giao diện Loading
+  loadingOverlay.style.opacity = "0";
+  setTimeout(() => loadingOverlay.remove(), 500);
 
   // 2. Khởi tạo các tiện ích dùng chung: Vòng Quay, Lightbox
   initLuckyWheel();
@@ -459,10 +479,10 @@ document.addEventListener("DOMContentLoaded", () => {
 /**
  * Nạp và chuẩn hóa dữ liệu cấu hình
  */
-function initCardConfiguration() {
+async function initCardConfiguration() {
   let urlData = null;
   if (window.CardStorage) {
-    urlData = window.CardStorage.getFromUrl();
+    urlData = await window.CardStorage.getFromUrl();
   }
 
   const baseConfig = typeof BIRTHDAY_CONFIG !== "undefined" ? BIRTHDAY_CONFIG : {};
