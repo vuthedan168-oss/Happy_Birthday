@@ -1564,3 +1564,46 @@
 .coquette-bow.tr { top: -12px; right: -12px; transform: rotate(15deg); }
 .coquette-bow.bl { bottom: -12px; left: -12px; transform: rotate(-15deg); }
 .coquette-bow.br { bottom: -12px; right: -12px; transform: rotate(15deg); }
+
+#modal-photobooth .modal-card {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 20px !important;
+  overflow-x: hidden !important;
+}
+.photobooth-frame {
+  max-width: 100%;
+}
+.camera-filters {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  width: 100%;
+  margin-top: 5px !important;
+}
+.camera-filters button {
+  border-radius: 20px !important;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1) !important;
+  padding: 6px 16px !important;
+}
+#selfie-initial-actions button, #selfie-review-actions button {
+  border-radius: 20px !important;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1) !important;
+}
+
+@keyframes rollingInfinite {
+  0% { transform: translateY(var(--reel-from)); filter: blur(5px); }
+  100% { transform: translateY(calc(var(--reel-from) - 760px)); filter: blur(5px); }
+}
+.rolling-fast {
+  animation: rollingInfinite 0.4s linear infinite !important;
+}
+@keyframes lovegiftReelStop {
+  0% { transform: translateY(calc(var(--reel-from) - 760px)); filter: blur(5px); }
+  100% { transform: translateY(var(--reel-to)); filter: blur(0); }
+}
+.stopping-fast {
+  animation: 1.5s cubic-bezier(0.1, 0.7, 0.1, 1) forwards lovegiftReelStop !important;
+}

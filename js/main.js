@@ -735,18 +735,25 @@ function initStageOpening() {
     reelScroller.style.setProperty("--reel-from", `${reelFrom}px`);
     reelScroller.style.setProperty("--reel-to", `${reelTo}px`);
     
-    // Khôi phục logic .rolling
-    reelScroller.classList.add("rolling");
+    // Chạy animation cuộn nhanh liên tục
+    reelScroller.classList.add("rolling-fast");
     setTimeout(() => {
-      if (reelScroller) { reelScroller.classList.remove("rolling"); reelScroller.classList.add("birthday-glow"); }
+      if (reelScroller) { 
+        reelScroller.classList.remove("rolling-fast");
+        reelScroller.classList.add("stopping-fast"); // Hãm phanh từ từ
+        
+        // Chờ 1.5s hãm phanh xong thì phát sáng
+        setTimeout(() => {
+          if (selectedDayEl) selectedDayEl.classList.add("birthday-glow");
+        }, 1500);
+      }
     }, 3500);
   }
 
-  // Tự động chuyển sang stage 2 sau khi hiệu ứng mở đầu hoàn tất (tăng lên 6.7s để số quay đủ lâu)
   if (OPENING_TIMER) clearTimeout(OPENING_TIMER);
   OPENING_TIMER = setTimeout(() => {
     switchStage("intro");
-  }, 6700);
+  }, 7000);
 
   if (skipBtn) {
     skipBtn.addEventListener("click", () => {
@@ -1941,6 +1948,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const filterType = btn.getAttribute("data-filter");
         if (filterType === "none") {
           videoEl.style.filter = "none";
+        } else if (filterType === "beauty") {
+          videoEl.style.filter = "brightness(1.15) contrast(1.05) saturate(1.2) blur(0.5px)";
         } else if (filterType === "peach") {
           videoEl.style.filter = "sepia(0.3) saturate(1.4) hue-rotate(-10deg) contrast(1.1)";
         } else if (filterType === "coquette") {
