@@ -1480,7 +1480,7 @@
 
 /* N?n vu tr? gradient su th?m */
 #stage-starlight { 
-    background: radial-gradient(ellipse at center, #020111 0%, #000000 100%) !important; 
+    background: radial-gradient(ellipse at bottom, #2a1a1f 0%, #11080b 100%) !important; 
     overflow: hidden; 
     position: relative; 
     z-index: 1;
@@ -1536,3 +1536,31 @@
 .rolling {
   animation: rollingInfinite 0.8s linear infinite !important;
 }
+
+.birthday-glow {
+  text-shadow: 0 0 20px #ffd700, 0 0 40px #ffb300, 0 0 80px #ffffff;
+  transform: scale(1.25);
+  color: #fff;
+  transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.photobooth-frame {
+  background: repeating-linear-gradient(45deg, #ffe6ea, #ffe6ea 10px, #ffccd5 10px, #ffccd5 20px);
+  padding: 15px;
+  border-radius: 12px;
+  position: relative;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+.photobooth-frame > video, .photobooth-frame > canvas {
+  border-radius: 8px;
+  border: 4px solid #fff;
+}
+.coquette-bow {
+  position: absolute;
+  font-size: 1.8rem;
+  z-index: 20;
+}
+.coquette-bow.tl { top: -12px; left: -12px; transform: rotate(-15deg); }
+.coquette-bow.tr { top: -12px; right: -12px; transform: rotate(15deg); }
+.coquette-bow.bl { bottom: -12px; left: -12px; transform: rotate(-15deg); }
+.coquette-bow.br { bottom: -12px; right: -12px; transform: rotate(15deg); }

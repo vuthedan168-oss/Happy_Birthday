@@ -738,7 +738,7 @@ function initStageOpening() {
     // Khôi phục logic .rolling
     reelScroller.classList.add("rolling");
     setTimeout(() => {
-      if (reelScroller) reelScroller.classList.remove("rolling");
+      if (reelScroller) { reelScroller.classList.remove("rolling"); reelScroller.classList.add("birthday-glow"); }
     }, 3500);
   }
 
@@ -1285,48 +1285,37 @@ function spawnMeteorsBatch(count) {
  * Hàng trăm sao băng 3D
  */
 function createShootingStars() {
-    const sky = document.getElementById('stage-starlight');
-    
-    // Giữ lại nội dung cũ của stage-starlight (các class khác như starlight-actions-wrap...) 
-    // và chỉ dọn dẹp các sao hiện có (nếu muốn, nhưng tốt nhất là tạo một container riêng 
-    // hoặc thêm vào cuối để không xóa đè nút bấm).
-    // Vì prompt nói sky.innerHTML = ''; nên nếu áp dụng thẳng sẽ xóa mất nút UI!
-    // Vậy ta sẽ tìm meteor-sky-container để an toàn hơn, hoặc theo prompt.
-    // Dựa vào prompt, tôi sẽ chèn trực tiếp, nhưng để không bị mất UI, tôi sẽ chọn background element.
-    let starBg = document.getElementById('meteor-sky-container');
+    const starBg = document.getElementById('meteor-sky-container');
     if (!starBg) return;
     starBg.innerHTML = ''; 
     
-    // 1. Tạo 50 ngôi sao tĩnh nhấp nháy làm phông nền vũ trụ
-    for(let i = 0; i < 50; i++) {
+    for(let i = 0; i < 80; i++) {
         let staticStar = document.createElement('div');
         staticStar.className = 'static-star';
         staticStar.style.left = Math.random() * 100 + 'vw';
         staticStar.style.top = Math.random() * 100 + 'vh';
-        let size = Math.random() * 3 + 1; // Kích thước từ 1px đến 4px
+        let size = Math.random() * 3 + 1; 
         staticStar.style.width = size + 'px';
         staticStar.style.height = size + 'px';
         staticStar.style.animationDelay = (Math.random() * 5) + 's';
+        staticStar.style.boxShadow = '0 0 8px #ffdfba';
         starBg.appendChild(staticStar);
     }
 
-    // 2. Tạo 5-7 vệt sao băng lớn bay xẹt qua
-    let numMeteors = 5 + Math.floor(Math.random() * 3);
-    for(let j = 0; j < numMeteors; j++) {
+    for(let j = 0; j < 15; j++) {
         let meteor = document.createElement('div');
         meteor.className = 'shooting-star-3d';
-        // Phân bổ vị trí ngẫu nhiên tập trung ở nửa trên và bên phải màn hình
         meteor.style.left = (Math.random() * 150) + 'vw'; 
         meteor.style.top = (Math.random() * 50 - 20) + 'vh';
-        meteor.style.animationDelay = (Math.random() * 10) + 's';
-        meteor.style.animationDuration = (Math.random() * 2 + 2) + 's'; // Tốc độ bay ngẫu nhiên
+        meteor.style.animationDuration = (0.5 + Math.random() * 1) + 's';
+        meteor.style.animationDelay = (Math.random() * 1.5) + 's';
         starBg.appendChild(meteor);
+
+        setTimeout(() => {
+            if(meteor.parentNode) meteor.parentNode.removeChild(meteor);
+        }, 3000);
     }
 }
-
-/**
- * Khởi động lại toàn bộ hành trình
- */
 function restartExperience() {
   IS_STAR_LAUNCHED = false;
   SELECTED_WISH = "";
@@ -1942,3 +1931,24 @@ function startCelebrationJourney() {
 function initUtilities() {
   // Any extra initialization hooks
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+  const filterBtns = document.querySelectorAll(".camera-filters button");
+  const videoEl = document.getElementById("selfie-video");
+  if (filterBtns && videoEl) {
+    filterBtns.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const filterType = btn.getAttribute("data-filter");
+        if (filterType === "none") {
+          videoEl.style.filter = "none";
+        } else if (filterType === "peach") {
+          videoEl.style.filter = "sepia(0.3) saturate(1.4) hue-rotate(-10deg) contrast(1.1)";
+        } else if (filterType === "coquette") {
+          videoEl.style.filter = "brightness(1.1) saturate(1.5) contrast(1.05) drop-shadow(0 0 5px rgba(255,192,203,0.5))";
+        } else if (filterType === "vintage") {
+          videoEl.style.filter = "grayscale(0.5) sepia(0.5) contrast(1.2)";
+        }
+      });
+    });
+  }
+});
