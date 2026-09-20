@@ -481,14 +481,37 @@ document.addEventListener("DOMContentLoaded", async () => {
   initLightbox();
   initUtilities();
 
-  // 3. Kiểm tra khóa Giai đoạn 0: Countdown Lock
+  // 3. Kiểm tra khóa Giai đoạn 0 & Xử lý Autoplay Policy
   const lockStatus = checkCardLockStatus();
-  if (lockStatus.isLocked) {
-    // Kích hoạt Giai đoạn 0 (Khóa đếm ngược)
-    initStageCountdown(lockStatus);
+  const startOverlay = document.getElementById("start-overlay");
+
+  if (startOverlay) {
+    startOverlay.addEventListener("click", () => {
+      startOverlay.style.opacity = "0";
+      setTimeout(() => startOverlay.style.display = "none", 500);
+
+      const audioEl = document.getElementById("bg-audio");
+      if (audioEl) {
+        audioEl.play().catch(e => console.log(e));
+        const audioIcon = document.getElementById("audio-icon");
+        if (audioIcon) audioIcon.textContent = "🔊";
+      }
+      if (window.currentAudio && typeof window.currentAudio.play === 'function') {
+        window.currentAudio.play().catch(e => console.log(e));
+      }
+
+      if (lockStatus.isLocked) {
+        initStageCountdown(lockStatus);
+      } else {
+        startCelebrationJourney();
+      }
+    });
   } else {
-    // Không bị khóa: Bắt đầu hành trình sinh nhật ngay lập tức
-    startCelebrationJourney();
+    if (lockStatus.isLocked) {
+      initStageCountdown(lockStatus);
+    } else {
+      startCelebrationJourney();
+    }
   }
 });
 
@@ -802,10 +825,10 @@ function initStageIntro() {
 
     if (hintEl) hintEl.textContent = "✨ Ngọn nến đã tắt, điều ước đã bay đi...";
 
-    // Chuyển sang Giai đoạn Beats sau 1.6s
+    // Chuyển sang Giai đoạn Beats sau 8s
     setTimeout(() => {
       playEmotionalBeats();
-    }, 1600);
+    }, 8000);
   };
 
 
@@ -944,7 +967,7 @@ function playEmotionalBeats() {
         beatsTextEl.style.transform = "translateY(0)";
 
         currentBeatIndex++;
-        setTimeout(showNextBeat, 2600);
+        setTimeout(showNextBeat, 8000);
       }, 400);
     }
   };
@@ -997,7 +1020,7 @@ function initStageWish() {
       // Chuyển trực tiếp sang màn Sao băng như yêu cầu
       setTimeout(() => {
         switchStage("starlight");
-      }, 2200);
+      }, 8000);
     });
   }
 }
@@ -1279,8 +1302,8 @@ function createShootingStars() {
     if (!starBg) return;
     starBg.innerHTML = ''; 
     
-    // 1. Tạo 150 ngôi sao tĩnh nhấp nháy làm phông nền vũ trụ
-    for(let i = 0; i < 150; i++) {
+    // 1. Tạo 50 ngôi sao tĩnh nhấp nháy làm phông nền vũ trụ
+    for(let i = 0; i < 50; i++) {
         let staticStar = document.createElement('div');
         staticStar.className = 'static-star';
         staticStar.style.left = Math.random() * 100 + 'vw';
@@ -1292,8 +1315,9 @@ function createShootingStars() {
         starBg.appendChild(staticStar);
     }
 
-    // 2. Tạo 15-20 vệt sao băng lớn bay xẹt qua
-    for(let j = 0; j < 20; j++) {
+    // 2. Tạo 5-7 vệt sao băng lớn bay xẹt qua
+    let numMeteors = 5 + Math.floor(Math.random() * 3);
+    for(let j = 0; j < numMeteors; j++) {
         let meteor = document.createElement('div');
         meteor.className = 'shooting-star-3d';
         // Phân bổ vị trí ngẫu nhiên tập trung ở nửa trên và bên phải màn hình
