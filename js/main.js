@@ -301,7 +301,7 @@ function triggerOutro() {
       curtainLeft.style.transform = 'translateX(0)';
       curtainRight.style.transform = 'translateX(0)';
       curtainText.style.opacity = '1';
-    }, 1500);
+    }, 4000);
   }
 }
 
@@ -481,30 +481,35 @@ document.addEventListener("DOMContentLoaded", async () => {
   initLightbox();
   initUtilities();
 
-  // 3. Kiểm tra khóa Giai đoạn 0 & Xử lý Autoplay Policy
+  // 3. Khởi tạo nhạc nền ngay lập tức và ép trình duyệt tải trước
+  window.currentAudio = new Audio('assets/audio/birthday.mp3');
+  window.currentAudio.preload = 'auto';
+
   const lockStatus = checkCardLockStatus();
   const startOverlay = document.getElementById("start-overlay");
 
   if (startOverlay) {
-    startOverlay.addEventListener("click", () => {
-      startOverlay.style.opacity = "0";
-      setTimeout(() => startOverlay.style.display = "none", 500);
+    // Lắng nghe khi nhạc đã tải xong đủ để phát không giật lag
+    window.currentAudio.addEventListener('canplaythrough', function() {
+        startOverlay.innerHTML = "Chạm vào đây để mở thiệp ✨";
+        startOverlay.style.pointerEvents = "auto"; // Cho phép click
+        startOverlay.style.opacity = "1";
+        startOverlay.classList.add('pulse-animation'); // Thêm class hiệu ứng đập nhịp nhàng
+    });
 
-      const audioEl = document.getElementById("bg-audio");
-      if (audioEl) {
-        audioEl.play().catch(e => console.log(e));
+    // Xử lý khi người dùng chạm
+    startOverlay.addEventListener('click', function() {
+        window.currentAudio.play(); // Nhạc sẽ nổ ra ngay lập tức 100% không độ trễ
+        startOverlay.style.display = 'none';
+        
         const audioIcon = document.getElementById("audio-icon");
         if (audioIcon) audioIcon.textContent = "🔊";
-      }
-      if (window.currentAudio && typeof window.currentAudio.play === 'function') {
-        window.currentAudio.play().catch(e => console.log(e));
-      }
 
-      if (lockStatus.isLocked) {
-        initStageCountdown(lockStatus);
-      } else {
-        startCelebrationJourney();
-      }
+        if (lockStatus.isLocked) {
+          initStageCountdown(lockStatus);
+        } else {
+          startCelebrationJourney();
+        }
     });
   } else {
     if (lockStatus.isLocked) {
@@ -825,10 +830,10 @@ function initStageIntro() {
 
     if (hintEl) hintEl.textContent = "✨ Ngọn nến đã tắt, điều ước đã bay đi...";
 
-    // Chuyển sang Giai đoạn Beats sau 8s
+    // Chuyển sang Giai đoạn Beats sau 1.6s
     setTimeout(() => {
       playEmotionalBeats();
-    }, 8000);
+    }, 1600);
   };
 
 
@@ -967,7 +972,7 @@ function playEmotionalBeats() {
         beatsTextEl.style.transform = "translateY(0)";
 
         currentBeatIndex++;
-        setTimeout(showNextBeat, 8000);
+        setTimeout(showNextBeat, 2600);
       }, 400);
     }
   };
@@ -1020,7 +1025,7 @@ function initStageWish() {
       // Chuyển trực tiếp sang màn Sao băng như yêu cầu
       setTimeout(() => {
         switchStage("starlight");
-      }, 8000);
+      }, 2200);
     });
   }
 }
@@ -1227,7 +1232,7 @@ function initStageStarlight() {
         // Bắn vài loạt sao băng tự động
         spawnMeteorsBatch(10);
         createShootingStars();
-      }, 1500);
+      }, 4000);
     });
   }
 
