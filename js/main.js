@@ -753,7 +753,7 @@ function initStageOpening() {
   if (OPENING_TIMER) clearTimeout(OPENING_TIMER);
   OPENING_TIMER = setTimeout(() => {
     switchStage("intro");
-  }, 7000);
+  }, 9000); // 5s cuộn/dừng + 4s đọc lời chúc
 
   if (skipBtn) {
     skipBtn.addEventListener("click", () => {
