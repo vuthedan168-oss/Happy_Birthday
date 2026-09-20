@@ -1241,14 +1241,16 @@ function initStageStarlight() {
       if (IS_STAR_LAUNCHED) return;
       IS_STAR_LAUNCHED = true;
 
-      if (window.BirthdayAudio) window.BirthdayAudio.playStarLaunch();
+      const swooshSound = new Audio('assets/audio/swoosh.mp3');
+      swooshSound.volume = 1.0;
+      swooshSound.play();
 
       // Star phóng lên trời
       if (starElement) {
         starElement.classList.remove("lovegift-twinkle");
         starElement.classList.add("lovegift-launch");
       }
-      if (wishPill) wishPill.style.opacity = "0";
+      if (wishPill) wishPill.classList.add("wish-fly-up");
 
       // Hiển thị lời chúc đã bay lên & hiện duy nhất nút quay thưởng nhận quà
       setTimeout(() => {
@@ -1256,6 +1258,7 @@ function initStageStarlight() {
         if (actionsWrap) actionsWrap.style.display = "flex";
         // Bắn vài loạt sao băng tự động
         spawnMeteorsBatch(10);
+        create3DShootingStars();
       }, 1500);
     });
   }
@@ -1314,6 +1317,33 @@ function spawnMeteorsBatch(count) {
       const ry = Math.random() * window.innerHeight * 0.5;
       createShootingStarAt(rx, ry);
     }, i * 220);
+  }
+}
+
+/**
+ * Hàng trăm sao băng 3D
+ */
+function create3DShootingStars() {
+  const sky = document.getElementById("meteor-sky-container");
+  if (!sky) return;
+
+  const count = 30 + Math.floor(Math.random() * 20); // 30-50
+  for (let i = 0; i < count; i++) {
+    const star = document.createElement("div");
+    star.className = "shooting-star-3d";
+    
+    // Vị trí ngẫu nhiên
+    const left = Math.random() * 100;
+    const top = Math.random() * 100 - 50; // Tránh bay từ quá thấp
+    const delay = Math.random() * 3;
+    const duration = 1 + Math.random() * 1.5;
+    
+    star.style.left = `${left}vw`;
+    star.style.top = `${top}vh`;
+    star.style.animationDelay = `${delay}s`;
+    star.style.animationDuration = `${duration}s`;
+    
+    sky.appendChild(star);
   }
 }
 
