@@ -33,34 +33,34 @@ const CardStorage = {
   async saveToCloud(cardData) {
     const payload = JSON.stringify(cardData);
     const sizeInKB = Math.round(payload.length / 1024);
-    if (sizeInKB > 100) {
-      throw new Error(`Dữ liệu quá nặng (${sizeInKB}KB > 100KB giới hạn). Hãy xóa bớt ảnh hoặc dùng "Thêm ảnh bằng Link URL"!`);
+    if (sizeInKB > 5000) {
+      throw new Error(`Dữ liệu quá nặng (${sizeInKB}KB > 5000KB giới hạn). Hãy xóa bớt ảnh hoặc dùng "Thêm ảnh bằng Link URL"!`);
     }
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 12000); // 12s timeout
+    const timeoutId = setTimeout(() => controller.abort(), 20000); // 20s timeout
 
     try {
-      const response = await fetch('https://api.jsonbin.io/v3/b', {
+      // Đổi sang ByteBin (Miễn phí, Không cần Key, Tốc độ cao)
+      const response = await fetch('https://bytebin.lucko.me/post', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Master-Key': JSONBIN_KEY,
-          'X-Bin-Private': 'false'
+          'User-Agent': 'BirthdayCardCreator/1.0'
         },
         body: payload,
         signal: controller.signal
       });
       clearTimeout(timeoutId);
       if (!response.ok) {
-        throw new Error('Máy chủ Cloud từ chối kết nối (có thể đã hết lượt dùng miễn phí).');
+        throw new Error('Máy chủ Cloud từ chối kết nối (Mã lỗi: ' + response.status + ').');
       }
       const data = await response.json();
-      return data.metadata.id; // Trả về ID của bản ghi
+      return data.key; // Trả về ID của bản ghi trên ByteBin
     } catch (e) {
       clearTimeout(timeoutId);
       if (e.name === 'AbortError') {
-        throw new Error('Quá thời gian kết nối (12s). Do mạng chậm hoặc ảnh quá nặng!');
+        throw new Error('Quá thời gian kết nối (20s). Do mạng chậm hoặc ảnh quá nặng!');
       }
       console.error("Lỗi khi lưu dữ liệu thiệp lên cloud:", e);
       throw new Error(e.message || 'Lỗi mạng (Failed to fetch). Vui lòng thử lại sau.');
@@ -70,15 +70,24 @@ const CardStorage = {
   // Tải dữ liệu từ Cloud Database dựa trên ID
   async loadFromCloud(id) {
     try {
-      const response = await fetch(`https://api.jsonbin.io/v3/b/${id}`, {
+      // Hỗ trợ cả link bytebin và tương thích ngược với JSONBin nếu ID có định dạng dài (JSONBin ID dài 24 ký tự)
+      const isLegacyJsonBin = id.length > 20; 
+      const fetchUrl = isLegacyJsonBin 
+          ? `https://api.jsonbin.io/v3/b/${id}` 
+          : `https://bytebin.lucko.me/${id}`;
+          
+      const headers = isLegacyJsonBin 
+          ? { 'X-Master-Key': '$2a$10$9UrD.pyl/tW.yznI0vX3ge5.u7USfVKfz/iy/RCFCQMboP1lHtj52' } 
+          : {};
+
+      const response = await fetch(fetchUrl, {
         method: 'GET',
-        headers: {
-          'X-Master-Key': JSONBIN_KEY
-        }
+        headers: headers
       });
+      
       if (!response.ok) return null;
       const data = await response.json();
-      return data.record;
+      return isLegacyJsonBin ? data.record : data;
     } catch (e) {
       console.error("Lỗi khi tải dữ liệu thiệp từ cloud:", e);
       return null;
