@@ -31,6 +31,15 @@ const CardStorage = {
 
   // Lưu dữ liệu lên Cloud Database
   async saveToCloud(cardData) {
+    const payload = JSON.stringify(cardData);
+    const sizeInKB = Math.round(payload.length / 1024);
+    if (sizeInKB > 100) {
+      throw new Error(`Dữ liệu quá nặng (${sizeInKB}KB > 100KB giới hạn). Hãy xóa bớt ảnh hoặc dùng "Thêm ảnh bằng Link URL"!`);
+    }
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 12000); // 12s timeout
+
     try {
       const response = await fetch('https://api.jsonbin.io/v3/b', {
         method: 'POST',
@@ -39,16 +48,22 @@ const CardStorage = {
           'X-Master-Key': JSONBIN_KEY,
           'X-Bin-Private': 'false'
         },
-        body: JSON.stringify(cardData)
+        body: payload,
+        signal: controller.signal
       });
+      clearTimeout(timeoutId);
       if (!response.ok) {
-        throw new Error('Không thể kết nối đến máy chủ Cloud');
+        throw new Error('Máy chủ Cloud từ chối kết nối (có thể đã hết lượt dùng miễn phí).');
       }
       const data = await response.json();
       return data.metadata.id; // Trả về ID của bản ghi
     } catch (e) {
+      clearTimeout(timeoutId);
+      if (e.name === 'AbortError') {
+        throw new Error('Quá thời gian kết nối (12s). Do mạng chậm hoặc ảnh quá nặng!');
+      }
       console.error("Lỗi khi lưu dữ liệu thiệp lên cloud:", e);
-      throw e;
+      throw new Error(e.message || 'Lỗi mạng (Failed to fetch). Vui lòng thử lại sau.');
     }
   },
 
