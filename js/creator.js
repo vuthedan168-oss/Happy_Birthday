@@ -10,7 +10,8 @@ async function uploadImageToCloud(file) {
     reader.onload = (e) => {
       const img = new Image();
       img.onload = () => {
-        const maxWidth = 600;
+        // Giảm xuống 400px để tránh vượt limit 100KB của JSONBin
+        const maxWidth = 400;
         let width = img.width;
         let height = img.height;
 
@@ -25,7 +26,8 @@ async function uploadImageToCloud(file) {
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
         
-        resolve(canvas.toDataURL('image/jpeg', 0.6));
+        // Quality 0.5 để tối ưu tối đa
+        resolve(canvas.toDataURL('image/jpeg', 0.5));
       };
       img.onerror = () => reject(new Error('Failed to load image for compression'));
       img.src = e.target.result;
@@ -635,8 +637,18 @@ function initFormSubmit() {
         triggerBtn.innerHTML = "⏳ Đang khởi tạo dữ liệu đám mây...";
       }
 
+      // Loại bỏ Base64 Audio cực nặng để không làm sập Cloud (100KB limit)
+      const cloudData = { ...data };
+      if (cloudData.musicUrl && cloudData.musicUrl.startsWith('data:audio')) {
+        cloudData.musicUrl = "assets/audio/birthday.mp3";
+        alert("Lưu ý: Nhạc nền tải lên từ máy quá nặng để lưu trữ online. Thiệp đã tự động chuyển về nhạc mặc định. Hãy dùng 'Link URL' để chia sẻ nhạc tuỳ chọn nhé!");
+      }
+      if (cloudData.backgroundMusic && cloudData.backgroundMusic.startsWith('data:audio')) {
+        cloudData.backgroundMusic = "assets/audio/birthday.mp3";
+      }
+
       // Lưu lên Cloud Database
-      const recordId = await window.CardStorage.saveToCloud(data);
+      const recordId = await window.CardStorage.saveToCloud(cloudData);
 
       // Sinh Link chia sẻ 100% Client-side qua ID
       const targetShareUrl = window.CardStorage.createShareUrl(recordId);
