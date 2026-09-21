@@ -909,7 +909,7 @@ function initStageQuiz() {
         btn.style.width = "100%";
         btn.style.textAlign = "left";
         btn.style.justifyContent = "flex-start";
-        btn.innerHTML = \`<span style="margin-right:8px;">\${opt.emoji || '✨'}</span> \${opt.text}\`;
+        btn.innerHTML = `<span style="margin-right:8px;">${opt.emoji || '✨'}</span> ${opt.text}`;
         
         btn.addEventListener("click", () => {
           // Disable all buttons
