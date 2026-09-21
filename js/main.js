@@ -912,11 +912,11 @@ function initStageQuiz() {
         btn.innerHTML = `<span style="margin-right:8px;">${opt.emoji || '✨'}</span> ${opt.text}`;
         
         btn.addEventListener("click", () => {
-          // Disable all buttons
-          const allBtns = optionsWrap.querySelectorAll(".quiz-option-btn");
-          allBtns.forEach(b => b.disabled = true);
-
           if (opt.isCorrect) {
+            // Disable all buttons
+            const allBtns = optionsWrap.querySelectorAll(".quiz-option-btn");
+            allBtns.forEach(b => b.disabled = true);
+
             btn.style.background = "rgba(46, 204, 113, 0.2)";
             btn.style.borderColor = "#2ecc71";
             btn.style.color = "#2ecc71";
@@ -927,7 +927,7 @@ function initStageQuiz() {
             }
             if (hintEl) hintEl.textContent = q.hint || "Giỏi quá!";
             
-            if (window.BirthdayAudio) window.BirthdayAudio.playDing();
+            if (window.BirthdayAudio && typeof window.BirthdayAudio.playDing === 'function') window.BirthdayAudio.playDing();
             safeVibrate([30, 50, 30]);
 
             setTimeout(() => {
@@ -938,31 +938,19 @@ function initStageQuiz() {
               }
             }, 300);
           } else {
+            // Sai thì cho phép chọn lại
+            btn.disabled = true; // Chỉ vô hiệu hóa nút đã chọn sai
             btn.style.background = "rgba(231, 76, 60, 0.2)";
             btn.style.borderColor = "#e74c3c";
             btn.style.color = "#e74c3c";
-            
-            // Find correct one and highlight it
-            q.options.forEach((o, idx2) => {
-              if (o.isCorrect) {
-                allBtns[idx2].style.background = "rgba(46, 204, 113, 0.2)";
-                allBtns[idx2].style.borderColor = "#2ecc71";
-                allBtns[idx2].style.color = "#2ecc71";
-              }
-            });
 
             if (feedbackEl) {
-              feedbackEl.textContent = "Sai rồi nha! 😅";
+              feedbackEl.textContent = "Sai rồi nha, chọn lại đi! 😅";
               feedbackEl.style.color = "#e74c3c";
               feedbackEl.style.opacity = "1";
             }
-            if (hintEl) hintEl.textContent = q.hint || "Tiếc quá!";
             
             safeVibrate([50]);
-            
-            setTimeout(() => {
-              if (nextBtn) nextBtn.style.display = "inline-block";
-            }, 500);
           }
         });
         optionsWrap.appendChild(btn);
@@ -971,18 +959,15 @@ function initStageQuiz() {
   }
 
   if (nextBtn) {
-    // Xóa event cũ (do hàm init gọi lại có thể bị bind nhiều lần)
-    const newNextBtn = nextBtn.cloneNode(true);
-    nextBtn.parentNode.replaceChild(newNextBtn, nextBtn);
-    
-    newNextBtn.addEventListener("click", () => {
+    // Xóa event cũ bằng cách gán lại onclick để tránh mất reference
+    nextBtn.onclick = () => {
       currentIdx++;
       if (currentIdx < qList.length) {
         renderQuestion(currentIdx);
       } else {
         switchStage("intro");
       }
-    });
+    };
   }
 
   renderQuestion(currentIdx);
