@@ -1599,6 +1599,84 @@ body, #app-container, .lovegift-stage-bg {
   display: none;
 }
 .coquette-bow {
+@keyframes rollingInfinite {
+  0% { transform: translateY(var(--reel-from)); filter: blur(5px); }
+  100% { transform: translateY(calc(var(--reel-from) - 760px)); filter: blur(5px); }
+}
+.rolling-fast {
+  animation: rollingInfinite 0.4s linear infinite !important;
+}
+@keyframes lovegiftReelStop {
+  0% { transform: translateY(calc(var(--reel-from) - 760px)); filter: blur(5px); }
+  100% { transform: translateY(var(--reel-to)); filter: blur(0); }
+}
+.stopping-fast {
+  animation: 1.5s cubic-bezier(0.1, 0.7, 0.1, 1) forwards lovegiftReelStop !important;
+}
+/* Custom UI/UX Overhaul Styles */
+.lovegift-cake-img {
+  max-height: 80vh;
+  object-fit: contain;
+}
+
+.photobooth-title-shine {
+  background: linear-gradient(90deg, #FFDF73, #FFC107, #FFF5C3, #FFDF73);
+  background-size: 200% auto;
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: shine 3s linear infinite;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+  font-size: 1.8rem;
+  margin-bottom: 10px;
+  text-align: center;
+  font-family: 'Dancing Script', cursive;
+  font-weight: bold;
+}
+
+@keyframes shine {
+  to {
+    background-position: 200% center;
+  }
+}
+
+.shooting-star-wish {
+  width: 5px;
+  height: 5px;
+  background: #fff;
+  box-shadow: 0 0 15px 4px #fff, 0 0 30px 8px #ffd700;
+  position: absolute;
+  border-radius: 50%;
+  animation: wish-fly 2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  z-index: 100;
+}
+
+.shooting-star-wish::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 200px;
+  height: 2px;
+  background: linear-gradient(90deg, #fff, transparent);
+  right: 50%;
+}
+
+@keyframes wish-fly {
+  0% { transform: scale(1) translateX(0) translateY(0); opacity: 1; }
+  100% { transform: scale(0.5) translateX(100vw) translateY(-80vh); opacity: 0; }
+}
+
+.final-photobooth-result {
+  width: 85%;
+  max-width: 350px;
+  aspect-ratio: 3/4;
+  border-radius: 10px;
+  object-fit: cover;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+}
+
+.coquette-bow {
   position: absolute;
   font-size: 1.8rem;
   z-index: 20;
@@ -1620,7 +1698,11 @@ body, #app-container, .lovegift-stage-bg {
   overflow-x: hidden !important;
 }
 .photobooth-frame {
+  height: 50vh;
+  width: auto;
+  aspect-ratio: 3/4;
   max-width: 100%;
+  margin: 0 auto;
 }
 .camera-filters {
   display: flex !important;
@@ -1638,46 +1720,4 @@ body, #app-container, .lovegift-stage-bg {
 #selfie-initial-actions button, #selfie-review-actions button {
   border-radius: 20px !important;
   box-shadow: 0 4px 6px rgba(0,0,0,0.1) !important;
-}
-
-@keyframes rollingInfinite {
-  0% { transform: translateY(var(--reel-from)); filter: blur(5px); }
-  100% { transform: translateY(calc(var(--reel-from) - 760px)); filter: blur(5px); }
-}
-.rolling-fast {
-  animation: rollingInfinite 0.4s linear infinite !important;
-}
-@keyframes lovegiftReelStop {
-  0% { transform: translateY(calc(var(--reel-from) - 760px)); filter: blur(5px); }
-  100% { transform: translateY(var(--reel-to)); filter: blur(0); }
-}
-.stopping-fast {
-  animation: 1.5s cubic-bezier(0.1, 0.7, 0.1, 1) forwards lovegiftReelStop !important;
-}
-/* Custom UI/UX Overhaul Styles */
-.lovegift-cake-img {
-  max-height: 80vh;
-  object-fit: contain;
-}
-
-#photobooth-title {
-  position: absolute;
-  top: -20px;
-  left: 0;
-  right: 0;
-  color: #ffd700;
-  text-shadow: 0 0 10px #ffb300, 0 0 20px #ffffff;
-  font-family: 'Dancing Script', cursive;
-  font-size: 2.2rem;
-  text-align: center;
-  z-index: 10;
-}
-
-.final-photobooth-result {
-  width: 85%;
-  max-width: 350px;
-  aspect-ratio: 3/4;
-  border-radius: 10px;
-  object-fit: cover;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
 }

@@ -211,15 +211,17 @@ function handleSelfieFileUpload(file) {
     if (canvas) {
       const img = new Image();
       img.onload = () => {
+        const topMargin = (img.naturalWidth || img.width) * 0.15;
         canvas.width = img.naturalWidth || img.width;
-        canvas.height = img.naturalHeight || img.height;
+        canvas.height = (img.naturalHeight || img.height) + topMargin;
         const ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#2c1520";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
         
         const filterStyle = video ? window.getComputedStyle(video).filter : 'none';
         if (filterStyle !== 'none') ctx.filter = filterStyle;
         
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, topMargin, canvas.width, canvas.height - topMargin);
         ctx.filter = 'none';
 
         const frame = video ? video.closest('.photobooth-frame') : null;
@@ -229,11 +231,21 @@ function handleSelfieFileUpload(file) {
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
           const p = bowSize * 0.8;
+          const vTop = topMargin + p;
+          const vBottom = canvas.height - p;
           const drawDecor = (x, y, text, d) => { ctx.save(); ctx.translate(x, y); ctx.rotate(d * Math.PI / 180); ctx.fillText(text, 0, 0); ctx.restore(); };
-          drawDecor(p, p, "🎀", -15); drawDecor(canvas.width - p, p, "🎀", 15);
-          drawDecor(p, canvas.height - p, "🎀", -15); drawDecor(canvas.width - p, canvas.height - p, "🎀", 15);
-          drawDecor(p, canvas.height / 2, "🌸", 0); drawDecor(canvas.width - p, canvas.height / 2, "🌸", 0);
-          drawDecor(canvas.width / 2, p, "🌸", 0); drawDecor(canvas.width / 2, canvas.height - p, "🌸", 0);
+          drawDecor(p, vTop, "🎀", -15); drawDecor(canvas.width - p, vTop, "🎀", 15);
+          drawDecor(p, vBottom, "🎀", -15); drawDecor(canvas.width - p, vBottom, "🎀", 15);
+          drawDecor(p, topMargin + (canvas.height - topMargin) / 2, "🌸", 0); drawDecor(canvas.width - p, topMargin + (canvas.height - topMargin) / 2, "🌸", 0);
+          drawDecor(canvas.width / 2, vTop, "🌸", 0); drawDecor(canvas.width / 2, vBottom, "🌸", 0);
+
+          const name = ACTIVE_CONFIG.recipientName || "Bạn";
+          ctx.font = `bold ${canvas.width * 0.1}px 'Dancing Script', cursive`;
+          ctx.fillStyle = '#ffd700';
+          ctx.shadowColor = '#ffb300';
+          ctx.shadowBlur = 10;
+          ctx.fillText(`Happy Birthday ${name}`, canvas.width / 2, topMargin / 2);
+          ctx.shadowBlur = 0;
         }
         
         selfieDataUrl = canvas.toDataURL('image/jpeg', 0.9);
@@ -382,17 +394,22 @@ document.addEventListener("DOMContentLoaded", () => {
               
               // Chụp ảnh
               const ctx = canvas.getContext('2d');
+              const topMargin = video.videoWidth * 0.15;
               canvas.width = video.videoWidth;
-              canvas.height = video.videoHeight;
+              canvas.height = video.videoHeight + topMargin;
               
+              ctx.fillStyle = "#2c1520";
+              ctx.fillRect(0, 0, canvas.width, canvas.height);
+
               const filterStyle = window.getComputedStyle(video).filter;
               if (filterStyle !== 'none') ctx.filter = filterStyle;
               
-              ctx.translate(canvas.width, 0); // Lật ảnh gương
+              ctx.save();
+              ctx.translate(canvas.width, 0);
               ctx.scale(-1, 1);
-              ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+              ctx.drawImage(video, 0, topMargin, canvas.width, video.videoHeight);
+              ctx.restore();
               
-              ctx.setTransform(1, 0, 0, 1, 0, 0);
               ctx.filter = 'none';
 
               const frame = video.closest('.photobooth-frame');
@@ -402,18 +419,19 @@ document.addEventListener("DOMContentLoaded", () => {
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 const p = bowSize * 0.8;
+                const vTop = topMargin + p;
+                const vBottom = canvas.height - p;
                 const drawDecor = (x, y, text, d) => { ctx.save(); ctx.translate(x, y); ctx.rotate(d * Math.PI / 180); ctx.fillText(text, 0, 0); ctx.restore(); };
-                drawDecor(p, p, "🎀", -15); drawDecor(canvas.width - p, p, "🎀", 15);
-                drawDecor(p, canvas.height - p, "🎀", -15); drawDecor(canvas.width - p, canvas.height - p, "🎀", 15);
+                drawDecor(p, vTop, "🎀", -15); drawDecor(canvas.width - p, vTop, "🎀", 15);
+                drawDecor(p, vBottom, "🎀", -15); drawDecor(canvas.width - p, vBottom, "🎀", 15);
                 
-                // Vẽ chữ Happy Birthday
                 const name = ACTIVE_CONFIG.recipientName || "Bạn";
                 ctx.font = `bold ${canvas.width * 0.1}px 'Dancing Script', cursive`;
                 ctx.fillStyle = '#ffd700';
                 ctx.shadowColor = '#ffb300';
                 ctx.shadowBlur = 10;
-                ctx.fillText(`Happy Birthday ${name}`, canvas.width / 2, p);
-                ctx.shadowBlur = 0; // Reset shadow for other drawings
+                ctx.fillText(`Happy Birthday ${name}`, canvas.width / 2, topMargin / 2);
+                ctx.shadowBlur = 0;
               }
               
               selfieDataUrl = canvas.toDataURL('image/jpeg', 0.9);
@@ -432,17 +450,22 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
           // Fallback nếu không có overlay
           const ctx = canvas.getContext('2d');
+          const topMargin = video.videoWidth * 0.15;
           canvas.width = video.videoWidth;
-          canvas.height = video.videoHeight;
+          canvas.height = video.videoHeight + topMargin;
           
+          ctx.fillStyle = "#2c1520";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+
           const filterStyle = window.getComputedStyle(video).filter;
           if (filterStyle !== 'none') ctx.filter = filterStyle;
           
+          ctx.save();
           ctx.translate(canvas.width, 0);
           ctx.scale(-1, 1);
-          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          ctx.drawImage(video, 0, topMargin, canvas.width, video.videoHeight);
+          ctx.restore();
           
-          ctx.setTransform(1, 0, 0, 1, 0, 0);
           ctx.filter = 'none';
 
           const frame = video.closest('.photobooth-frame');
@@ -452,17 +475,18 @@ document.addEventListener("DOMContentLoaded", () => {
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             const p = bowSize * 0.8;
+            const vTop = topMargin + p;
+            const vBottom = canvas.height - p;
             const drawDecor = (x, y, text, d) => { ctx.save(); ctx.translate(x, y); ctx.rotate(d * Math.PI / 180); ctx.fillText(text, 0, 0); ctx.restore(); };
-            drawDecor(p, p, "🎀", -15); drawDecor(canvas.width - p, p, "🎀", 15);
-            drawDecor(p, canvas.height - p, "🎀", -15); drawDecor(canvas.width - p, canvas.height - p, "🎀", 15);
+            drawDecor(p, vTop, "🎀", -15); drawDecor(canvas.width - p, vTop, "🎀", 15);
+            drawDecor(p, vBottom, "🎀", -15); drawDecor(canvas.width - p, vBottom, "🎀", 15);
 
-            // Vẽ chữ Happy Birthday
             const name = ACTIVE_CONFIG.recipientName || "Bạn";
             ctx.font = `bold ${canvas.width * 0.1}px 'Dancing Script', cursive`;
             ctx.fillStyle = '#ffd700';
             ctx.shadowColor = '#ffb300';
             ctx.shadowBlur = 10;
-            ctx.fillText(`Happy Birthday ${name}`, canvas.width / 2, p);
+            ctx.fillText(`Happy Birthday ${name}`, canvas.width / 2, topMargin / 2);
             ctx.shadowBlur = 0;
           }
           
@@ -1475,7 +1499,7 @@ function createShootingStarAt(x, y) {
   const duration = 0.8 + Math.random() * 0.4;
 
   meteorWrap.innerHTML = `
-    <span class="lovegift-meteor" style="width: ${length}px; animation-duration: ${duration}s;"></span>
+    <span class="shooting-star-wish" style="width: ${length}px; animation-duration: ${duration}s;"></span>
   `;
 
   sky.appendChild(meteorWrap);
@@ -1521,7 +1545,7 @@ function createShootingStars() {
 
     for(let j = 0; j < 7; j++) {
         let meteor = document.createElement('div');
-        meteor.className = 'shooting-star-3d';
+        meteor.className = 'shooting-star-wish';
         meteor.style.left = (Math.random() * 150) + 'vw'; 
         meteor.style.top = (Math.random() * 50 - 20) + 'vh';
         meteor.style.animationDuration = (0.5 + Math.random() * 1) + 's';
@@ -1758,17 +1782,16 @@ function spinLuckyWheel() {
   if (IS_WHEEL_SPINNING) return;
   IS_WHEEL_SPINNING = true;
 
+  const canvas = document.getElementById("lucky-wheel-canvas");
   const wheelData = ACTIVE_CONFIG.luckyWheel || {};
   const prizes = (wheelData.prizes && wheelData.prizes.length > 0)
     ? wheelData.prizes
     : ((wheelData.gifts && wheelData.gifts.length > 0) ? wheelData.gifts : []);
 
-  if (prizes.length === 0) return;
+  if (prizes.length === 0 || !canvas) return;
 
   const prizeCount = prizes.length;
-  const arc = (Math.PI * 2) / prizeCount;
-
-  // Chọn giải thưởng ngẫu nhiên bằng thuật toán Weighted Random
+  
   let totalWeight = 0;
   prizes.forEach(p => totalWeight += p.percent || (100 / prizeCount));
   
@@ -1785,43 +1808,29 @@ function spinLuckyWheel() {
   }
   const winningPrize = prizes[winningIndex];
 
-  // Kim chỉ ở đỉnh (-PI/2). Tính góc xoay cần đạt để ô trúng nằm ở đỉnh
-  const extraRotations = 5 + Math.floor(Math.random() * 3);
-  const targetWedgeAngle = (3 * Math.PI / 2) - (winningIndex * arc + arc / 2);
-  const totalTargetAngle = WHEEL_ROTATION + (extraRotations * Math.PI * 2) + ((targetWedgeAngle - (WHEEL_ROTATION % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2));
+  const sliceDeg = 360 / prizeCount;
+  const randomOffset = (Math.random() - 0.5) * (sliceDeg * 0.6);
+  let targetAngle = 270 - (winningIndex * sliceDeg + sliceDeg / 2) + randomOffset;
+  
+  targetAngle += 360 * 5;
 
-  const startAngle = WHEEL_ROTATION;
-  const distance = totalTargetAngle - startAngle;
-  const duration = 4500;
-  const startTime = performance.now();
+  const currentRotation = parseFloat(canvas.dataset.rotation || "0");
+  const finalAngle = currentRotation + targetAngle - (currentRotation % 360) + (targetAngle % 360 < currentRotation % 360 ? 360 : 0);
+  
+  canvas.style.transition = 'transform 4s cubic-bezier(0.25, 1, 0.5, 1)';
+  canvas.style.transform = `rotate(${finalAngle}deg)`;
+  canvas.dataset.rotation = finalAngle;
 
-  let lastTickAngle = startAngle;
+  let tickInterval = setInterval(() => {
+    if (window.BirthdayAudio) window.BirthdayAudio.playWheelTick();
+  }, 300);
+  
+  setTimeout(() => clearInterval(tickInterval), 2500);
 
-  const animateSpin = (now) => {
-    const elapsed = now - startTime;
-    const progress = Math.min(1, elapsed / duration);
-    // Cubic ease out
-    const ease = 1 - Math.pow(1 - progress, 3);
-    const currentAngle = startAngle + distance * ease;
-
-    drawLuckyWheel(currentAngle);
-
-    // Tiếng tick khi đi qua mỗi ô
-    if (Math.abs(currentAngle - lastTickAngle) >= arc) {
-      if (window.BirthdayAudio) window.BirthdayAudio.playWheelTick();
-      lastTickAngle = currentAngle;
-    }
-
-    if (progress < 1) {
-      requestAnimationFrame(animateSpin);
-    } else {
-      WHEEL_ROTATION = currentAngle % (Math.PI * 2);
-      IS_WHEEL_SPINNING = false;
-      showPrizeCelebration(winningPrize);
-    }
-  };
-
-  requestAnimationFrame(animateSpin);
+  setTimeout(() => {
+    IS_WHEEL_SPINNING = false;
+    showPrizeCelebration(winningPrize);
+  }, 4000);
 }
 
 function showPrizeCelebration(prize) {
