@@ -1602,7 +1602,7 @@ body, #app-container, .lovegift-stage-bg {
   position: absolute;
   font-size: 1.8rem;
   z-index: 20;
-  display: none;
+  display: block;
 }
 .photobooth-frame.coquette-mode .coquette-bow {
   display: block;

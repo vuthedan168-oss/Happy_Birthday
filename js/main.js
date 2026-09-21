@@ -219,15 +219,17 @@ function handleSelfieFileUpload(file) {
         ctx.filter = 'none';
 
         const frame = video ? video.closest('.photobooth-frame') : null;
-        if (frame && frame.classList.contains('coquette-mode')) {
+        if (frame) {
           const bowSize = canvas.width * 0.12;
           ctx.font = `${bowSize}px sans-serif`;
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
           const p = bowSize * 0.8;
-          const drawB = (x, y, d) => { ctx.save(); ctx.translate(x, y); ctx.rotate(d * Math.PI / 180); ctx.fillText("🎀", 0, 0); ctx.restore(); };
-          drawB(p, p, -15); drawB(canvas.width - p, p, 15);
-          drawB(p, canvas.height - p, -15); drawB(canvas.width - p, canvas.height - p, 15);
+          const drawDecor = (x, y, text, d) => { ctx.save(); ctx.translate(x, y); ctx.rotate(d * Math.PI / 180); ctx.fillText(text, 0, 0); ctx.restore(); };
+          drawDecor(p, p, "🎀", -15); drawDecor(canvas.width - p, p, "🎀", 15);
+          drawDecor(p, canvas.height - p, "🎀", -15); drawDecor(canvas.width - p, canvas.height - p, "🎀", 15);
+          drawDecor(p, canvas.height / 2, "🌸", 0); drawDecor(canvas.width - p, canvas.height / 2, "🌸", 0);
+          drawDecor(canvas.width / 2, p, "🌸", 0); drawDecor(canvas.width / 2, canvas.height - p, "🌸", 0);
         }
         
         selfieDataUrl = canvas.toDataURL('image/jpeg', 0.9);
@@ -390,15 +392,17 @@ document.addEventListener("DOMContentLoaded", () => {
               ctx.filter = 'none';
 
               const frame = video.closest('.photobooth-frame');
-              if (frame && frame.classList.contains('coquette-mode')) {
+              if (frame) {
                 const bowSize = canvas.width * 0.12;
                 ctx.font = `${bowSize}px sans-serif`;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 const p = bowSize * 0.8;
-                const drawB = (x, y, d) => { ctx.save(); ctx.translate(x, y); ctx.rotate(d * Math.PI / 180); ctx.fillText("🎀", 0, 0); ctx.restore(); };
-                drawB(p, p, -15); drawB(canvas.width - p, p, 15);
-                drawB(p, canvas.height - p, -15); drawB(canvas.width - p, canvas.height - p, 15);
+                const drawDecor = (x, y, text, d) => { ctx.save(); ctx.translate(x, y); ctx.rotate(d * Math.PI / 180); ctx.fillText(text, 0, 0); ctx.restore(); };
+                drawDecor(p, p, "🎀", -15); drawDecor(canvas.width - p, p, "🎀", 15);
+                drawDecor(p, canvas.height - p, "🎀", -15); drawDecor(canvas.width - p, canvas.height - p, "🎀", 15);
+                drawDecor(p, canvas.height / 2, "🌸", 0); drawDecor(canvas.width - p, canvas.height / 2, "🌸", 0);
+                drawDecor(canvas.width / 2, p, "🌸", 0); drawDecor(canvas.width / 2, canvas.height - p, "🌸", 0);
               }
               
               selfieDataUrl = canvas.toDataURL('image/jpeg', 0.9);
@@ -431,15 +435,17 @@ document.addEventListener("DOMContentLoaded", () => {
           ctx.filter = 'none';
 
           const frame = video.closest('.photobooth-frame');
-          if (frame && frame.classList.contains('coquette-mode')) {
+          if (frame) {
             const bowSize = canvas.width * 0.12;
             ctx.font = `${bowSize}px sans-serif`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             const p = bowSize * 0.8;
-            const drawB = (x, y, d) => { ctx.save(); ctx.translate(x, y); ctx.rotate(d * Math.PI / 180); ctx.fillText("🎀", 0, 0); ctx.restore(); };
-            drawB(p, p, -15); drawB(canvas.width - p, p, 15);
-            drawB(p, canvas.height - p, -15); drawB(canvas.width - p, canvas.height - p, 15);
+            const drawDecor = (x, y, text, d) => { ctx.save(); ctx.translate(x, y); ctx.rotate(d * Math.PI / 180); ctx.fillText(text, 0, 0); ctx.restore(); };
+            drawDecor(p, p, "🎀", -15); drawDecor(canvas.width - p, p, "🎀", 15);
+            drawDecor(p, canvas.height - p, "🎀", -15); drawDecor(canvas.width - p, canvas.height - p, "🎀", 15);
+            drawDecor(p, canvas.height / 2, "🌸", 0); drawDecor(canvas.width - p, canvas.height / 2, "🌸", 0);
+            drawDecor(canvas.width / 2, p, "🌸", 0); drawDecor(canvas.width / 2, canvas.height - p, "🌸", 0);
           }
           
           selfieDataUrl = canvas.toDataURL('image/jpeg', 0.9);
@@ -1076,9 +1082,9 @@ function initStageWish() {
 
       triggerConfettiBurst();
 
-      // Chuyển trực tiếp sang màn Sao băng như yêu cầu
+      // Chuyển sang màn Album Kỷ Niệm (Heart/Polaroid)
       setTimeout(() => {
-        switchStage("starlight");
+        switchStage("heart");
       }, 2200);
     });
   }
@@ -1615,8 +1621,21 @@ function spinLuckyWheel() {
   const prizeCount = prizes.length;
   const arc = (Math.PI * 2) / prizeCount;
 
-  // Chọn giải thưởng ngẫu nhiên
-  const winningIndex = Math.floor(Math.random() * prizeCount);
+  // Chọn giải thưởng ngẫu nhiên bằng thuật toán Weighted Random
+  let totalWeight = 0;
+  prizes.forEach(p => totalWeight += p.percent || (100 / prizeCount));
+  
+  let rand = Math.random() * totalWeight;
+  let winningIndex = 0;
+  let currentSum = 0;
+  
+  for (let i = 0; i < prizeCount; i++) {
+    currentSum += prizes[i].percent || (100 / prizeCount);
+    if (rand <= currentSum) {
+      winningIndex = i;
+      break;
+    }
+  }
   const winningPrize = prizes[winningIndex];
 
   // Kim chỉ ở đỉnh (-PI/2). Tính góc xoay cần đạt để ô trúng nằm ở đỉnh
