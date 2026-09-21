@@ -572,7 +572,7 @@ function collectFormData() {
     wishes: wishList,
     letterBody: wishesText,
     letterSignature: signature,
-    musicUrl: document.getElementById('music-intro')?.value || "assets/audio/birthday.mp3",
+    musicUrl: document.getElementById('music-bg')?.value || "assets/audio/birthday.mp3",
     slug: customSlug,
     unlockDateTime: startDate,
     startDate,
@@ -585,6 +585,7 @@ function collectFormData() {
       prizes,   // ưu tiên prizes để main.js đọc đúng
       gifts: prizes // giữ lại gifts để tương thích ngược
     },
+    quiz: quizQuestions,
     icons: iconsList,
     gallery: galleryPhotos.length ? galleryPhotos : []
   };

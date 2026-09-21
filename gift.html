@@ -207,6 +207,35 @@
     </section>
 
     <!-- ======================================================= -->
+    <!-- GIAI ĐOẠN 1.5: QUIZ TRẮC NGHIỆM ĐỘNG                    -->
+    <!-- ======================================================= -->
+    <section class="lovegift-fade-in" id="stage-quiz" style="display: none; position: relative; width: 100%; max-width: 460px; flex-direction: column; align-items: center; text-align: center; padding: 2rem 1.25rem;">
+      <p class="lovegift-kicker" id="quiz-kicker">Thử thách mở tiệc</p>
+      
+      <!-- Container render câu hỏi hiện tại -->
+      <div id="quiz-content-wrapper" style="width: 100%; margin-top: 1rem;">
+        <h2 class="font-serif" id="quiz-question-text" style="font-size: clamp(22px, 5vw, 28px); line-height: 1.35; color: var(--color-cream); margin-bottom: 0.5rem;">
+          Đang tải câu hỏi...
+        </h2>
+        <p class="font-sans" id="quiz-hint-text" style="font-size: 0.95rem; color: rgba(246, 234, 216, 0.7); margin-bottom: 1.5rem; min-height: 1.5rem;"></p>
+        
+        <div id="quiz-options-container" style="display: flex; flex-direction: column; gap: 0.75rem; width: 100%; max-width: 380px; margin: 0 auto;">
+          <!-- Options rendered dynamically by JS -->
+        </div>
+      </div>
+
+      <!-- Hiển thị kết quả & Điều hướng -->
+      <div id="quiz-feedback-wrap" style="margin-top: 1.5rem; min-height: 3rem; display: flex; flex-direction: column; align-items: center;">
+        <p class="font-script" id="quiz-feedback-text" style="font-size: 1.5rem; color: #ffd98e; opacity: 0; transition: opacity 0.3s ease; margin-bottom: 1rem;"></p>
+        <button type="button" class="lovegift-btn-gold" id="btn-next-quiz" style="display: none; padding: 0.8rem 1.5rem; width: auto; min-width: 180px;">Tiếp tục →</button>
+      </div>
+
+      <div class="quiz-progress" style="margin-top: 1.5rem; display: flex; gap: 0.4rem; justify-content: center;" id="quiz-progress-dots">
+        <!-- Progress dots -->
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
     <!-- GIAI ĐOẠN 2: REALISTIC CAKE & BLOW CANDLE               -->
     <!-- ======================================================= -->
     <section class="lovegift-fade-in" id="stage-intro" style="display: none; position: relative; width: 100%; max-width: 440px; flex-direction: column; align-items: center; justify-content: center; padding: 1rem; min-height: 100vh;">

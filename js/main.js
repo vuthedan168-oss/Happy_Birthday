@@ -678,7 +678,7 @@ function switchStage(stageName) {
 
 
   const stages = [
-    "stage-countdown", "stage-opening", "stage-intro", "stage-beats", "stage-wish",
+    "stage-countdown", "stage-opening", "stage-quiz", "stage-intro", "stage-beats", "stage-wish",
     "stage-heart", "stage-letter", "stage-final", "stage-starlight"
   ];
 
@@ -832,17 +832,160 @@ function initStageOpening() {
     }, 3500);
   }
 
+  const proceedToNext = () => {
+    if (ACTIVE_CONFIG.quiz && ACTIVE_CONFIG.quiz.length > 0) {
+      switchStage("quiz");
+      initStageQuiz();
+    } else {
+      switchStage("intro");
+    }
+  };
+
   if (OPENING_TIMER) clearTimeout(OPENING_TIMER);
   OPENING_TIMER = setTimeout(() => {
-    switchStage("intro");
+    proceedToNext();
   }, 9000); // 5s cuộn/dừng + 4s đọc lời chúc
 
   if (skipBtn) {
     skipBtn.addEventListener("click", () => {
       if (OPENING_TIMER) clearTimeout(OPENING_TIMER);
-      switchStage("intro");
+      proceedToNext();
     });
   }
+}
+
+/**
+ * =========================================================
+ * GIAI ĐOẠN 1.5: QUIZ TRẮC NGHIỆM ĐỘNG
+ * =========================================================
+ */
+function initStageQuiz() {
+  const qList = ACTIVE_CONFIG.quiz || [];
+  if (qList.length === 0) {
+    switchStage("intro");
+    return;
+  }
+
+  let currentIdx = 0;
+  const questionEl = document.getElementById("quiz-question-text");
+  const hintEl = document.getElementById("quiz-hint-text");
+  const optionsWrap = document.getElementById("quiz-options-container");
+  const feedbackEl = document.getElementById("quiz-feedback-text");
+  const nextBtn = document.getElementById("btn-next-quiz");
+  const dotsWrap = document.getElementById("quiz-progress-dots");
+
+  function renderDots() {
+    if (!dotsWrap) return;
+    dotsWrap.innerHTML = "";
+    for (let i = 0; i < qList.length; i++) {
+      const dot = document.createElement("span");
+      dot.style.width = "8px";
+      dot.style.height = "8px";
+      dot.style.borderRadius = "50%";
+      dot.style.background = i === currentIdx ? "#ffd98e" : "rgba(255, 217, 142, 0.3)";
+      dot.style.transition = "background 0.3s";
+      dotsWrap.appendChild(dot);
+    }
+  }
+
+  function renderQuestion(index) {
+    const q = qList[index];
+    if (!q) return;
+
+    if (questionEl) questionEl.textContent = q.question;
+    if (hintEl) hintEl.textContent = "";
+    if (feedbackEl) {
+      feedbackEl.textContent = "";
+      feedbackEl.style.opacity = "0";
+    }
+    if (nextBtn) nextBtn.style.display = "none";
+    renderDots();
+
+    if (optionsWrap) {
+      optionsWrap.innerHTML = "";
+      q.options.forEach((opt, optIdx) => {
+        const btn = document.createElement("button");
+        btn.className = "lovegift-btn-secondary quiz-option-btn";
+        btn.style.width = "100%";
+        btn.style.textAlign = "left";
+        btn.style.justifyContent = "flex-start";
+        btn.innerHTML = \`<span style="margin-right:8px;">\${opt.emoji || '✨'}</span> \${opt.text}\`;
+        
+        btn.addEventListener("click", () => {
+          // Disable all buttons
+          const allBtns = optionsWrap.querySelectorAll(".quiz-option-btn");
+          allBtns.forEach(b => b.disabled = true);
+
+          if (opt.isCorrect) {
+            btn.style.background = "rgba(46, 204, 113, 0.2)";
+            btn.style.borderColor = "#2ecc71";
+            btn.style.color = "#2ecc71";
+            if (feedbackEl) {
+              feedbackEl.textContent = "Chính xác! 🎉";
+              feedbackEl.style.color = "#2ecc71";
+              feedbackEl.style.opacity = "1";
+            }
+            if (hintEl) hintEl.textContent = q.hint || "Giỏi quá!";
+            
+            if (window.BirthdayAudio) window.BirthdayAudio.playDing();
+            safeVibrate([30, 50, 30]);
+
+            setTimeout(() => {
+              if (nextBtn) nextBtn.style.display = "inline-block";
+              // Auto next after 1.5s if it's not the last question
+              if (currentIdx < qList.length - 1) {
+                setTimeout(() => nextBtn.click(), 1500);
+              }
+            }, 300);
+          } else {
+            btn.style.background = "rgba(231, 76, 60, 0.2)";
+            btn.style.borderColor = "#e74c3c";
+            btn.style.color = "#e74c3c";
+            
+            // Find correct one and highlight it
+            q.options.forEach((o, idx2) => {
+              if (o.isCorrect) {
+                allBtns[idx2].style.background = "rgba(46, 204, 113, 0.2)";
+                allBtns[idx2].style.borderColor = "#2ecc71";
+                allBtns[idx2].style.color = "#2ecc71";
+              }
+            });
+
+            if (feedbackEl) {
+              feedbackEl.textContent = "Sai rồi nha! 😅";
+              feedbackEl.style.color = "#e74c3c";
+              feedbackEl.style.opacity = "1";
+            }
+            if (hintEl) hintEl.textContent = q.hint || "Tiếc quá!";
+            
+            safeVibrate([50]);
+            
+            setTimeout(() => {
+              if (nextBtn) nextBtn.style.display = "inline-block";
+            }, 500);
+          }
+        });
+        optionsWrap.appendChild(btn);
+      });
+    }
+  }
+
+  if (nextBtn) {
+    // Xóa event cũ (do hàm init gọi lại có thể bị bind nhiều lần)
+    const newNextBtn = nextBtn.cloneNode(true);
+    nextBtn.parentNode.replaceChild(newNextBtn, nextBtn);
+    
+    newNextBtn.addEventListener("click", () => {
+      currentIdx++;
+      if (currentIdx < qList.length) {
+        renderQuestion(currentIdx);
+      } else {
+        switchStage("intro");
+      }
+    });
+  }
+
+  renderQuestion(currentIdx);
 }
 
 /**

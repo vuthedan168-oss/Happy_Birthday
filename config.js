@@ -17,6 +17,30 @@ const BIRTHDAY_CONFIG = {
   birthdayDate: "17 Tháng 7", // Chuỗi hiển thị phụ
   openingGreeting: "Happy Birthday",
 
+  // 2.5 CÂU HỎI TRẮC NGHIỆM (QUIZ)
+  quiz: [
+    {
+      id: 1,
+      question: "Hôm nay là ngày sinh nhật đặc biệt của thiên thần nào nhỉ? 🧚‍♀️",
+      hint: "Tất cả các câu trả lời đều hướng về cậu đó!",
+      options: [
+        { text: "✨ Hương Giang xinh đẹp & rạng ngời ✨", isCorrect: true, emoji: "✨" },
+        { text: "🌸 Một nàng tiên nữ vừa giáng trần 🌸", isCorrect: false, emoji: "✨" },
+        { text: "👑 Công chúa đáng yêu nhất vũ trụ 👑", isCorrect: false, emoji: "✨" }
+      ]
+    },
+    {
+      id: 2,
+      question: "Vũ khí bí mật khiến ai gặp cũng phải đổ gục trước thiên thần là gì? 💫",
+      hint: "Vì nụ cười của cậu có siêu năng lượng tích cực đó!",
+      options: [
+        { text: "Nụ cười tỏa nắng xua tan mọi mệt mỏi ☀️", isCorrect: true, emoji: "✨" },
+        { text: "Trái tim ấm áp và sự quan tâm chân thành 🍓", isCorrect: false, emoji: "✨" },
+        { text: "Đôi mắt biết cười lấp lánh như ngàn vì sao 🌟", isCorrect: false, emoji: "✨" }
+      ]
+    }
+  ],
+
   // 3. THỔI NẾN BÁNH KEM 3D (CINEMATIC CANDLE)
   cakeTitle: "Có một món quà nhỏ dành cho cậu…",
   cakeSubtitle: "Nhưng trước khi mở, thổi nến trước nhé 🎂",
