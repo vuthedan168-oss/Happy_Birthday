@@ -211,7 +211,26 @@ function handleSelfieFileUpload(file) {
         canvas.height = img.naturalHeight || img.height;
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        const filterStyle = video ? window.getComputedStyle(video).filter : 'none';
+        if (filterStyle !== 'none') ctx.filter = filterStyle;
+        
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        ctx.filter = 'none';
+
+        const frame = video ? video.closest('.photobooth-frame') : null;
+        if (frame && frame.classList.contains('coquette-mode')) {
+          const bowSize = canvas.width * 0.12;
+          ctx.font = `${bowSize}px sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          const p = bowSize * 0.8;
+          const drawB = (x, y, d) => { ctx.save(); ctx.translate(x, y); ctx.rotate(d * Math.PI / 180); ctx.fillText("🎀", 0, 0); ctx.restore(); };
+          drawB(p, p, -15); drawB(canvas.width - p, p, 15);
+          drawB(p, canvas.height - p, -15); drawB(canvas.width - p, canvas.height - p, 15);
+        }
+        
+        selfieDataUrl = canvas.toDataURL('image/jpeg', 0.9);
         
         if (video) video.style.display = 'none';
         canvas.style.display = 'block';
@@ -359,9 +378,28 @@ document.addEventListener("DOMContentLoaded", () => {
               const ctx = canvas.getContext('2d');
               canvas.width = video.videoWidth;
               canvas.height = video.videoHeight;
+              
+              const filterStyle = window.getComputedStyle(video).filter;
+              if (filterStyle !== 'none') ctx.filter = filterStyle;
+              
               ctx.translate(canvas.width, 0); // Lật ảnh gương
               ctx.scale(-1, 1);
               ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+              
+              ctx.setTransform(1, 0, 0, 1, 0, 0);
+              ctx.filter = 'none';
+
+              const frame = video.closest('.photobooth-frame');
+              if (frame && frame.classList.contains('coquette-mode')) {
+                const bowSize = canvas.width * 0.12;
+                ctx.font = `${bowSize}px sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                const p = bowSize * 0.8;
+                const drawB = (x, y, d) => { ctx.save(); ctx.translate(x, y); ctx.rotate(d * Math.PI / 180); ctx.fillText("🎀", 0, 0); ctx.restore(); };
+                drawB(p, p, -15); drawB(canvas.width - p, p, 15);
+                drawB(p, canvas.height - p, -15); drawB(canvas.width - p, canvas.height - p, 15);
+              }
               
               selfieDataUrl = canvas.toDataURL('image/jpeg', 0.9);
               video.style.display = 'none';
@@ -381,9 +419,28 @@ document.addEventListener("DOMContentLoaded", () => {
           const ctx = canvas.getContext('2d');
           canvas.width = video.videoWidth;
           canvas.height = video.videoHeight;
+          
+          const filterStyle = window.getComputedStyle(video).filter;
+          if (filterStyle !== 'none') ctx.filter = filterStyle;
+          
           ctx.translate(canvas.width, 0);
           ctx.scale(-1, 1);
           ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          
+          ctx.setTransform(1, 0, 0, 1, 0, 0);
+          ctx.filter = 'none';
+
+          const frame = video.closest('.photobooth-frame');
+          if (frame && frame.classList.contains('coquette-mode')) {
+            const bowSize = canvas.width * 0.12;
+            ctx.font = `${bowSize}px sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            const p = bowSize * 0.8;
+            const drawB = (x, y, d) => { ctx.save(); ctx.translate(x, y); ctx.rotate(d * Math.PI / 180); ctx.fillText("🎀", 0, 0); ctx.restore(); };
+            drawB(p, p, -15); drawB(canvas.width - p, p, 15);
+            drawB(p, canvas.height - p, -15); drawB(canvas.width - p, canvas.height - p, 15);
+          }
           
           selfieDataUrl = canvas.toDataURL('image/jpeg', 0.9);
           video.style.display = 'none';
@@ -1296,7 +1353,7 @@ function createShootingStars() {
     if (!starBg) return;
     starBg.innerHTML = ''; 
     
-    for(let i = 0; i < 80; i++) {
+    for(let i = 0; i < 40; i++) {
         let staticStar = document.createElement('div');
         staticStar.className = 'static-star';
         staticStar.style.left = Math.random() * 100 + 'vw';
@@ -1309,7 +1366,7 @@ function createShootingStars() {
         starBg.appendChild(staticStar);
     }
 
-    for(let j = 0; j < 15; j++) {
+    for(let j = 0; j < 7; j++) {
         let meteor = document.createElement('div');
         meteor.className = 'shooting-star-3d';
         meteor.style.left = (Math.random() * 150) + 'vw'; 
@@ -1490,21 +1547,14 @@ function drawLuckyWheel(currentAngle) {
   const center = size / 2;
   const radius = center - 12;
 
-  const defaultPrizes = [
-    { name: "1 Chầu Trà Sữa 🧋", message: "Được khao 1 ly trà sữa full topping!", color: "#FF6B6B" },
-    { name: "1 Vé Xem Phim 🍿", message: "Một buổi xem phim rạp combo bắp nước!", color: "#4ECDC4" },
-    { name: "1 Điều Ước Bất Kỳ 🌟", message: "Người tạo thiệp sẽ thực hiện 1 điều ước!", color: "#FFD93D" },
-    { name: "Một Ôm Ấm Áp 🤗", message: "Một cái ôm chân thành tiếp thêm năng lượng!", color: "#FF8E72" },
-    { name: "Bữa Tối Thịnh Soạn 🍕", message: "Một bữa ăn thỏa thích món cậu thích!", color: "#6C5CE7" },
-    { name: "Quà Bí Mật 🎁", message: "Một hộp quà bất ngờ giao tận tay!", color: "#FFAAA6" }
-  ];
-
   const wheelData = ACTIVE_CONFIG.luckyWheel || {};
   const prizes = (wheelData.prizes && wheelData.prizes.length > 0)
     ? wheelData.prizes
-    : ((wheelData.gifts && wheelData.gifts.length > 0) ? wheelData.gifts : defaultPrizes);
+    : ((wheelData.gifts && wheelData.gifts.length > 0) ? wheelData.gifts : []);
 
-  const arc = (Math.PI * 2) / (prizes.length || 1);
+  if (prizes.length === 0) return;
+
+  const arc = (Math.PI * 2) / prizes.length;
 
   ctx.clearRect(0, 0, size, size);
 
@@ -1555,21 +1605,14 @@ function spinLuckyWheel() {
   if (IS_WHEEL_SPINNING) return;
   IS_WHEEL_SPINNING = true;
 
-  const defaultPrizes = [
-    { name: "1 Chầu Trà Sữa 🧋", message: "Được khao 1 ly trà sữa full topping bất kỳ lúc nào!" },
-    { name: "1 Vé Xem Phim 🍿", message: "Một buổi đi xem phim rạp với combo bắp nước siêu to!" },
-    { name: "1 Điều Ước Bất Kỳ 🌟", message: "Người tạo thiệp sẽ thực hiện 1 điều ước trong khả năng!" },
-    { name: "Một Ôm Ấm Áp 🤗", message: "Một cái ôm chân thành tiếp thêm năng lượng tích cực!" },
-    { name: "Bữa Tối Thịnh Soạn 🍕", message: "Một bữa ăn thỏa thích với món mà cậu thích nhất!" },
-    { name: "Quà Bí Mật 🎁", message: "Một hộp quà bất ngờ được giao tận tay cậu sớm thôi!" }
-  ];
-
   const wheelData = ACTIVE_CONFIG.luckyWheel || {};
   const prizes = (wheelData.prizes && wheelData.prizes.length > 0)
     ? wheelData.prizes
-    : ((wheelData.gifts && wheelData.gifts.length > 0) ? wheelData.gifts : defaultPrizes);
+    : ((wheelData.gifts && wheelData.gifts.length > 0) ? wheelData.gifts : []);
 
-  const prizeCount = prizes.length || 1;
+  if (prizes.length === 0) return;
+
+  const prizeCount = prizes.length;
   const arc = (Math.PI * 2) / prizeCount;
 
   // Chọn giải thưởng ngẫu nhiên
@@ -1946,6 +1989,12 @@ document.addEventListener("DOMContentLoaded", () => {
     filterBtns.forEach(btn => {
       btn.addEventListener("click", () => {
         const filterType = btn.getAttribute("data-filter");
+        const frame = videoEl.closest('.photobooth-frame');
+        if (frame) {
+          if (filterType === "coquette") frame.classList.add("coquette-mode");
+          else frame.classList.remove("coquette-mode");
+        }
+
         if (filterType === "none") {
           videoEl.style.filter = "none";
         } else if (filterType === "beauty") {

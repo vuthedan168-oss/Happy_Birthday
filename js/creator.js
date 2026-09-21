@@ -4,22 +4,13 @@
  * =========================================================
  */
 
-const IMGBB_API_KEY = '6b1e627dfb25c1f8b76e06d59424fee6';
 async function uploadImageToCloud(file) {
-  const formData = new FormData();
-  formData.append('image', file);
-
-  const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
-    method: 'POST',
-    body: formData
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => resolve(e.target.result);
+    reader.onerror = (e) => reject(new Error('Failed to read file'));
+    reader.readAsDataURL(file);
   });
-
-  if (!response.ok) {
-    throw new Error('Upload failed');
-  }
-
-  const data = await response.json();
-  return data.data.url;
 }
 
 document.addEventListener("DOMContentLoaded", () => {

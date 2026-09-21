@@ -41,6 +41,16 @@
   --color-bg-deep: #1e0e16;
 }
 
+/* Base Body & Viewport Lock */
+body, #app-container, .lovegift-stage-bg {
+  height: 100dvh;
+  width: 100vw;
+  overflow: hidden;
+  position: fixed;
+  overscroll-behavior: none;
+  touch-action: none;
+}
+
 /* Base Stage */
 .lovegift-stage-bg {
   background: radial-gradient(58% 46% at 50% 40%, rgba(120, 58, 60, 0.55) 0%, rgba(90, 44, 52, 0.25) 42%, rgba(44, 21, 32, 0) 72%),
@@ -850,6 +860,15 @@
   inset: 0;
 }
 
+/* Wish Pill Text Wrapping */
+#starlight-chosen-wish {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 90%;
+  text-align: center;
+}
+
 /* Meteor Shower Dark Overlay */
 #stage-starlight::before {
   content: '';
@@ -1508,6 +1527,7 @@
     box-shadow: none !important;
     transform: rotate(-45deg) !important;
     opacity: 0 !important;
+    will-change: transform, opacity;
     animation: shootingStar 3s linear infinite !important;
 }
 /* Ph?n d?u pht sng r?c r? c?a sao bang */
@@ -1524,8 +1544,8 @@
     box-shadow: 0 0 20px #4d94ff, 0 0 40px #005ce6, 0 0 60px #ffffff;
 }
 @keyframes shootingStar {
-    0% { transform: translate(100px, -100px) rotate(-45deg); opacity: 1; }
-    100% { transform: translate(-800px, 800px) rotate(-45deg); opacity: 0; }
+    0% { transform: translate3d(100px, -100px, 0) rotate(-45deg); opacity: 1; }
+    100% { transform: translate3d(-800px, 800px, 0) rotate(-45deg); opacity: 0; }
 }
 
 
@@ -1555,6 +1575,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  margin: 0 auto;
 }
 .photobooth-frame > video, .photobooth-frame > canvas {
   border-radius: 8px;
@@ -1564,10 +1585,27 @@
   object-fit: cover !important;
   box-sizing: border-box;
 }
+.photobooth-frame .active-sticker {
+  position: absolute;
+  top: 15px; /* same as padding */
+  left: 15px;
+  right: 15px;
+  bottom: 15px;
+  width: calc(100% - 30px);
+  height: calc(100% - 30px);
+  z-index: 10;
+  pointer-events: none;
+  object-fit: contain;
+  display: none;
+}
 .coquette-bow {
   position: absolute;
   font-size: 1.8rem;
   z-index: 20;
+  display: none;
+}
+.photobooth-frame.coquette-mode .coquette-bow {
+  display: block;
 }
 .coquette-bow.tl { top: -12px; left: -12px; transform: rotate(-15deg); }
 .coquette-bow.tr { top: -12px; right: -12px; transform: rotate(15deg); }
