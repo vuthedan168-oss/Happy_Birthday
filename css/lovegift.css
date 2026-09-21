@@ -1654,3 +1654,30 @@ body, #app-container, .lovegift-stage-bg {
 .stopping-fast {
   animation: 1.5s cubic-bezier(0.1, 0.7, 0.1, 1) forwards lovegiftReelStop !important;
 }
+/* Custom UI/UX Overhaul Styles */
+.lovegift-cake-img {
+  max-height: 80vh;
+  object-fit: contain;
+}
+
+#photobooth-title {
+  position: absolute;
+  top: -20px;
+  left: 0;
+  right: 0;
+  color: #ffd700;
+  text-shadow: 0 0 10px #ffb300, 0 0 20px #ffffff;
+  font-family: 'Dancing Script', cursive;
+  font-size: 2.2rem;
+  text-align: center;
+  z-index: 10;
+}
+
+.final-photobooth-result {
+  width: 85%;
+  max-width: 350px;
+  aspect-ratio: 3/4;
+  border-radius: 10px;
+  object-fit: cover;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+}

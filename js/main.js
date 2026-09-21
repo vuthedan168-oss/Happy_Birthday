@@ -135,7 +135,11 @@ function openSelfieModal() {
   const reviewActions = document.getElementById('selfie-review-actions');
   const btnTake = document.getElementById('btn-take-selfie');
   
-  if (modal) modal.style.display = 'flex';
+  if (modal) {
+    modal.style.display = 'flex';
+    const nameEl = document.getElementById('photobooth-recipient-name');
+    if (nameEl) nameEl.textContent = ACTIVE_CONFIG.recipientName || "Bạn";
+  }
   if (video) video.style.display = 'block';
   if (canvas) canvas.style.display = 'none';
   if (initActions) initActions.style.display = 'flex';
@@ -401,8 +405,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 const drawDecor = (x, y, text, d) => { ctx.save(); ctx.translate(x, y); ctx.rotate(d * Math.PI / 180); ctx.fillText(text, 0, 0); ctx.restore(); };
                 drawDecor(p, p, "🎀", -15); drawDecor(canvas.width - p, p, "🎀", 15);
                 drawDecor(p, canvas.height - p, "🎀", -15); drawDecor(canvas.width - p, canvas.height - p, "🎀", 15);
-                drawDecor(p, canvas.height / 2, "🌸", 0); drawDecor(canvas.width - p, canvas.height / 2, "🌸", 0);
-                drawDecor(canvas.width / 2, p, "🌸", 0); drawDecor(canvas.width / 2, canvas.height - p, "🌸", 0);
+                
+                // Vẽ chữ Happy Birthday
+                const name = ACTIVE_CONFIG.recipientName || "Bạn";
+                ctx.font = `bold ${canvas.width * 0.1}px 'Dancing Script', cursive`;
+                ctx.fillStyle = '#ffd700';
+                ctx.shadowColor = '#ffb300';
+                ctx.shadowBlur = 10;
+                ctx.fillText(`Happy Birthday ${name}`, canvas.width / 2, p);
+                ctx.shadowBlur = 0; // Reset shadow for other drawings
               }
               
               selfieDataUrl = canvas.toDataURL('image/jpeg', 0.9);
@@ -444,8 +455,15 @@ document.addEventListener("DOMContentLoaded", () => {
             const drawDecor = (x, y, text, d) => { ctx.save(); ctx.translate(x, y); ctx.rotate(d * Math.PI / 180); ctx.fillText(text, 0, 0); ctx.restore(); };
             drawDecor(p, p, "🎀", -15); drawDecor(canvas.width - p, p, "🎀", 15);
             drawDecor(p, canvas.height - p, "🎀", -15); drawDecor(canvas.width - p, canvas.height - p, "🎀", 15);
-            drawDecor(p, canvas.height / 2, "🌸", 0); drawDecor(canvas.width - p, canvas.height / 2, "🌸", 0);
-            drawDecor(canvas.width / 2, p, "🌸", 0); drawDecor(canvas.width / 2, canvas.height - p, "🌸", 0);
+
+            // Vẽ chữ Happy Birthday
+            const name = ACTIVE_CONFIG.recipientName || "Bạn";
+            ctx.font = `bold ${canvas.width * 0.1}px 'Dancing Script', cursive`;
+            ctx.fillStyle = '#ffd700';
+            ctx.shadowColor = '#ffb300';
+            ctx.shadowBlur = 10;
+            ctx.fillText(`Happy Birthday ${name}`, canvas.width / 2, p);
+            ctx.shadowBlur = 0;
           }
           
           selfieDataUrl = canvas.toDataURL('image/jpeg', 0.9);
@@ -545,7 +563,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   initUtilities();
 
   // 3. Khởi tạo nhạc nền ngay lập tức và ép trình duyệt tải trước
-  window.currentAudio = new Audio('assets/audio/birthday.mp3');
+  const musicSrc = ACTIVE_CONFIG.musicUrl || 'assets/audio/birthday.mp3';
+  window.currentAudio = new Audio(musicSrc);
   window.currentAudio.preload = 'auto';
 
   const lockStatus = checkCardLockStatus();
