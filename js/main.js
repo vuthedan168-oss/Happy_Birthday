@@ -338,6 +338,14 @@ function triggerOutro() {
       curtainLeft.style.transform = 'translateX(0)';
       curtainRight.style.transform = 'translateX(0)';
       curtainText.style.opacity = '1';
+
+      setTimeout(() => {
+        if (window.BirthdayAudio && typeof window.BirthdayAudio.fadeOutAudio === 'function') {
+           window.BirthdayAudio.fadeOutAudio(500);
+        }
+        document.body.innerHTML = '<div style="background:#000;width:100vw;height:100vh;"></div>';
+        window.location.reload();
+      }, 7000);
     }, 4000);
   }
 }
@@ -868,7 +876,7 @@ function initStageOpening() {
   if (OPENING_TIMER) clearTimeout(OPENING_TIMER);
   OPENING_TIMER = setTimeout(() => {
     proceedToNext();
-  }, 9000); // 5s cuộn/dừng + 4s đọc lời chúc
+  }, 7000); // 5s cuộn/dừng + 2s đọc lời chúc
 
   if (skipBtn) {
     skipBtn.addEventListener("click", () => {
@@ -958,7 +966,7 @@ function initStageQuiz() {
               if (nextBtn) nextBtn.style.display = "inline-block";
               // Auto next after 1.5s if it's not the last question
               if (currentIdx < qList.length - 1) {
-                setTimeout(() => nextBtn.click(), 1500);
+                window.quizAutoNextTimer = setTimeout(() => nextBtn.click(), 1500);
               }
             }, 300);
           } else {
@@ -985,6 +993,7 @@ function initStageQuiz() {
   if (nextBtn) {
     // Xóa event cũ bằng cách gán lại onclick để tránh mất reference
     nextBtn.onclick = () => {
+      if (window.quizAutoNextTimer) clearTimeout(window.quizAutoNextTimer);
       currentIdx++;
       if (currentIdx < qList.length) {
         renderQuestion(currentIdx);
@@ -1543,18 +1552,18 @@ function createShootingStars() {
         starBg.appendChild(staticStar);
     }
 
-    for(let j = 0; j < 7; j++) {
+    for(let j = 0; j < 100; j++) {
         let meteor = document.createElement('div');
         meteor.className = 'shooting-star-wish';
-        meteor.style.left = (Math.random() * 150) + 'vw'; 
-        meteor.style.top = (Math.random() * 50 - 20) + 'vh';
-        meteor.style.animationDuration = (0.5 + Math.random() * 1) + 's';
-        meteor.style.animationDelay = (Math.random() * 1.5) + 's';
+        meteor.style.left = (Math.random() * 100) + 'vw'; 
+        meteor.style.top = (50 + Math.random() * 50) + 'vh';
+        meteor.style.animationDuration = (0.8 + Math.random() * 1) + 's';
+        meteor.style.animationDelay = (Math.random() * 2.5) + 's';
         starBg.appendChild(meteor);
 
         setTimeout(() => {
             if(meteor.parentNode) meteor.parentNode.removeChild(meteor);
-        }, 3000);
+        }, 4000);
     }
 }
 function restartExperience() {
@@ -1793,14 +1802,14 @@ function spinLuckyWheel() {
   const prizeCount = prizes.length;
   
   let totalWeight = 0;
-  prizes.forEach(p => totalWeight += p.percent || (100 / prizeCount));
+  prizes.forEach(p => totalWeight += (p.rate !== undefined ? parseFloat(p.rate) : (p.percent !== undefined ? parseFloat(p.percent) : (100 / prizeCount))));
   
   let rand = Math.random() * totalWeight;
   let winningIndex = 0;
   let currentSum = 0;
   
   for (let i = 0; i < prizeCount; i++) {
-    currentSum += prizes[i].percent || (100 / prizeCount);
+    currentSum += (prizes[i].rate !== undefined ? parseFloat(prizes[i].rate) : (prizes[i].percent !== undefined ? parseFloat(prizes[i].percent) : (100 / prizeCount)));
     if (rand <= currentSum) {
       winningIndex = i;
       break;
