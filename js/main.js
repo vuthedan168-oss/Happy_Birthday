@@ -683,14 +683,43 @@ async function initCardConfiguration() {
   setSafeText("starlight-tap-hint", ACTIVE_CONFIG.starlightTapHint || "Chạm vào bầu trời để thả thêm sao băng nhé ✧");
 }
 
+function changeStageMusic(newSrc) {
+  if (!window.currentAudio) return;
+  const currentSrc = window.currentAudio.getAttribute("src") || window.currentAudio.src || "";
+  // Check if we are already playing this track (using endsWith or indexOf to handle absolute/relative paths)
+  if (currentSrc.indexOf(newSrc) !== -1) return;
+
+  // Fade out current track
+  const fadeOutInterval = setInterval(() => {
+    if (window.currentAudio.volume > 0.1) {
+      window.currentAudio.volume -= 0.1;
+    } else {
+      clearInterval(fadeOutInterval);
+      window.currentAudio.pause();
+      window.currentAudio.src = newSrc;
+      window.currentAudio.load();
+      window.currentAudio.volume = 0.6;
+      window.currentAudio.play().catch(e => console.log("Audio play error:", e));
+    }
+  }, 50);
+}
+
 /**
  * Chuyển đổi giữa các giai đoạn hiển thị
  */
 function switchStage(stageName) {
   CURRENT_STAGE = stageName;
 
-
-
+  // Xử lý nhạc nền theo từng giai đoạn
+  if (["countdown", "opening", "quiz", "intro"].includes(stageName)) {
+    changeStageMusic("assets/audio/birthday.mp3");
+  } else if (["beats", "wish"].includes(stageName)) {
+    changeStageMusic("assets/audio/Yung Kai.m4a");
+  } else if (["heart", "letter"].includes(stageName)) {
+    changeStageMusic("assets/audio/Noi Nay Co Anh.m4a");
+  } else if (["final", "starlight"].includes(stageName)) {
+    changeStageMusic("assets/audio/Happy Birthday Remix.m4a");
+  }
   const stages = [
     "stage-countdown", "stage-opening", "stage-quiz", "stage-intro", "stage-beats", "stage-wish",
     "stage-heart", "stage-letter", "stage-final", "stage-starlight"
@@ -823,10 +852,10 @@ function initStageOpening() {
     let targetIndex = numbers.indexOf(targetDay, 2);
     if (targetIndex === -1) targetIndex = 18;
 
-    const itemHeight = 76;
-    const centerOffset = 114;
+    const itemHeight = 104;
+    const centerOffset = 100;
     const reelTo = -(targetIndex * itemHeight - centerOffset);
-    const reelFrom = -190;
+    const reelFrom = -208; // 2 * 104 = 208
 
     reelScroller.style.setProperty("--reel-from", `${reelFrom}px`);
     reelScroller.style.setProperty("--reel-to", `${reelTo}px`);
