@@ -1642,30 +1642,34 @@ body, #app-container, .lovegift-stage-bg {
 }
 
 .shooting-star-wish {
-  width: 5px;
-  height: 5px;
-  background: #fff;
-  box-shadow: 0 0 15px 4px #fff, 0 0 30px 8px #ffd700;
   position: absolute;
-  border-radius: 50%;
-  animation: wish-fly 2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%);
+  border-radius: 50px;
+  animation: wish-fly 2s linear forwards;
   z-index: 100;
+  transform-origin: left center;
+  will-change: transform, opacity;
 }
 
-.shooting-star-wish::after {
+.shooting-star-wish::before {
   content: '';
   position: absolute;
   top: 50%;
+  left: -2px;
   transform: translateY(-50%);
-  width: 200px;
-  height: 2px;
-  background: linear-gradient(90deg, #fff, transparent);
-  right: 50%;
+  width: 6px;
+  height: 6px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 10px 2px #fff, 0 0 20px 5px #ffd700, 0 0 30px 8px #ffb300;
 }
 
 @keyframes wish-fly {
-  0% { transform: scale(1) translateX(0) translateY(0); opacity: 1; }
-  100% { transform: scale(0.5) translateX(100vw) translateY(-80vh); opacity: 0; }
+  0% { transform: rotate(-35deg) translate3d(-5vw, 0, 0); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: rotate(-35deg) translate3d(120vw, 0, 0); opacity: 0; }
 }
 
 .final-photobooth-result {
