@@ -1565,17 +1565,13 @@ body, #app-container, .lovegift-stage-bg {
 }
 
 .photobooth-frame {
-  background: repeating-linear-gradient(45deg, #ffe6ea, #ffe6ea 10px, #ffccd5 10px, #ffccd5 20px);
-  padding: 15px;
-  border-radius: 12px;
   position: relative;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
   margin: 0 auto;
   max-width: 100%;
+  overflow: hidden; /* Ensure rounded corners clip video if needed */
+  border-radius: 12px; /* Or match the frame's inner curve */
 }
 .photobooth-frame > video, .photobooth-frame > canvas {
-  border-radius: 8px;
-  border: 4px solid #fff;
   width: 100% !important;
   height: auto !important;
   box-sizing: border-box;
@@ -1583,7 +1579,7 @@ body, #app-container, .lovegift-stage-bg {
 }
 .photobooth-frame .active-sticker {
   position: absolute;
-  top: 15px; /* same as padding */
+  top: 15px;
   left: 15px;
   right: 15px;
   bottom: 15px;
@@ -1594,7 +1590,16 @@ body, #app-container, .lovegift-stage-bg {
   object-fit: contain;
   display: none;
 }
-.coquette-bow {
+.photobooth-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  pointer-events: none;
+  z-index: 10;
+}
 @keyframes rollingInfinite {
   0% { transform: translateY(var(--reel-from)); filter: blur(5px); }
   100% { transform: translateY(calc(var(--reel-from) - 760px)); filter: blur(5px); }

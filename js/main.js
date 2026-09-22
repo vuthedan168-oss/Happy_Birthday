@@ -402,9 +402,8 @@ document.addEventListener("DOMContentLoaded", () => {
               
               // Chụp ảnh
               const ctx = canvas.getContext('2d');
-              const topMargin = video.videoWidth * 0.15;
               canvas.width = video.videoWidth;
-              canvas.height = video.videoHeight + topMargin;
+              canvas.height = video.videoHeight;
               
               ctx.fillStyle = "#2c1520";
               ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -415,31 +414,17 @@ document.addEventListener("DOMContentLoaded", () => {
               ctx.save();
               ctx.translate(canvas.width, 0);
               ctx.scale(-1, 1);
-              ctx.drawImage(video, 0, topMargin, canvas.width, video.videoHeight);
+              ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
               ctx.restore();
               
               ctx.filter = 'none';
 
               const frame = video.closest('.photobooth-frame');
               if (frame) {
-                const bowSize = canvas.width * 0.12;
-                ctx.font = `${bowSize}px sans-serif`;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                const p = bowSize * 0.8;
-                const vTop = topMargin + p;
-                const vBottom = canvas.height - p;
-                const drawDecor = (x, y, text, d) => { ctx.save(); ctx.translate(x, y); ctx.rotate(d * Math.PI / 180); ctx.fillText(text, 0, 0); ctx.restore(); };
-                drawDecor(p, vTop, "🎀", -15); drawDecor(canvas.width - p, vTop, "🎀", 15);
-                drawDecor(p, vBottom, "🎀", -15); drawDecor(canvas.width - p, vBottom, "🎀", 15);
-                
-                const name = ACTIVE_CONFIG.recipientName || "Bạn";
-                ctx.font = `bold ${canvas.width * 0.1}px 'Dancing Script', cursive`;
-                ctx.fillStyle = '#ffd700';
-                ctx.shadowColor = '#ffb300';
-                ctx.shadowBlur = 10;
-                ctx.fillText(`Happy Birthday ${name}`, canvas.width / 2, topMargin / 2);
-                ctx.shadowBlur = 0;
+                const overlayImg = frame.querySelector('.photobooth-overlay');
+                if (overlayImg) {
+                  ctx.drawImage(overlayImg, 0, 0, canvas.width, canvas.height);
+                }
               }
               
               selfieDataUrl = canvas.toDataURL('image/jpeg', 0.9);
@@ -458,9 +443,8 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
           // Fallback nếu không có overlay
           const ctx = canvas.getContext('2d');
-          const topMargin = video.videoWidth * 0.15;
           canvas.width = video.videoWidth;
-          canvas.height = video.videoHeight + topMargin;
+          canvas.height = video.videoHeight;
           
           ctx.fillStyle = "#2c1520";
           ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -471,31 +455,17 @@ document.addEventListener("DOMContentLoaded", () => {
           ctx.save();
           ctx.translate(canvas.width, 0);
           ctx.scale(-1, 1);
-          ctx.drawImage(video, 0, topMargin, canvas.width, video.videoHeight);
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
           ctx.restore();
           
           ctx.filter = 'none';
 
           const frame = video.closest('.photobooth-frame');
           if (frame) {
-            const bowSize = canvas.width * 0.12;
-            ctx.font = `${bowSize}px sans-serif`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            const p = bowSize * 0.8;
-            const vTop = topMargin + p;
-            const vBottom = canvas.height - p;
-            const drawDecor = (x, y, text, d) => { ctx.save(); ctx.translate(x, y); ctx.rotate(d * Math.PI / 180); ctx.fillText(text, 0, 0); ctx.restore(); };
-            drawDecor(p, vTop, "🎀", -15); drawDecor(canvas.width - p, vTop, "🎀", 15);
-            drawDecor(p, vBottom, "🎀", -15); drawDecor(canvas.width - p, vBottom, "🎀", 15);
-
-            const name = ACTIVE_CONFIG.recipientName || "Bạn";
-            ctx.font = `bold ${canvas.width * 0.1}px 'Dancing Script', cursive`;
-            ctx.fillStyle = '#ffd700';
-            ctx.shadowColor = '#ffb300';
-            ctx.shadowBlur = 10;
-            ctx.fillText(`Happy Birthday ${name}`, canvas.width / 2, topMargin / 2);
-            ctx.shadowBlur = 0;
+            const overlayImg = frame.querySelector('.photobooth-overlay');
+            if (overlayImg) {
+              ctx.drawImage(overlayImg, 0, 0, canvas.width, canvas.height);
+            }
           }
           
           selfieDataUrl = canvas.toDataURL('image/jpeg', 0.9);
