@@ -3,35 +3,13 @@
    Enhanced for Interactive Birthday Card & Studio
    ========================================================= */
 
-@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
-
-/* Local Calligraphic & Romantic Fonts */
-@font-face {
-  font-family: 'fzAghita';
-  src: url('../assets/fonts/FzAghita-s.p.0twig7otq-0_g.woff2') format('woff2');
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Dancing Script Local';
-  font-style: normal;
-  font-weight: 400 700;
-  font-display: swap;
-  src: url('../assets/fonts/32fe63294b6cd18c-s.p.090h5ho-armea.woff2') format('woff2');
-  unicode-range: U+102-103, U+110-111, U+128-129, U+168-169, U+1A0-1A1, U+1AF-1B0, U+300-301, U+303-304, U+308-309, U+323, U+329, U+1EA0-1EF9, U+20AB;
-}
-@font-face {
-  font-family: 'Dancing Script Local';
-  font-style: normal;
-  font-weight: 400 700;
-  font-display: swap;
-  src: url('../assets/fonts/406d3fc8d5ec9f59-s.p.06_5xv2ritwv5.woff2') format('woff2');
-}
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Quicksand:wght@400;500;600;700&display=swap');
 
 :root {
-  --font-fz: 'fzAghita', 'Dancing Script Local', 'Dancing Script', cursive;
-  --font-hand: 'Dancing Script Local', 'Dancing Script', cursive;
-  --font-serif: 'Playfair Display', 'fzAghita', serif;
-  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-fz: 'Dancing Script', cursive;
+  --font-hand: 'Dancing Script', cursive;
+  --font-serif: 'Playfair Display', serif;
+  --font-sans: 'Quicksand', system-ui, -apple-system, sans-serif;
   --font-script: var(--font-fz);
 
   --color-rose: #c98b76;

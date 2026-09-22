@@ -10,8 +10,8 @@ async function uploadImageToCloud(file) {
     reader.onload = (e) => {
       const img = new Image();
       img.onload = () => {
-        // Giảm xuống 200px để tối ưu dung lượng JSONBin (100KB limit)
-        const maxWidth = 200;
+        // Giữ ảnh sắc nét (ByteBin hỗ trợ 5MB)
+        const maxWidth = 1080;
         let width = img.width;
         let height = img.height;
 
@@ -26,8 +26,8 @@ async function uploadImageToCloud(file) {
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
         
-        // Quality 0.4 để giảm tối đa size
-        resolve(canvas.toDataURL('image/jpeg', 0.4));
+        // Quality 0.85 để ảnh sắc nét
+        resolve(canvas.toDataURL('image/jpeg', 0.85));
       };
       img.onerror = () => reject(new Error('Failed to load image for compression'));
       img.src = e.target.result;

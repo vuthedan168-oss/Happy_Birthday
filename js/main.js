@@ -56,12 +56,12 @@ function initMicBlowing(onBlowOut) {
                 flame.style.transform = `scale(${flickerScale}) rotate(${flickerRot}deg)`;
               }
 
-              if (average > 80) {
+              if (average > 40) {
                 blowFrames++;
-                if (blowFrames > 8) { // ~0.8s liên tục vượt ngưỡng
+                if (blowFrames > 12) { // ~1.2s liên tục vượt ngưỡng
                   hasTriggered = true;
                   stopMicBlowing(); // Dừng mic an toàn trước
-                  onBlowOut();
+                  onBlowOut(true);
                 }
               } else {
                 blowFrames = Math.max(0, blowFrames - 2);
