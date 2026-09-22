@@ -715,10 +715,8 @@ function switchStage(stageName) {
     changeStageMusic("assets/audio/birthday.mp3");
   } else if (["beats", "wish"].includes(stageName)) {
     changeStageMusic("assets/audio/Yung Kai.m4a");
-  } else if (["heart", "letter"].includes(stageName)) {
+  } else if (["heart", "letter", "final", "starlight"].includes(stageName)) {
     changeStageMusic("assets/audio/Noi Nay Co Anh.m4a");
-  } else if (["final", "starlight"].includes(stageName)) {
-    changeStageMusic("assets/audio/Happy Birthday Remix.m4a");
   }
   const stages = [
     "stage-countdown", "stage-opening", "stage-quiz", "stage-intro", "stage-beats", "stage-wish",
@@ -1464,6 +1462,9 @@ function initStageStarlight() {
     launchStarBtn.addEventListener("click", () => {
       if (IS_STAR_LAUNCHED) return;
       IS_STAR_LAUNCHED = true;
+
+      // Đổi nhạc sang bài Remix ngay khi gửi điều ước
+      changeStageMusic("assets/audio/Happy Birthday Remix.m4a");
 
       const swooshSound = new Audio('assets/audio/swoosh.mp3');
       swooshSound.volume = 1.0;
