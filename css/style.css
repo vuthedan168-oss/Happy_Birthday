@@ -4,24 +4,7 @@
  * Mau sac: Deep Midnight Velvet, Starlight Gold, Neon Rose & Glassmorphism
  */
 
-@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Caveat:wght@600;700&display=swap');
-
-/* Phông chữ sang trọng fzAghita kế thừa từ dự án gốc Happy_Birthday */
-@font-face {
-  font-family: 'fzAghita';
-  src: url('../assets/fonts/FzAghita-s.p.0twig7otq-0_g.woff2') format('woff2');
-  font-weight: 400 500;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'fzAghita';
-  src: url('../assets/fonts/406d3fc8d5ec9f59-s.p.06_5xv2ritwv5.woff2') format('woff2');
-  font-weight: 600 700;
-  font-style: normal;
-  font-display: swap;
-}
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Montserrat:wght@300;400;500;600;700;800;900&family=Be+Vietnam+Pro:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Quicksand:wght@400;500;600;700&display=swap');
 
 :root {
   --bg-dark: #07060f;
@@ -35,10 +18,10 @@
   --accent-purple: #a855f7;
   --text-main: #f8fafc;
   --text-muted: #94a3b8;
-  --font-main: 'Outfit', 'Plus Jakarta Sans', sans-serif;
-  --font-hand: 'Dancing Script', 'Caveat', cursive;
-  --font-serif: 'fzAghita', Georgia, serif;
-  --font-sans: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  --font-main: 'Montserrat', 'Be Vietnam Pro', sans-serif;
+  --font-hand: 'Dancing Script', cursive;
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Quicksand', 'Montserrat', 'Be Vietnam Pro', sans-serif;
   --color-gold: #c9a24b;
   --color-cream: #f6ead8;
   --color-rose: #c98b76;

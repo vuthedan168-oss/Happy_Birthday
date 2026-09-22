@@ -49,22 +49,34 @@ function initMicBlowing(onBlowOut) {
               for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
               const average = sum / dataArray.length;
               
+              const hintEl = document.getElementById('candle-hint');
               const flame = document.getElementById('flame-element');
               if (flame && !flame.classList.contains('lovegift-blowout')) {
                 const flickerScale = 1 + (average / 255) * 0.5;
-                const flickerRot = (Math.random() - 0.5) * (average / 5);
-                flame.style.transform = `scale(${flickerScale}) rotate(${flickerRot}deg)`;
+                const bendAngle = Math.min(blowFrames * 6, 75);
+                const flickerRot = bendAngle + (Math.random() - 0.5) * (average / 3);
+                flame.style.transform = `scale(${flickerScale}) rotate(${flickerRot}deg) translateX(${bendAngle/3}px)`;
               }
 
               if (average > 40) {
                 blowFrames++;
+                if (hintEl && !hasTriggered) {
+                  if (blowFrames > 9) hintEl.innerHTML = "Gần tắt rồi... 🕯️💨";
+                  else if (blowFrames > 5) hintEl.innerHTML = "Sắp được rồi! Thổi mạnh lên! 🌬️";
+                  else if (blowFrames > 2) hintEl.innerHTML = "Đang thổi... Cố lên! 💨";
+                }
+
                 if (blowFrames > 12) { // ~1.2s liên tục vượt ngưỡng
                   hasTriggered = true;
                   stopMicBlowing(); // Dừng mic an toàn trước
+                  if (hintEl) hintEl.innerHTML = "Phùuuu! Nến đã tắt! 🎉";
                   onBlowOut(true);
                 }
               } else {
                 blowFrames = Math.max(0, blowFrames - 2);
+                if (blowFrames === 0 && hintEl && !hasTriggered) {
+                   hintEl.innerHTML = "👆 Nhấn & giữ ngọn nến, hoặc THỔI trực tiếp vào micro 🎂💨";
+                }
               }
             }
           }, 100);
