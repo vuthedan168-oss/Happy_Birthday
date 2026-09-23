@@ -1142,8 +1142,9 @@ body, #app-container, .lovegift-stage-bg {
 
 .wheel-stage-wrapper {
   position: relative;
-  width: 310px;
-  height: 310px;
+  width: 100%;
+  max-width: 310px;
+  aspect-ratio: 1 / 1;
   margin: 1.5rem auto;
   display: flex;
   align-items: center;
@@ -1162,8 +1163,8 @@ body, #app-container, .lovegift-stage-bg {
 }
 
 .wheel-canvas {
-  width: 310px;
-  height: 310px;
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
   box-shadow: 0 0 25px rgba(201, 162, 75, 0.35);
 }

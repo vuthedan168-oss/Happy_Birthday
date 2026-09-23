@@ -18,7 +18,7 @@ let COUNTDOWN_INTERVAL = null;
 function safeVibrate(pattern) {
   try {
     if (navigator.vibrate) navigator.vibrate(pattern);
-  } catch(e) {}
+  } catch (e) { }
 }
 
 let audioCtx = null;
@@ -38,24 +38,24 @@ function initMicBlowing(onBlowOut) {
           const source = audioCtx.createMediaStreamSource(stream);
           source.connect(analyser);
           analyser.fftSize = 256;
-          
+
           let blowFrames = 0;
           micBlowInterval = setInterval(() => {
             if (!IS_CARD_LOCKED && CURRENT_STAGE === 'intro' && !hasTriggered) {
               const dataArray = new Uint8Array(analyser.frequencyBinCount);
               analyser.getByteFrequencyData(dataArray);
-              
+
               let sum = 0;
               for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
               const average = sum / dataArray.length;
-              
+
               const hintEl = document.getElementById('candle-hint');
               const flame = document.getElementById('flame-element');
               if (flame && !flame.classList.contains('lovegift-blowout')) {
                 const flickerScale = 1 + (average / 255) * 0.5;
                 const bendAngle = Math.min(blowFrames * 6, 75);
                 const flickerRot = bendAngle + (Math.random() - 0.5) * (average / 3);
-                flame.style.transform = `scale(${flickerScale}) rotate(${flickerRot}deg) translateX(${bendAngle/3}px)`;
+                flame.style.transform = `scale(${flickerScale}) rotate(${flickerRot}deg) translateX(${bendAngle / 3}px)`;
               }
 
               if (average > 40) {
@@ -75,7 +75,7 @@ function initMicBlowing(onBlowOut) {
               } else {
                 blowFrames = Math.max(0, blowFrames - 2);
                 if (blowFrames === 0 && hintEl && !hasTriggered) {
-                   hintEl.innerHTML = "👆 Nhấn & giữ ngọn nến, hoặc THỔI trực tiếp vào micro 🎂💨";
+                  hintEl.innerHTML = "👆 Nhấn & giữ ngọn nến, hoặc THỔI trực tiếp vào micro 🎂💨";
                 }
               }
             }
@@ -83,7 +83,7 @@ function initMicBlowing(onBlowOut) {
         })
         .catch(err => console.log('Mic error:', err));
     }
-  } catch(e) {}
+  } catch (e) { }
 }
 
 function stopMicBlowing() {
@@ -92,7 +92,7 @@ function stopMicBlowing() {
     micStream.getTracks().forEach(track => track.stop());
   }
   if (audioCtx) {
-    audioCtx.close().catch(e => {});
+    audioCtx.close().catch(e => { });
   }
 }
 
@@ -146,7 +146,7 @@ function openSelfieModal() {
   const initActions = document.getElementById('selfie-initial-actions');
   const reviewActions = document.getElementById('selfie-review-actions');
   const btnTake = document.getElementById('btn-take-selfie');
-  
+
   if (modal) {
     modal.style.display = 'flex';
     const nameEl = document.getElementById('photobooth-recipient-name');
@@ -180,7 +180,7 @@ function openSelfieModal() {
         selfieStream = stream;
         if (video) {
           video.srcObject = stream;
-          video.play().catch(() => {});
+          video.play().catch(() => { });
         }
         hideCameraNotice();
       })
@@ -199,7 +199,7 @@ function openSelfieModal() {
         }
         // Giữ nguyên modal để người dùng chọn tải ảnh hoặc bỏ qua, không tự ý đóng!
       });
-  } catch(e) {
+  } catch (e) {
     console.warn('Lỗi khi mở camera:', e);
     showCameraNotice("⚠️ Trình duyệt đang chặn Camera. Vui lòng tắt bong bóng chat, hoặc ấn dấu 3 chấm góc phải chọn 'Mở bằng trình duyệt' (Chrome/Safari)!");
     if (btnTake) {
@@ -214,12 +214,12 @@ function handleSelfieFileUpload(file) {
   const reader = new FileReader();
   reader.onload = (e) => {
     selfieDataUrl = e.target.result;
-    
+
     const canvas = document.getElementById('selfie-canvas');
     const video = document.getElementById('selfie-video');
     const initActions = document.getElementById('selfie-initial-actions');
     const reviewActions = document.getElementById('selfie-review-actions');
-    
+
     if (canvas) {
       const img = new Image();
       img.onload = () => {
@@ -229,10 +229,10 @@ function handleSelfieFileUpload(file) {
         const ctx = canvas.getContext('2d');
         ctx.fillStyle = "#2c1520";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
+
         const filterStyle = video ? window.getComputedStyle(video).filter : 'none';
         if (filterStyle !== 'none') ctx.filter = filterStyle;
-        
+
         ctx.drawImage(img, 0, topMargin, canvas.width, canvas.height - topMargin);
         ctx.filter = 'none';
 
@@ -259,9 +259,9 @@ function handleSelfieFileUpload(file) {
           ctx.fillText(`Happy Birthday ${name}`, canvas.width / 2, topMargin / 2);
           ctx.shadowBlur = 0;
         }
-        
+
         selfieDataUrl = canvas.toDataURL('image/jpeg', 0.9);
-        
+
         if (video) video.style.display = 'none';
         canvas.style.display = 'block';
         hideCameraNotice();
@@ -292,23 +292,23 @@ function openStoryExport() {
   stopSelfieCamera();
   const photoModal = document.getElementById('modal-photobooth');
   if (photoModal) photoModal.style.display = 'none';
-  
+
   const exportModal = document.getElementById('modal-story-export');
   const exportImg = document.getElementById('export-selfie-img');
-  
+
   if (selfieDataUrl && exportImg) {
     exportImg.src = selfieDataUrl;
     exportImg.style.display = 'block';
     exportImg.style.transform = 'none';
   }
-  
+
   if (exportModal) exportModal.style.display = 'flex';
 }
 
 function downloadStory() {
   const frame = document.getElementById('story-export-frame');
   if (!frame || typeof html2canvas !== 'function') return;
-  
+
   html2canvas(frame, { scale: 2, useCORS: true, backgroundColor: '#2c1520' }).then(canvas => {
     const link = document.createElement('a');
     link.download = 'HappyBirthday_Story.png';
@@ -330,7 +330,7 @@ function triggerOutro() {
   if (window.BirthdayAudio && typeof window.BirthdayAudio.playApplause === 'function') {
     window.BirthdayAudio.playApplause();
   }
-  
+
   const outro = document.getElementById('outro-overlay');
   const text = document.getElementById('outro-text');
   if (outro) {
@@ -344,7 +344,7 @@ function triggerOutro() {
   const curtainLeft = document.getElementById('curtain-left');
   const curtainRight = document.getElementById('curtain-right');
   const curtainText = document.getElementById('curtain-text');
-  
+
   if (curtainLeft && curtainRight && curtainText) {
     setTimeout(() => {
       curtainLeft.style.transform = 'translateX(0)';
@@ -353,7 +353,7 @@ function triggerOutro() {
 
       setTimeout(() => {
         if (window.BirthdayAudio && typeof window.BirthdayAudio.fadeOutAudio === 'function') {
-           window.BirthdayAudio.fadeOutAudio(500);
+          window.BirthdayAudio.fadeOutAudio(500);
         }
         document.body.innerHTML = '<div style="background:#000;width:100vw;height:100vh;"></div>';
         window.location.reload();
@@ -368,12 +368,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnTakeSelfie = document.getElementById('btn-take-selfie');
   const btnRetakeSelfie = document.getElementById('btn-retake-selfie');
   const btnConfirmSelfie = document.getElementById('btn-confirm-selfie');
-  
+
   const btnDownloadStory = document.getElementById('btn-download-story');
   const btnFinish = document.getElementById('btn-finish-experience');
 
   if (btnSkipSelfie) btnSkipSelfie.addEventListener('click', skipSelfie);
-  
+
   if (btnTakeSelfie) {
     btnTakeSelfie.addEventListener('click', () => {
       const video = document.getElementById('selfie-video');
@@ -391,7 +391,7 @@ document.addEventListener("DOMContentLoaded", () => {
           countdownOverlay.style.display = 'flex';
           let count = 3;
           countdownOverlay.textContent = count;
-          
+
           const interval = setInterval(() => {
             count--;
             if (count > 0) {
@@ -399,7 +399,7 @@ document.addEventListener("DOMContentLoaded", () => {
             } else {
               clearInterval(interval);
               countdownOverlay.style.display = 'none';
-              
+
               // Hiệu ứng chớp Flash trắng
               if (flashOverlay) {
                 flashOverlay.style.display = 'block';
@@ -411,24 +411,24 @@ document.addEventListener("DOMContentLoaded", () => {
                   }, 500);
                 }, 50);
               }
-              
+
               // Chụp ảnh
               const ctx = canvas.getContext('2d');
               canvas.width = video.videoWidth;
               canvas.height = video.videoHeight;
-              
+
               ctx.fillStyle = "#2c1520";
               ctx.fillRect(0, 0, canvas.width, canvas.height);
 
               const filterStyle = window.getComputedStyle(video).filter;
               if (filterStyle !== 'none') ctx.filter = filterStyle;
-              
+
               ctx.save();
               ctx.translate(canvas.width, 0);
               ctx.scale(-1, 1);
               ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
               ctx.restore();
-              
+
               ctx.filter = 'none';
 
               const frame = video.closest('.photobooth-frame');
@@ -438,14 +438,14 @@ document.addEventListener("DOMContentLoaded", () => {
                   ctx.drawImage(overlayImg, 0, 0, canvas.width, canvas.height);
                 }
               }
-              
+
               selfieDataUrl = canvas.toDataURL('image/jpeg', 0.9);
               video.style.display = 'none';
               canvas.style.display = 'block';
-              
+
               document.getElementById('selfie-initial-actions').style.display = 'none';
               document.getElementById('selfie-review-actions').style.display = 'flex';
-              
+
               // Khôi phục nút
               btnTakeSelfie.disabled = false;
               if (btnSkip) btnSkip.disabled = false;
@@ -457,19 +457,19 @@ document.addEventListener("DOMContentLoaded", () => {
           const ctx = canvas.getContext('2d');
           canvas.width = video.videoWidth;
           canvas.height = video.videoHeight;
-          
+
           ctx.fillStyle = "#2c1520";
           ctx.fillRect(0, 0, canvas.width, canvas.height);
 
           const filterStyle = window.getComputedStyle(video).filter;
           if (filterStyle !== 'none') ctx.filter = filterStyle;
-          
+
           ctx.save();
           ctx.translate(canvas.width, 0);
           ctx.scale(-1, 1);
           ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
           ctx.restore();
-          
+
           ctx.filter = 'none';
 
           const frame = video.closest('.photobooth-frame');
@@ -479,11 +479,11 @@ document.addEventListener("DOMContentLoaded", () => {
               ctx.drawImage(overlayImg, 0, 0, canvas.width, canvas.height);
             }
           }
-          
+
           selfieDataUrl = canvas.toDataURL('image/jpeg', 0.9);
           video.style.display = 'none';
           canvas.style.display = 'block';
-          
+
           document.getElementById('selfie-initial-actions').style.display = 'none';
           document.getElementById('selfie-review-actions').style.display = 'flex';
           btnTakeSelfie.disabled = false;
@@ -586,26 +586,26 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   if (startOverlay) {
     // Lắng nghe khi nhạc đã tải xong đủ để phát không giật lag
-    window.currentAudio.addEventListener('canplaythrough', function() {
-        startOverlay.innerHTML = "Chạm vào đây để mở thiệp ✨";
-        startOverlay.style.pointerEvents = "auto"; // Cho phép click
-        startOverlay.style.opacity = "1";
-        startOverlay.classList.add('pulse-animation'); // Thêm class hiệu ứng đập nhịp nhàng
+    window.currentAudio.addEventListener('canplaythrough', function () {
+      startOverlay.innerHTML = "Chạm vào đây để mở thiệp ✨";
+      startOverlay.style.pointerEvents = "auto"; // Cho phép click
+      startOverlay.style.opacity = "1";
+      startOverlay.classList.add('pulse-animation'); // Thêm class hiệu ứng đập nhịp nhàng
     });
 
     // Xử lý khi người dùng chạm
-    startOverlay.addEventListener('click', function() {
-        window.currentAudio.play(); // Nhạc sẽ nổ ra ngay lập tức 100% không độ trễ
-        startOverlay.style.display = 'none';
-        
-        const audioIcon = document.getElementById("audio-icon");
-        if (audioIcon) audioIcon.textContent = "🔊";
+    startOverlay.addEventListener('click', function () {
+      window.currentAudio.play(); // Nhạc sẽ nổ ra ngay lập tức 100% không độ trễ
+      startOverlay.style.display = 'none';
 
-        if (lockStatus.isLocked) {
-          initStageCountdown(lockStatus);
-        } else {
-          startCelebrationJourney();
-        }
+      const audioIcon = document.getElementById("audio-icon");
+      if (audioIcon) audioIcon.textContent = "🔊";
+
+      if (lockStatus.isLocked) {
+        initStageCountdown(lockStatus);
+      } else {
+        startCelebrationJourney();
+      }
     });
   } else {
     if (lockStatus.isLocked) {
@@ -667,8 +667,16 @@ async function initCardConfiguration() {
   setSafeText("heart-tap-hint", ACTIVE_CONFIG.heartTapHint || "Chạm vào trái tim để xem ảnh ♡");
 
   setSafeText("letter-kicker", ACTIVE_CONFIG.letterKicker || "Lá thư nhỏ");
-  setSafeHtml("letter-body-text", ACTIVE_CONFIG.letterBody || `Tớ không giỏi nói mấy lời hoa mỹ, nên viết đơn giản thôi: chúc mừng sinh nhật cậu nhé.\n\nNăm vừa rồi chắc chẳng dễ dàng gì, vậy mà cậu vẫn đi tới được hôm nay — giỏi hơn cậu nghĩ nhiều đấy.\n\nTớ chỉ mong cậu ăn ngon ngủ đủ, bớt lo một chút, và nhớ là luôn có người ở đây khi cậu cần.`);
-  setSafeText("letter-signature-text", ACTIVE_CONFIG.letterSignature || `— ${sender}`);
+
+  const letterEl = document.getElementById("letter-body-text");
+  if (letterEl) {
+    letterEl.innerHTML = (ACTIVE_CONFIG.letterContent || ACTIVE_CONFIG.letterBody || "").replace(/\n/g, "<br>");
+  }
+
+  const signEl = document.getElementById("letter-signature-text");
+  if (signEl) {
+    signEl.textContent = ACTIVE_CONFIG.signature || ACTIVE_CONFIG.letterSignature || "";
+  }
 
   setSafeText("final-kicker", ACTIVE_CONFIG.finalKicker || "Dành cho cậu");
   setSafeText("final-title", ACTIVE_CONFIG.finalTitle || `Chúc Mừng Sinh Nhật, ${receiver}`);
@@ -857,14 +865,14 @@ function initStageOpening() {
 
     reelScroller.style.setProperty("--reel-from", `${reelFrom}px`);
     reelScroller.style.setProperty("--reel-to", `${reelTo}px`);
-    
+
     // Chạy animation cuộn nhanh liên tục
     reelScroller.classList.add("rolling-fast");
     setTimeout(() => {
-      if (reelScroller) { 
+      if (reelScroller) {
         reelScroller.classList.remove("rolling-fast");
         reelScroller.classList.add("stopping-fast"); // Hãm phanh từ từ
-        
+
         // Chờ 1.5s hãm phanh xong thì phát sáng
         setTimeout(() => {
           if (selectedDayEl) selectedDayEl.classList.add("birthday-glow");
@@ -951,7 +959,7 @@ function initStageQuiz() {
         btn.style.textAlign = "left";
         btn.style.justifyContent = "flex-start";
         btn.innerHTML = `<span style="margin-right:8px;">${opt.emoji || '✨'}</span> ${opt.text}`;
-        
+
         btn.addEventListener("click", () => {
           if (opt.isCorrect) {
             // Disable all buttons
@@ -967,7 +975,7 @@ function initStageQuiz() {
               feedbackEl.style.opacity = "1";
             }
             if (hintEl) hintEl.textContent = q.hint || "Giỏi quá!";
-            
+
             if (window.BirthdayAudio && typeof window.BirthdayAudio.playDing === 'function') window.BirthdayAudio.playDing();
             safeVibrate([30, 50, 30]);
 
@@ -990,7 +998,7 @@ function initStageQuiz() {
               feedbackEl.style.color = "#e74c3c";
               feedbackEl.style.opacity = "1";
             }
-            
+
             safeVibrate([50]);
           }
         });
@@ -1214,7 +1222,7 @@ function playEmotionalBeats() {
     if (beatsTextEl) {
       beatsTextEl.style.opacity = "0";
       beatsTextEl.style.transform = "translateY(10px)";
-      
+
       setTimeout(() => {
         beatsTextEl.textContent = beats[currentBeatIndex];
         beatsTextEl.style.opacity = "1";
@@ -1245,7 +1253,7 @@ function initStageWish() {
   if (submitBtn && textArea) {
     submitBtn.addEventListener("click", () => {
       const wish = textArea.value.trim() || "Một điều ước bí mật";
-      
+
       SELECTED_WISH = wish;
       const chosenStarText = document.getElementById("starlight-chosen-wish");
       if (chosenStarText) chosenStarText.textContent = `“${wish}”`;
@@ -1294,26 +1302,26 @@ function initStageHeart() {
   const gallery = (ACTIVE_CONFIG.gallery && ACTIVE_CONFIG.gallery.length > 0)
     ? ACTIVE_CONFIG.gallery
     : [
-        { url: "assets/images/girl/girl2.jpeg", caption: "Nụ cười rạng rỡ nhất ☀️" },
-        { url: "assets/images/girl/girl3.jpeg", caption: "Những khoảnh khắc ngập tràn niềm vui 🌸" },
-        { url: "assets/images/photo1.jpg", caption: "Kỷ niệm ngọt ngào 💖" },
-        { url: "assets/images/photo2.jpg", caption: "Mỗi ngày đều là món quà ✨" },
-        { url: "assets/images/photo3.jpg", caption: "Bình yên và hạnh phúc 🍀" },
-        { url: "assets/images/photo4.jpg", caption: "Tuổi mới thật rực rỡ! 🎂" }
-      ];
+      { url: "assets/images/girl/girl2.jpeg", caption: "Nụ cười rạng rỡ nhất ☀️" },
+      { url: "assets/images/girl/girl3.jpeg", caption: "Những khoảnh khắc ngập tràn niềm vui 🌸" },
+      { url: "assets/images/photo1.jpg", caption: "Kỷ niệm ngọt ngào 💖" },
+      { url: "assets/images/photo2.jpg", caption: "Mỗi ngày đều là món quà ✨" },
+      { url: "assets/images/photo3.jpg", caption: "Bình yên và hạnh phúc 🍀" },
+      { url: "assets/images/photo4.jpg", caption: "Tuổi mới thật rực rỡ! 🎂" }
+    ];
 
   // Ma trận trái tim 10 hàng x 11 cột
   const HEART_MATRIX = [
-    [0,1,1,0,0,0,0,0,1,1,0],
-    [1,1,1,1,0,0,0,1,1,1,1],
-    [1,1,1,1,1,0,1,1,1,1,1],
-    [1,1,1,1,1,1,1,1,1,1,1],
-    [1,1,1,1,1,1,1,1,1,1,1],
-    [0,1,1,1,1,1,1,1,1,1,0],
-    [0,0,1,1,1,1,1,1,1,0,0],
-    [0,0,0,1,1,1,1,1,0,0,0],
-    [0,0,0,0,1,1,1,0,0,0,0],
-    [0,0,0,0,0,1,0,0,0,0,0]
+    [0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0],
+    [1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1],
+    [1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+    [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+    [0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0],
+    [0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0]
   ];
 
   // Thuật toán pseudo-random dựa trên sin
@@ -1397,7 +1405,7 @@ function initStageLetter() {
   const actionsWrap = document.getElementById("letter-actions-wrap");
   const signText = document.getElementById("letter-signature-text");
 
-  const rawLetterText = ACTIVE_CONFIG.letterContent || "Tớ không giỏi nói mấy lời hoa mỹ, nên viết đơn giản thôi: chúc mừng sinh nhật cậu nhé.\n\nNăm vừa rồi chắc chẳng dễ dàng gì, vậy mà cậu vẫn đi tới được hôm nay — giỏi hơn cậu nghĩ nhiều đấy.\n\nTớ chỉ mong cậu ăn ngon ngủ đủ, bớt lo một chút, và nhớ là luôn có người ở đây khi cậu cần.";
+  const rawLetterText = ACTIVE_CONFIG.letterContent || ACTIVE_CONFIG.letterBody || "";
 
   if (btnOpen) {
     btnOpen.addEventListener("click", () => {
@@ -1462,6 +1470,14 @@ function initStageStarlight() {
     launchStarBtn.addEventListener("click", () => {
       if (IS_STAR_LAUNCHED) return;
       IS_STAR_LAUNCHED = true;
+
+      // Gửi ngầm điều ước lên Google Sheets
+      const scriptURL = 'https://script.google.com/macros/s/AKfycbzhT5Y4Qolo3K5ntuVo_90gjSlsob7PtlNJxJvouMohLsE5OjbLJhDhTCp4PDV4P4JA/exec';
+      const formData = new FormData();
+      formData.append('wish', SELECTED_WISH);
+
+      fetch(scriptURL, { method: 'POST', body: formData })
+        .catch(error => console.error('Loi:', error.message));
 
       // Đổi nhạc sang bài Remix ngay khi gửi điều ước
       changeStageMusic("assets/audio/Happy Birthday Remix.m4a");
@@ -1547,36 +1563,36 @@ function spawnMeteorsBatch(count) {
  * Hàng trăm sao băng 3D
  */
 function createShootingStars() {
-    const starBg = document.getElementById('meteor-sky-container');
-    if (!starBg) return;
-    starBg.innerHTML = ''; 
-    
-    for(let i = 0; i < 40; i++) {
-        let staticStar = document.createElement('div');
-        staticStar.className = 'static-star';
-        staticStar.style.left = Math.random() * 100 + 'vw';
-        staticStar.style.top = Math.random() * 100 + 'vh';
-        let size = Math.random() * 3 + 1; 
-        staticStar.style.width = size + 'px';
-        staticStar.style.height = size + 'px';
-        staticStar.style.animationDelay = (Math.random() * 5) + 's';
-        staticStar.style.boxShadow = '0 0 8px #ffdfba';
-        starBg.appendChild(staticStar);
-    }
+  const starBg = document.getElementById('meteor-sky-container');
+  if (!starBg) return;
+  starBg.innerHTML = '';
 
-    for(let j = 0; j < 100; j++) {
-        let meteor = document.createElement('div');
-        meteor.className = 'shooting-star-wish';
-        meteor.style.left = (Math.random() * 100) + 'vw'; 
-        meteor.style.top = (50 + Math.random() * 50) + 'vh';
-        meteor.style.animationDuration = (0.8 + Math.random() * 1) + 's';
-        meteor.style.animationDelay = (Math.random() * 2.5) + 's';
-        starBg.appendChild(meteor);
+  for (let i = 0; i < 40; i++) {
+    let staticStar = document.createElement('div');
+    staticStar.className = 'static-star';
+    staticStar.style.left = Math.random() * 100 + 'vw';
+    staticStar.style.top = Math.random() * 100 + 'vh';
+    let size = Math.random() * 3 + 1;
+    staticStar.style.width = size + 'px';
+    staticStar.style.height = size + 'px';
+    staticStar.style.animationDelay = (Math.random() * 5) + 's';
+    staticStar.style.boxShadow = '0 0 8px #ffdfba';
+    starBg.appendChild(staticStar);
+  }
 
-        setTimeout(() => {
-            if(meteor.parentNode) meteor.parentNode.removeChild(meteor);
-        }, 4000);
-    }
+  for (let j = 0; j < 100; j++) {
+    let meteor = document.createElement('div');
+    meteor.className = 'shooting-star-wish';
+    meteor.style.left = (Math.random() * 100) + 'vw';
+    meteor.style.top = (50 + Math.random() * 50) + 'vh';
+    meteor.style.animationDuration = (0.8 + Math.random() * 1) + 's';
+    meteor.style.animationDelay = (Math.random() * 2.5) + 's';
+    starBg.appendChild(meteor);
+
+    setTimeout(() => {
+      if (meteor.parentNode) meteor.parentNode.removeChild(meteor);
+    }, 4000);
+  }
 }
 function restartExperience() {
   IS_STAR_LAUNCHED = false;
@@ -1812,14 +1828,14 @@ function spinLuckyWheel() {
   if (prizes.length === 0 || !canvas) return;
 
   const prizeCount = prizes.length;
-  
+
   let totalWeight = 0;
   prizes.forEach(p => totalWeight += (p.rate !== undefined ? parseFloat(p.rate) : (p.percent !== undefined ? parseFloat(p.percent) : (100 / prizeCount))));
-  
+
   let rand = Math.random() * totalWeight;
   let winningIndex = 0;
   let currentSum = 0;
-  
+
   for (let i = 0; i < prizeCount; i++) {
     currentSum += (prizes[i].rate !== undefined ? parseFloat(prizes[i].rate) : (prizes[i].percent !== undefined ? parseFloat(prizes[i].percent) : (100 / prizeCount)));
     if (rand <= currentSum) {
@@ -1832,12 +1848,12 @@ function spinLuckyWheel() {
   const sliceDeg = 360 / prizeCount;
   const randomOffset = (Math.random() - 0.5) * (sliceDeg * 0.6);
   let targetAngle = 270 - (winningIndex * sliceDeg + sliceDeg / 2) + randomOffset;
-  
+
   targetAngle += 360 * 5;
 
   const currentRotation = parseFloat(canvas.dataset.rotation || "0");
   const finalAngle = currentRotation + targetAngle - (currentRotation % 360) + (targetAngle % 360 < currentRotation % 360 ? 360 : 0);
-  
+
   canvas.style.transition = 'transform 4s cubic-bezier(0.25, 1, 0.5, 1)';
   canvas.style.transform = `rotate(${finalAngle}deg)`;
   canvas.dataset.rotation = finalAngle;
@@ -1845,7 +1861,7 @@ function spinLuckyWheel() {
   let tickInterval = setInterval(() => {
     if (window.BirthdayAudio) window.BirthdayAudio.playWheelTick();
   }, 300);
-  
+
   setTimeout(() => clearInterval(tickInterval), 2500);
 
   setTimeout(() => {
@@ -1926,8 +1942,8 @@ function checkCardLockStatus() {
 
   // 1. Chế độ Preview Demo Giai đoạn 0 (qua query ?countdown=preview hoặc ?lock=1 hoặc #countdown=preview)
   const isPreview = urlParams.get("countdown") === "preview" ||
-                    urlParams.get("lock") === "1" ||
-                    hash.includes("countdown=preview");
+    urlParams.get("lock") === "1" ||
+    hash.includes("countdown=preview");
 
   if (isPreview) {
     // Tạo mốc thời gian demo: 2 ngày 5 giờ 30 phút từ hiện tại để hiển thị đếm ngược sống động
