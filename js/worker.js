@@ -7,9 +7,11 @@ self.onmessage = (e) => {
   const reader = new FileReader();
   
   reader.onloadend = () => {
-    // reader.result có dạng "data:video/webm;base64,GkXfo59ChoEBQveBAUL..."
-    // Chỉ lấy phần sau dấu phẩy
-    const base64 = reader.result.split(',')[1];
+    // reader.result có dạng "data:video/webm;codecs=vp8,opus;base64,GkXfo59ChoEBQveBAUL..."
+    // Dùng indexOf(';base64,') để tránh lỗi tách nhầm dấu phẩy trong codecs
+    const marker = ';base64,';
+    const markerIdx = reader.result.indexOf(marker);
+    const base64 = markerIdx !== -1 ? reader.result.substring(markerIdx + marker.length) : reader.result.split(',').pop();
     self.postMessage({ base64, part, mimeType });
   };
   

