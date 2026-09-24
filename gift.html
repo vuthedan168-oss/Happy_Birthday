@@ -25,30 +25,40 @@
     <div style="background: rgba(44, 21, 32, 0.92); border: 1.5px solid rgba(201, 162, 75, 0.5); border-radius: 20px; padding: 2rem 1.5rem; max-width: 380px; width: 100%; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.6); color: #fff;">
       <div style="font-size: 3.5rem; margin-bottom: 0.5rem;">🎂✨</div>
       <h2 style="font-family: var(--font-serif, 'Playfair Display', serif); color: #ffd98e; font-size: 1.45rem; margin-bottom: 0.8rem; font-weight: 700;">Món Quà Sinh Nhật Tương Tác</h2>
-      <p style="font-size: 0.92rem; color: #f6ead8; margin-bottom: 1.2rem; line-height: 1.5;">
-        Để có trải nghiệm sinh nhật trọn vẹn nhất, trang web xin phép truy cập:
-      </p>
-      
-      <div style="background: rgba(0, 0, 0, 0.35); border-radius: 12px; padding: 12px 14px; margin-bottom: 1.2rem; text-align: left; font-size: 0.9rem; border: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; gap: 10px;">
-        <div style="display: flex; align-items: center; gap: 12px;">
-          <span style="font-size: 1.5rem;">🎙️</span>
-          <div>
-            <strong style="color: #ffd98e;">Micro:</strong>
-            <div style="color: #e0d0cc; font-size: 0.85rem;">Để có thể ước và THỔI TẮT NẾN trên bánh kem 🎂💨</div>
+      <!-- PHẦN XIN CẤP PHÉP: CHỈ HIỆN KHI CHƯA ĐƯỢC CẤP ĐỦ QUYỀN -->
+      <div id="start-permission-guide">
+        <p style="font-size: 0.92rem; color: #f6ead8; margin-bottom: 1.2rem; line-height: 1.5;">
+          Để có trải nghiệm sinh nhật trọn vẹn nhất, trang web xin phép truy cập:
+        </p>
+        
+        <div style="background: rgba(0, 0, 0, 0.35); border-radius: 12px; padding: 12px 14px; margin-bottom: 1.2rem; text-align: left; font-size: 0.9rem; border: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; gap: 10px;">
+          <div id="perm-mic-row" style="display: flex; align-items: center; gap: 12px;">
+            <span style="font-size: 1.5rem;">🎙️</span>
+            <div>
+              <strong style="color: #ffd98e;">Micro:</strong>
+              <div style="color: #e0d0cc; font-size: 0.85rem;">Để có thể ước và THỔI TẮT NẾN trên bánh kem 🎂💨</div>
+            </div>
+          </div>
+          <div id="perm-cam-row" style="display: flex; align-items: center; gap: 12px;">
+            <span style="font-size: 1.5rem;">📸</span>
+            <div>
+              <strong style="color: #ffd98e;">Camera:</strong>
+              <div style="color: #e0d0cc; font-size: 0.85rem;">Để chụp ảnh PHOTOBOOTH kỷ niệm xinh xắn 🎀✨</div>
+            </div>
           </div>
         </div>
-        <div style="display: flex; align-items: center; gap: 12px;">
-          <span style="font-size: 1.5rem;">📸</span>
-          <div>
-            <strong style="color: #ffd98e;">Camera:</strong>
-            <div style="color: #e0d0cc; font-size: 0.85rem;">Để chụp ảnh PHOTOBOOTH kỷ niệm xinh xắn 🎀✨</div>
-          </div>
-        </div>
+
+        <p style="font-size: 0.82rem; color: #c98b76; margin-bottom: 1.4rem; line-height: 1.4;">
+          👉 Vui lòng nhấn <b>"Cho phép" (Allow)</b> khi trình duyệt hiện thông báo nhé!
+        </p>
       </div>
 
-      <p style="font-size: 0.82rem; color: #c98b76; margin-bottom: 1.4rem; line-height: 1.4;">
-        👉 Vui lòng nhấn <b>"Cho phép" (Allow)</b> khi trình duyệt hiện thông báo nhé!
-      </p>
+      <!-- PHẦN THÔNG ĐIỆP KHI ĐÃ CẤP ĐỦ QUYỀN RỒI -->
+      <div id="start-granted-guide" style="display: none;">
+        <p style="font-size: 0.95rem; color: #f6ead8; margin-bottom: 1.5rem; line-height: 1.6;">
+          Một món quà bất ngờ và ấm áp đang chờ đón bạn.<br>Chạm vào nút bên dưới để mở thiệp ngay nhé! ✨💖
+        </p>
+      </div>
 
       <button type="button" id="start-btn-action" style="width: 100%; padding: 12px 20px; font-size: 1.05rem; font-weight: 600; color: #2c1520; background: linear-gradient(135deg, #ffd98e 0%, #c9a24b 100%); border: none; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 15px rgba(201, 162, 75, 0.4); transition: transform 0.2s, box-shadow 0.2s;">
         ✨ Mở Thiệp & Khám Phá ✨
