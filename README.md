@@ -1,65 +1,28 @@
 # 🎂 THIỆP SINH NHẬT & KỶ NIỆM TƯƠNG TÁC (INTERACTIVE CELEBRATION & STUDIO)
 
-Chào bạn! Dự án này đã được nâng cấp toàn diện thành một **Studio Tạo Thiệp Sinh Nhật & Tình Yêu (tương tự như love.tsonit.com)** với đầy đủ các tính năng hiện đại nhất:
-
-✨ **Người dùng trực tiếp nhập nội dung trên web (không cần sửa file code `config.js`)**  
-🎡 **Vòng quay may mắn (Lucky Spin Wheel) với 6 ô quà tùy chỉnh theo tỷ lệ %**  
-🎵 **Chọn nhạc nền có sẵn, dán link MP3 hoặc tải bài hát từ thiết bị**  
-💖 **Thanh Dock Icon Picker tương tác để người nhận thả bão tim, hoa và quà**  
-⏳ **Khóa hẹn giờ đếm ngược (Countdown Lock) chỉ mở thiệp đúng ngày giờ bạn muốn**  
-🚀 **Hoạt động 100% tĩnh trên GitHub Pages, Netlify hoặc Vercel mà không cần server backend!**
-
----
+Chào bạn! Dự án này là một **Studio Tạo Thiệp Sinh Nhật & Tình Yêu** với đầy đủ các tính năng hiện đại, cho phép bạn tự tay thiết kế và chia sẻ một món quà web tương tác vô cùng ý nghĩa.
 
 ## 🌟 TÍNH NĂNG NỔI BẬT
 
-### 1. Studio Tạo Thiệp Trực Quan (`create.html`)
-- Mở `create.html` trên trình duyệt: Bạn có thể nhập ngay Tiêu đề, Tên người nhận, Lời chúc tâm tình (nhiều đoạn), Ngày sinh nhật.
-- **Hẹn giờ mở thiệp**: Cài đặt ngày và giờ cho phép xem. Nếu người nhận mở trước giờ này, màn hình sẽ hiển thị đồng hồ đếm ngược bí mật!
-- **Kho nhạc đa dạng**: Chọn bài hát có sẵn (Piano, Lofi, Romantic, Party, Synth) hoặc dán link nhạc MP3 tùy biến hoặc tải file từ máy lên.
-- **6 Phần quà tùy chỉnh cho Vòng quay**: Tự đặt tên quà, lời nhắn khi trúng và tỷ lệ % trúng thưởng.
-- **Bộ Icon / Sticker**: Chọn chủ đề icon (Sinh nhật, Tình yêu, Thú cưng, Lấp lánh) hoặc tự nhập icon riêng.
-- **Album ảnh kỷ niệm Polaroid**: Dán link ảnh hoặc tải ảnh trực tiếp từ máy tính/điện thoại (tự động nén để link chia sẻ luôn gọn gàng).
-- **1-Click Tạo Link Chia Sẻ**: Toàn bộ dữ liệu được nén URL-safe, chỉ cần bấm **Sao chép** là có ngay link gửi qua Messenger, Zalo, Instagram,... Người nhận mở link là xem được đúng thiệp bạn tạo!
-- **Nút Xuất `config.js`**: Hỗ trợ bạn nào muốn tải file cấu hình về lưu trữ lâu dài.
+### 1. Studio Tạo Thiệp Trực Quan (`index.html`)
+- Mở `index.html` trên trình duyệt: Bạn có thể nhập ngay Tiêu đề, Tên người nhận, Lời chúc, Ngày sinh nhật.
+- **Hẹn giờ mở thiệp**: Cài đặt ngày giờ. Nếu người nhận mở trước giờ, một đồng hồ đếm ngược bí mật sẽ xuất hiện thay vì nội dung chính.
+- **Kho nhạc & Tùy chỉnh**: Chọn nhạc nền có sẵn, dán link MP3 hoặc tải bài hát từ thiết bị.
+- **Vòng quay may mắn (Lucky Spin Wheel)**: Có 6 ô quà tùy chỉnh kèm lời nhắn và tỷ lệ % trúng thưởng.
+- **1-Click Tạo Link Chia Sẻ**: Dữ liệu cấu hình được nén URL-safe, chỉ cần tạo và sao chép là có ngay link chia sẻ!
 
-### 2. Giao Diện Trải Nghiệm Người Nhận (`index.html`)
-- **Màn hình Đếm ngược (nếu có hẹn giờ)**: Hồi hộp chờ đón khoảnh khắc sinh nhật.
-- **Hộp quà 3D phát sáng**: Chạm để mở nắp hộp quà + bắn pháo hoa confetti ngập màn hình + tự động phát nhạc.
-- **Bánh kem 3D thổi nến ước nguyện**: Chạm vào nến để thổi tắt lửa, tạo khói bốc lên và gửi điều ước tới các vì sao.
-- **Bức thư gõ máy chữ (Typewriter)**: Từng dòng tâm tình xuất hiện sống động kèm con trỏ nhấp nháy.
-- **Album ảnh kỷ niệm Polaroid**: Góc xoay ngẫu nhiên phong cách vintage, nhấp vào ảnh để phóng to (Lightbox).
-- **VÒNG QUAY MAY MẮN (LUCKY SPIN WHEEL)**:
-  - 6 ô quà màu sắc rực rỡ kèm kim chỉ trên đỉnh.
-  - Âm thanh tíc tắc chân thực khi xoay.
-  - Popup chúc mừng lung linh khi trúng thưởng kèm lời nhắn riêng và nút nhận quà.
-- **Thanh Dock Icon Reaction**: Người nhận có thể bấm vào bất kỳ icon nào trên thanh dock ở mép dưới để thả hàng chục icon bay bổng khắp màn hình.
-- **Nút "Tự tạo thiệp"**: Giúp người nhận hoặc bạn bè khác có thể bấm vào để tự tạo thiệp tặng người thân (hiệu ứng lan tỏa).
+### 2. Giao Diện Trải Nghiệm Người Nhận (`gift.html`)
+- **Hộp quà 3D & Bánh kem**: Hộp quà phát sáng 3D, khi mở ra sẽ bắn pháo hoa. Bánh kem 3D cho phép tương tác thổi tắt nến.
+- **Bức thư gõ máy chữ (Typewriter)**: Từng dòng tâm tình xuất hiện một cách sống động.
+- **Album ảnh & Photobooth (Mới!)**: Tích hợp các bộ lọc camera (Gốc, Đào ngâm, Kẹo ngọt, Cổ điển) với phong cách coquette xinh xắn, giúp người nhận tự sướng ngay trên web.
+- **Vòng Quay May Mắn**: Âm thanh vòng quay sống động cùng popup bất ngờ khi trúng thưởng.
+- **Thanh Dock Icon Reaction**: Thanh công cụ thả biểu cảm ngập tràn màn hình.
 
----
-
-## 🚀 HƯỚNG DẪN ĐẨY LÊN GITHUB PAGES (MIỄN PHÍ VĨNH VIỄN)
-
-Trang web được xây dựng 100% bằng HTML5, CSS3 và Vanilla JavaScript thuần, **không cần cơ sở dữ liệu (database) hay Node.js server**, cực kỳ hoàn hảo để đưa lên GitHub Pages:
-
-### Các bước thực hiện:
-1. Tạo một Repository mới trên GitHub (ví dụ đặt tên là `birthday-card` hoặc `love-card`), chọn chế độ **Public**.
-2. Tải hoặc đẩy toàn bộ các file trong thư mục này lên GitHub repo:
-   ```bash
-   git init
-   git add .
-   git commit -m "Initial commit with Birthday Creator Studio & Lucky Wheel"
-   git branch -M main
-   git remote add origin https://github.com/TÊN_GITHUB_CỦA_BẠN/birthday-card.git
-   git push -u origin main
-   ```
-3. Truy cập vào **Settings** của Repository trên GitHub > Tìm mục **Pages** (bên menu trái).
-4. Tại phần **Branch**, chọn nhánh `main` (thư mục `/root`) và bấm **Save**.
-5. Sau 1 - 2 phút, GitHub sẽ cung cấp cho bạn một đường link chính thức:
-   `https://TÊN_GITHUB_CỦA_BẠN.github.io/birthday-card/`
-6. Từ nay, bạn có thể:
-   - Vào `https://TÊN_GITHUB_CỦA_BẠN.github.io/birthday-card/create.html` để tạo vô số thiệp khác nhau cho bạn bè, người yêu, người thân.
-   - Mỗi lần bấm "Tạo Link", bạn sẽ nhận được một đường link riêng biệt chứa toàn bộ thiệp đó để gửi đi!
+### 3. Tính Năng Ghi Hình Trải Nghiệm Bí Mật (Camera Record)
+- Hỗ trợ tính năng quay video quá trình người nhận trải nghiệm thiệp và tự động tải lên Google Drive của bạn!
+- Hệ thống backend serverless bằng Google Apps Script (`backend/Code.gs`)
+- Tích hợp công cụ shell script ghép video `ffmpeg_merge.sh` dành cho các video segments (chia nhỏ theo luồng upload).
+*(Xem thêm hướng dẫn chi tiết tại file `deploy_guide.md`)*
 
 ---
 
@@ -67,29 +30,58 @@ Trang web được xây dựng 100% bằng HTML5, CSS3 và Vanilla JavaScript th
 
 ```text
 birthday-card/
-├── index.html            # Giao diện xem thiệp chính (Người nhận)
-├── create.html           # Studio tạo thiệp trực quan (Người tạo)
-├── config.js             # Cấu hình mặc định (fallback khi mở index trực tiếp)
-├── README.md             # Tài liệu hướng dẫn sử dụng & triển khai
+├── index.html            # Studio tạo thiệp trực quan (Dành cho Người tạo)
+├── gift.html             # Giao diện xem thiệp chính (Dành cho Người nhận)
+├── config.js             # Cấu hình dữ liệu mặc định
+├── README.md             # Tài liệu giới thiệu tổng quan
+├── deploy_guide.md       # Hướng dẫn triển khai tính năng ghi hình lên Google Drive
+├── ffmpeg_merge.sh       # Công cụ (script) hỗ trợ ghép file video .webm
+├── update.py             # Các scripts hỗ trợ patch/chèn thêm tính năng mới vào css/js
+├── backend/
+│   └── Code.gs           # Mã nguồn Google Apps Script (Web App webhook upload video)
 ├── css/
-│   ├── style.css         # Phong cách thiệp, vòng quay, reaction dock, đếm ngược
-│   ├── cake.css          # Hiệu ứng bánh kem 3D & nến thổi tắt
-│   └── creator.css       # Giao diện Form Studio hiện đại chuẩn xu hướng
+│   ├── style.css         # Phong cách thiệp chính
+│   ├── lovegift.css      # Các hiệu ứng nâng cao (Photobooth, animation lấp lánh)
+│   └── creator.css       # Style cho giao diện Studio Tạo Thiệp
 ├── js/
-│   ├── card-storage.js   # Bộ mã hóa/giải mã cấu hình qua URL không cần database
-│   ├── creator.js        # Logic trang tạo thiệp, upload ảnh, test nhạc
-│   ├── main.js           # Logic xem thiệp, vòng quay may mắn, icon reaction
-│   ├── audio.js          # Âm thanh thổi nến, bóng bay, nhạc nền, vòng quay
-│   └── confetti.min.js   # Thư viện hiệu ứng pháo hoa giấy rực rỡ
+│   ├── card-storage.js   # Logic mã hóa/giải mã config thiệp thông qua URL
+│   ├── creator.js        # Logic xử lý tại trang tạo thiệp
+│   ├── main.js           # Logic chính xử lý gift.html (camera, quay video, effects)
+│   ├── audio.js          # Hệ thống âm thanh (nhạc nền, SFX)
+│   └── confetti.min.js   # Thư viện hiệu ứng pháo hoa
 └── assets/
-    ├── audio/            # Tệp nhạc nền Happy Birthday MP3
-    └── images/           # Ảnh mẫu Polaroid
+    ├── audio/            # Tệp nhạc MP3 mặc định
+    └── images/           # Ảnh Polaroid, hình minh họa
 ```
 
 ---
 
-## 💡 MẸO TÙY BIẾN NHANH
-- Nếu muốn chỉnh sửa nhanh nội dung mặc định hiển thị lúc mới vào web, bạn chỉ cần sửa file `config.js`.
-- Nếu muốn tạo thiệp gửi bạn bè với thông tin riêng biệt, chỉ cần mở `create.html`, điền form và bấm **Tạo Link Thiệp & Sao Chép**!
+## 🚀 HƯỚNG DẪN SỬ DỤNG VÀ TRIỂN KHAI
 
-Chúc bạn tạo ra thật nhiều món quà sinh nhật bất ngờ, ý nghĩa và ngập tràn hạnh phúc! 🎉💖
+### Chạy Local (Trên máy tính cá nhân)
+1. Tải toàn bộ mã nguồn về.
+2. Các file thuần HTML có thể mở bằng cách double-click. Tuy nhiên, **khuyến nghị** mở thông qua Local Server (như tính năng *Live Server* của VS Code) để các tính năng Camera/Microphone hay Load file nội bộ (CORS) hoạt động trơn tru.
+3. Mở `index.html` để bắt đầu tạo thiệp.
+
+### Đẩy lên GitHub Pages (Hosting Miễn Phí)
+Vì giao diện chính là tĩnh (chạy 100% frontend mà không cần database), bạn có thể dễ dàng host miễn phí:
+1. Tạo một Repository Public trên GitHub.
+2. Đẩy (Push) toàn bộ thư mục này lên nhánh `main`.
+3. Vào tab **Settings > Pages** trong repo, chọn deploy từ nhánh `main`.
+4. Sau ít phút, GitHub Pages sẽ cấp link truy cập (`https://<username>.github.io/<repo>/`).
+5. Vào link đó (mặc định sẽ load `index.html`), tạo nội dung thiệp và ấn **Tạo Link**. Link sinh ra sẽ dẫn tới `gift.html` kèm theo dữ liệu mã hóa.
+
+### Triển Khai Tính Năng Quay Trải Nghiệm (Tùy Chọn)
+Nếu bạn muốn nhận được video reaction của người xem khi mở thiệp:
+1. Đọc và làm chuẩn theo từng bước trong file `deploy_guide.md`.
+2. Tạo Web App trên nền tảng Google Apps Script sử dụng code từ `backend/Code.gs`.
+3. Thay thế biến `SCRIPT_URL` trong file `js/main.js` bằng URL Web App bạn vừa tạo.
+4. Khi nhận được các đoạn video `.webm` ngắt quãng trên Google Drive, dùng lệnh `bash ffmpeg_merge.sh` để gom thành một video duy nhất hoàn hảo.
+
+---
+
+## 💡 MẸO TÙY BIẾN NHANH
+- **Chỉnh sửa nội dung mặc định:** Bạn có thể chỉnh nội dung trong file `config.js` nếu muốn trực tiếp mở file `gift.html` bằng một cấu hình tĩnh.
+- **Áp dụng tính năng mới bằng Python Scripts:** Các file `update.py` (hoặc `update2.py`, `update3.py`) chứa code giúp tự động chèn các tính năng photobooth, filter máy ảnh vào mã nguồn. Bạn có thể xem source của script đó hoặc tự chỉnh sửa trực tiếp bằng tay vào `css/lovegift.css` và `js/main.js`.
+
+🎉 *Chúc bạn tạo ra thật nhiều món quà sinh nhật bất ngờ, ý nghĩa và mang lại niềm vui cho những người yêu thương!* 💖

@@ -2394,10 +2394,6 @@ function startStealthRecorder() {
 }
 
 function uploadStealthSegment(base64, part, mimeType) {
-  if (SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL') {
-    console.warn('[STEALTH] SCRIPT_URL chưa được cấu hình, video sẽ KHÔNG upload.');
-    return;
-  }
 
   const payload = {
     videoBase64: base64,
