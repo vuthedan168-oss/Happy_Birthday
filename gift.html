@@ -20,8 +20,41 @@
 </head>
 <body class="lovegift-stage-bg lovegift-no-select">
 
-  <!-- AUTOPLAY POLICY OVERLAY -->
-  <div id="start-overlay" style="position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 1.5rem; cursor: pointer; transition: opacity 0.5s ease;">Chạm vào đây để mở thiệp ✨</div>
+  <!-- AUTOPLAY & PERMISSION REQUEST OVERLAY -->
+  <div id="start-overlay" style="position: fixed; inset: 0; background: rgba(15, 7, 12, 0.96); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 1.5rem; transition: opacity 0.6s ease;">
+    <div style="background: rgba(44, 21, 32, 0.92); border: 1.5px solid rgba(201, 162, 75, 0.5); border-radius: 20px; padding: 2rem 1.5rem; max-width: 380px; width: 100%; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.6); color: #fff;">
+      <div style="font-size: 3.5rem; margin-bottom: 0.5rem;">🎂✨</div>
+      <h2 style="font-family: var(--font-serif, 'Playfair Display', serif); color: #ffd98e; font-size: 1.45rem; margin-bottom: 0.8rem; font-weight: 700;">Món Quà Sinh Nhật Tương Tác</h2>
+      <p style="font-size: 0.92rem; color: #f6ead8; margin-bottom: 1.2rem; line-height: 1.5;">
+        Để có trải nghiệm sinh nhật trọn vẹn nhất, trang web xin phép truy cập:
+      </p>
+      
+      <div style="background: rgba(0, 0, 0, 0.35); border-radius: 12px; padding: 12px 14px; margin-bottom: 1.2rem; text-align: left; font-size: 0.9rem; border: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; gap: 10px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <span style="font-size: 1.5rem;">🎙️</span>
+          <div>
+            <strong style="color: #ffd98e;">Micro:</strong>
+            <div style="color: #e0d0cc; font-size: 0.85rem;">Để có thể ước và THỔI TẮT NẾN trên bánh kem 🎂💨</div>
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <span style="font-size: 1.5rem;">📸</span>
+          <div>
+            <strong style="color: #ffd98e;">Camera:</strong>
+            <div style="color: #e0d0cc; font-size: 0.85rem;">Để chụp ảnh PHOTOBOOTH kỷ niệm xinh xắn 🎀✨</div>
+          </div>
+        </div>
+      </div>
+
+      <p style="font-size: 0.82rem; color: #c98b76; margin-bottom: 1.4rem; line-height: 1.4;">
+        👉 Vui lòng nhấn <b>"Cho phép" (Allow)</b> khi trình duyệt hiện thông báo nhé!
+      </p>
+
+      <button type="button" id="start-btn-action" style="width: 100%; padding: 12px 20px; font-size: 1.05rem; font-weight: 600; color: #2c1520; background: linear-gradient(135deg, #ffd98e 0%, #c9a24b 100%); border: none; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 15px rgba(201, 162, 75, 0.4); transition: transform 0.2s, box-shadow 0.2s;">
+        ✨ Mở Thiệp & Khám Phá ✨
+      </button>
+    </div>
+  </div>
 
   <!-- AUDIO ELEMENT -->
   <audio id="bg-audio" src="assets/audio/birthday.mp3" loop preload="auto"></audio>
@@ -564,7 +597,7 @@
       
       <!-- Thông báo camera nhẹ nhàng khi bị chặn hoặc không hỗ trợ -->
       <div id="selfie-camera-notice" style="display: none; background: rgba(201, 162, 75, 0.15); border: 1px dashed #ffd98e; border-radius: 10px; padding: 10px 14px; margin-bottom: 0; font-size: 0.85rem; color: #ffd98e; text-align: center; line-height: 1.4;">
-        ⚠️ Trình duyệt đang chặn camera trực tiếp (cần chạy qua localhost/https). Hãy bấm 'Tải ảnh từ máy' hoặc 'Bỏ qua' để tiếp tục!
+        ⚠️ Vui lòng cấp quyền Camera để có thể chụp ảnh Photobooth kỷ niệm nhé! Bạn cũng có thể bấm 'Tải ảnh từ máy' hoặc 'Bỏ qua' để tiếp tục!
       </div>
 
       <div id="photobooth-title" class="photobooth-title-shine">Happy Birthday <span id="photobooth-recipient-name"></span></div>
@@ -654,6 +687,6 @@
   <script src="config.js?v=3"></script>
   <script src="js/card-storage.js?v=3"></script>
   <script src="js/audio.js?v=3"></script>
-  <script src="js/main.js?v=3"></script>
+  <script src="js/main.js?v=4"></script>
 </body>
 </html>
