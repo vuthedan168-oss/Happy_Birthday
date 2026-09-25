@@ -910,7 +910,31 @@ function initFormSubmit() {
           qrRenderUrl = buildFallbackBase();
         }
 
+        const fallbackImgQR = () => {
+          try {
+            let img = document.getElementById('qr-fallback-img');
+            if (!img) {
+              img = document.createElement('img');
+              img.id = 'qr-fallback-img';
+              img.alt = 'Mã QR Thiệp Sinh Nhật';
+              img.style.cssText = 'display: block; margin: 15px auto; width: 180px; height: 180px; border-radius: 12px; background: #ffffff; padding: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);';
+              qrCanvas.parentNode.insertBefore(img, qrCanvas);
+            }
+            img.src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(qrRenderUrl)}`;
+            qrCanvas.style.display = 'none';
+            img.style.display = 'block';
+          } catch (e) {
+            console.error("Lỗi fallback QR image:", e);
+          }
+        };
+
         const safeRenderCanvas = (targetUrl) => {
+          if (!window.QRCode || typeof window.QRCode.toCanvas !== 'function') {
+            console.warn("window.QRCode chưa sẵn sàng, dùng fallback QR hình ảnh.");
+            fallbackImgQR();
+            return;
+          }
+
           try {
             QRCode.toCanvas(qrCanvas, targetUrl, {
               width: 220,
@@ -919,14 +943,15 @@ function initFormSubmit() {
               color: { dark: '#000000', light: '#ffffff' }
             }, function (error) {
               if (error) {
-                console.warn("Lỗi tạo QR Canvas với URL hiện tại, thử fallback ngắn gọn:", error);
-                // LỖI 3 FIX: fallback cũng dùng window.location.origin chính xác, không hardcode localhost
-                const shortFallback = buildFallbackBase();
-                if (targetUrl !== shortFallback) {
-                  safeRenderCanvas(shortFallback);
-                }
+                console.warn("Lỗi tạo QR Canvas với URL hiện tại, chuyển sang fallback:", error);
+                fallbackImgQR();
                 return;
               }
+
+              // Ẩn ảnh fallback nếu canvas đã vẽ thành công
+              const fallbackImg = document.getElementById('qr-fallback-img');
+              if (fallbackImg) fallbackImg.style.display = 'none';
+              qrCanvas.style.display = 'block';
 
               // Vẽ tiếp icon/khung (Trái Tim 💖, Gấu 🧸, Hộp Quà 🎁) vào tâm Canvas
               if (frameType !== 'none') {
@@ -957,7 +982,7 @@ function initFormSubmit() {
                 }
               }
 
-              // Ép Canvas hiển thị ngay lập tức, không để bị ẩn CSS display: none hay chiều cao 0px
+              // Ép Canvas hiển thị ngay lập tức
               qrCanvas.style.setProperty('display', 'block', 'important');
               qrCanvas.style.setProperty('margin', '15px auto', 'important');
               qrCanvas.style.setProperty('width', '180px', 'important');
@@ -968,19 +993,19 @@ function initFormSubmit() {
               qrCanvas.style.setProperty('box-shadow', '0 4px 15px rgba(0,0,0,0.1)', 'important');
             });
           } catch (renderError) {
-            console.error("Lỗi try...catch an toàn khi gọi QRCode.toCanvas:", renderError);
+            console.error("Lỗi gọi QRCode.toCanvas, chuyển sang fallback:", renderError);
+            fallbackImgQR();
           }
         };
 
         safeRenderCanvas(qrRenderUrl);
       };
 
+      if (modal) modal.classList.add("active");
       drawQR();
       if (qrFrameSelect) {
         qrFrameSelect.onchange = drawQR;
       }
-
-      if (modal) modal.classList.add("active");
     } catch (error) {
       console.error("Lỗi khi mở modal chia sẻ:", error);
       alert("Đã xảy ra lỗi khi tạo thiệp: " + error.message);
