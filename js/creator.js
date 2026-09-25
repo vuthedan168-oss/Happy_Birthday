@@ -38,9 +38,6 @@ async function uploadImageToCloud(file) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  // 0. Auto-save nháp
-  initAutoSaveDraft();
-
   // 1. Quản lý danh sách ảnh kỷ niệm Polaroid
   initPhotoManager();
 
@@ -55,6 +52,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 5. Xử lý tạo link & sao chép
   initFormSubmit();
+
+  // 6. Hệ thống tự động lưu nháp & khôi phục dữ liệu (Draft Manager)
+  initDraftManager();
 });
 
 // State danh sách ảnh kỷ niệm
@@ -84,6 +84,7 @@ let galleryPhotos = [
     caption: "Tuổi mới thật rực rỡ! 🎂"
   }
 ];
+const DEFAULT_GALLERY_PHOTOS = JSON.parse(JSON.stringify(galleryPhotos));
 
 // Danh sách nhạc preset
 const MUSIC_PRESETS = {
@@ -144,6 +145,7 @@ function initPhotoManager() {
       const captionInput = item.querySelector(".photo-caption-input");
       captionInput.addEventListener("input", (e) => {
         galleryPhotos[index].caption = e.target.value;
+        if (typeof triggerDraftAutoSave === "function") triggerDraftAutoSave();
       });
 
       // Cập nhật url
@@ -151,6 +153,7 @@ function initPhotoManager() {
       urlInput.addEventListener("change", (e) => {
         galleryPhotos[index].url = e.target.value.trim();
         renderList();
+        if (typeof triggerDraftAutoSave === "function") triggerDraftAutoSave();
       });
 
       // Xóa ảnh
@@ -158,12 +161,14 @@ function initPhotoManager() {
       btnRemove.addEventListener("click", () => {
         galleryPhotos.splice(index, 1);
         renderList();
+        if (typeof triggerDraftAutoSave === "function") triggerDraftAutoSave();
       });
 
       container.appendChild(item);
     });
   };
 
+  window.renderPhotoList = renderList;
   renderList();
 
   // Nút thêm ảnh từ URL
@@ -176,6 +181,7 @@ function initPhotoManager() {
           caption: "Kỷ niệm mới ✨"
         });
         renderList();
+        if (typeof triggerDraftAutoSave === "function") triggerDraftAutoSave();
       }
     });
   }
@@ -196,7 +202,7 @@ function initPhotoManager() {
       try {
         for (const file of files) {
           const url = await uploadImageToCloud(file);
-          const caption = file.name.replace(/\\.[^/.]+$/, "") || "Kỷ niệm đẹp ✨";
+          const caption = file.name.replace(/\.[^/.]+$/, "") || "Kỷ niệm đẹp ✨";
 
           galleryPhotos.push({
             url: url,
@@ -204,6 +210,7 @@ function initPhotoManager() {
           });
         }
         renderList();
+        if (typeof triggerDraftAutoSave === "function") triggerDraftAutoSave();
       } catch (error) {
         console.error("Lỗi upload ảnh:", error);
         alert("Đã có lỗi khi tải ảnh lên máy chủ. Vui lòng thử lại!");
@@ -251,6 +258,7 @@ let dynamicQuizList = [
     ]
   }
 ];
+const DEFAULT_QUIZ_LIST = JSON.parse(JSON.stringify(dynamicQuizList));
 
 function escapeHtml(str) {
   if (!str) return "";
@@ -314,11 +322,13 @@ function initQuizManager() {
       const qTextInput = card.querySelector(".q-text-input");
       qTextInput.addEventListener("input", (e) => {
         dynamicQuizList[qIdx].question = e.target.value;
+        if (typeof triggerDraftAutoSave === "function") triggerDraftAutoSave();
       });
 
       const qHintInput = card.querySelector(".q-hint-input");
       qHintInput.addEventListener("input", (e) => {
         dynamicQuizList[qIdx].hint = e.target.value;
+        if (typeof triggerDraftAutoSave === "function") triggerDraftAutoSave();
       });
 
       const optInputs = card.querySelectorAll(".q-opt-input");
@@ -326,6 +336,7 @@ function initQuizManager() {
         optIn.addEventListener("input", (e) => {
           const optIdx = parseInt(e.target.dataset.optidx, 10);
           dynamicQuizList[qIdx].options[optIdx] = e.target.value;
+          if (typeof triggerDraftAutoSave === "function") triggerDraftAutoSave();
         });
       });
 
@@ -333,6 +344,7 @@ function initQuizManager() {
       radios.forEach((r) => {
         r.addEventListener("change", (e) => {
           dynamicQuizList[qIdx].correctIndex = parseInt(e.target.value, 10);
+          if (typeof triggerDraftAutoSave === "function") triggerDraftAutoSave();
         });
       });
 
@@ -340,12 +352,14 @@ function initQuizManager() {
       btnDel.addEventListener("click", () => {
         dynamicQuizList.splice(qIdx, 1);
         renderQuizList();
+        if (typeof triggerDraftAutoSave === "function") triggerDraftAutoSave();
       });
 
       container.appendChild(card);
     });
   };
 
+  window.renderQuizList = renderQuizList;
   renderQuizList();
 
   if (btnAdd) {
@@ -357,6 +371,7 @@ function initQuizManager() {
         options: ["Đáp án A siêu dễ thương", "Đáp án B tuyệt vời", "Đáp án C xuất sắc"]
       });
       renderQuizList();
+      if (typeof triggerDraftAutoSave === "function") triggerDraftAutoSave();
     });
   }
 }
@@ -534,6 +549,7 @@ function initIconThemeManager() {
       card.classList.add("active");
       const radio = card.querySelector('input[type="radio"]');
       if (radio) radio.checked = true;
+      if (typeof triggerDraftAutoSave === "function") triggerDraftAutoSave();
     });
   });
 }
@@ -925,17 +941,17 @@ function initFormSubmit() {
     });
   }
 
-  // Xem thiệp mẫu
+  // Xem thiệp mẫu (mở tab mới để không làm mất trang chỉnh sửa của người dùng)
   const btnViewDemo = document.getElementById("btn-view-demo");
   if (btnViewDemo) {
     btnViewDemo.addEventListener("click", (e) => {
       e.preventDefault();
       try {
-        const viewUrl = `${window.location.origin}/gift.html`;
-        window.location.href = viewUrl;
+        const viewUrl = new URL("gift.html", window.location.href).href;
+        window.open(viewUrl, "_blank");
       } catch (err) {
         console.error("Lỗi xem thiệp mẫu:", err);
-        window.location.href = "gift.html"; // fallback
+        window.open("gift.html", "_blank"); // fallback
       }
     });
   }
@@ -1095,47 +1111,376 @@ const BIRTHDAY_CONFIG = ${JSON.stringify(data, null, 2)};
 }
 
 /**
- * Tính năng tự động lưu nháp form (Auto-save Draft)
+ * =========================================================
+ * HỆ THỐNG QUẢN LÝ BẢN NHÁP TỰ ĐỘNG & BẢO VỆ DỮ LIỆU
+ * (COMPREHENSIVE DRAFT MANAGER & ACCIDENTAL EXIT PROTECTION)
+ * =========================================================
+ * - Tự động lưu mọi thay đổi (text, câu hỏi quiz, ảnh kỷ niệm, 6 món quà, âm nhạc, icon)
+ * - Tự động khôi phục nguyên vẹn khi người dùng quay lại hoặc vô tình thoát trang
+ * - Cảnh báo trước khi thoát tab (beforeunload) để không bao giờ bị mất dữ liệu
+ * - Hỗ trợ phím tắt Ctrl+S / Cmd+S và nút Lưu nháp thủ công
  */
-function initAutoSaveDraft() {
+
+const DRAFT_STORAGE_KEY = "birthday_card_draft_v2";
+const LEGACY_DRAFT_KEY = "birthday_card_draft";
+
+let draftSaveTimer = null;
+let isFormDirty = false;
+
+/**
+ * Cập nhật trạng thái hiển thị trên thanh Header
+ */
+function updateDraftStatusUI(state, timeStr) {
+  const dot = document.getElementById("draft-dot");
+  const text = document.getElementById("draft-status-text");
+  if (!dot || !text) return;
+
+  if (state === "saving") {
+    dot.className = "draft-indicator-dot saving";
+    text.textContent = "Đang lưu nháp...";
+  } else if (state === "saved") {
+    dot.className = "draft-indicator-dot saved";
+    const displayTime = timeStr || new Date().toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    text.textContent = `Đã lưu nháp (${displayTime})`;
+  } else if (state === "recovered") {
+    dot.className = "draft-indicator-dot saved";
+    text.textContent = `Đã khôi phục (${timeStr || "vừa xong"})`;
+  } else if (state === "error") {
+    dot.className = "draft-indicator-dot error";
+    text.textContent = "Lỗi lưu nháp";
+  }
+}
+
+/**
+ * Kích hoạt tự động lưu có Debounce (350ms)
+ */
+function triggerDraftAutoSave() {
+  isFormDirty = true;
+  updateDraftStatusUI("saving");
+  if (draftSaveTimer) clearTimeout(draftSaveTimer);
+  draftSaveTimer = setTimeout(() => {
+    saveDraft(true);
+  }, 350);
+}
+
+/**
+ * Thực hiện lưu toàn bộ dữ liệu hiện tại vào localStorage
+ */
+function saveDraft(showStatus = true) {
   try {
     const form = document.getElementById("creator-form");
-    if (!form) return;
+    if (!form) return false;
 
-    // Chọn tất cả các input text, number, textarea, date
-    const inputs = form.querySelectorAll('input[type="text"], input[type="number"], input[type="datetime-local"], textarea');
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
 
-    // 1. Khôi phục từ draft (nếu có)
-    const draftStr = localStorage.getItem("birthday_card_draft");
-    if (draftStr) {
-      const draftData = JSON.parse(draftStr);
-      inputs.forEach(input => {
-        if (input.id && draftData[input.id] !== undefined && draftData[input.id] !== '') {
-          input.value = draftData[input.id];
+    const draft = {
+      version: 2,
+      savedAt: now.toISOString(),
+      savedTime: timeStr,
+      fields: {},
+      gifts: [],
+      quiz: JSON.parse(JSON.stringify(dynamicQuizList || [])),
+      photos: JSON.parse(JSON.stringify(galleryPhotos || [])),
+      iconTheme: document.querySelector('input[name="icon-theme"]:checked')?.value || "birthday",
+      musicStageCountdown: document.getElementById("music-countdown")?.value || "",
+      qrFrame: document.getElementById("qr-frame-select")?.value || "none"
+    };
+
+    // 1. Lưu tất cả input, textarea, select có ID
+    const inputs = form.querySelectorAll('input:not([type="file"]):not([type="radio"]):not([type="submit"]):not([type="button"]), textarea, select');
+    inputs.forEach(input => {
+      if (input.id) {
+        draft.fields[input.id] = input.value;
+      }
+    });
+
+    // 2. Lưu trọn vẹn 6 món quà Vòng Quay May Mắn (kể cả không có ID)
+    const giftCards = document.querySelectorAll(".gift-item-card");
+    giftCards.forEach((card) => {
+      draft.gifts.push({
+        name: card.querySelector(".gift-name")?.value || "",
+        msg: card.querySelector(".gift-msg")?.value || "",
+        rate: card.querySelector(".gift-rate")?.value || ""
+      });
+    });
+
+    try {
+      localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
+      // Tương thích ngược với key cũ
+      localStorage.setItem(LEGACY_DRAFT_KEY, JSON.stringify(draft.fields));
+    } catch (quotaError) {
+      console.warn("Storage quota vượt quá giới hạn, lưu bản nháp an toàn ký tự:", quotaError);
+      // Nếu có ảnh base64 quá lớn, dùng link placeholder an toàn để không làm mất chữ viết
+      const safePhotos = draft.photos.map(p => ({
+        url: p.url && p.url.startsWith("data:") ? "assets/images/photo1.jpg" : p.url,
+        caption: p.caption
+      }));
+      draft.photos = safePhotos;
+      try {
+        localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
+      } catch (e2) {
+        console.error("Không thể lưu localStorage:", e2);
+      }
+    }
+
+    if (showStatus) {
+      updateDraftStatusUI("saved", timeStr);
+    }
+    return true;
+  } catch (err) {
+    console.error("Lỗi khi lưu nháp:", err);
+    if (showStatus) updateDraftStatusUI("error");
+    return false;
+  }
+}
+
+/**
+ * Tải và khôi phục toàn bộ bản nháp khi mở trang
+ */
+function loadAndRestoreDraft() {
+  try {
+    const rawV2 = localStorage.getItem(DRAFT_STORAGE_KEY);
+    const rawV1 = localStorage.getItem(LEGACY_DRAFT_KEY);
+
+    let draft = null;
+    if (rawV2) {
+      try { draft = JSON.parse(rawV2); } catch (e) {}
+    } else if (rawV1) {
+      try {
+        const fields = JSON.parse(rawV1);
+        if (fields && typeof fields === "object") {
+          draft = { fields: fields };
+        }
+      } catch (e) {}
+    }
+
+    if (!draft || (!draft.fields && !draft.gifts && !draft.quiz && !draft.photos)) {
+      return false;
+    }
+
+    // 1. Khôi phục các trường input, textarea, select theo ID
+    if (draft.fields) {
+      Object.keys(draft.fields).forEach(id => {
+        const el = document.getElementById(id);
+        if (el && draft.fields[id] !== undefined) {
+          el.value = draft.fields[id];
         }
       });
     }
 
-    // 2. Lắng nghe thay đổi và lưu nhẹ (chỉ văn bản)
-    const saveDraft = () => {
-      try {
-        const draftData = {};
-        inputs.forEach(input => {
-          if (input.id) {
-            draftData[input.id] = input.value;
-          }
-        });
-        localStorage.setItem("birthday_card_draft", JSON.stringify(draftData));
-      } catch (e) {
-        console.error("Lỗi auto-save draft:", e);
-      }
-    };
+    // 2. Khôi phục 6 phần quà vòng quay may mắn
+    if (Array.isArray(draft.gifts) && draft.gifts.length > 0) {
+      const giftCards = document.querySelectorAll(".gift-item-card");
+      giftCards.forEach((card, idx) => {
+        if (draft.gifts[idx]) {
+          const nameInput = card.querySelector(".gift-name");
+          const msgInput = card.querySelector(".gift-msg");
+          const rateInput = card.querySelector(".gift-rate");
+          if (nameInput && draft.gifts[idx].name !== undefined) nameInput.value = draft.gifts[idx].name;
+          if (msgInput && draft.gifts[idx].msg !== undefined) msgInput.value = draft.gifts[idx].msg;
+          if (rateInput && draft.gifts[idx].rate !== undefined) rateInput.value = draft.gifts[idx].rate;
+        }
+      });
+    }
 
-    inputs.forEach(input => {
-      input.addEventListener("input", saveDraft);
-      input.addEventListener("change", saveDraft);
-    });
-  } catch (globalErr) {
-    console.error("Lỗi khởi tạo auto-save draft:", globalErr);
+    // 3. Khôi phục danh sách câu hỏi trắc nghiệm động
+    if (Array.isArray(draft.quiz) && draft.quiz.length > 0) {
+      dynamicQuizList = draft.quiz;
+      if (typeof window.renderQuizList === "function") {
+        window.renderQuizList();
+      }
+    }
+
+    // 4. Khôi phục danh sách ảnh kỷ niệm Polaroid
+    if (Array.isArray(draft.photos) && draft.photos.length > 0) {
+      galleryPhotos = draft.photos;
+      if (typeof window.renderPhotoList === "function") {
+        window.renderPhotoList();
+      }
+    }
+
+    // 5. Khôi phục icon theme
+    if (draft.iconTheme) {
+      const targetRadio = document.querySelector(`input[name="icon-theme"][value="${draft.iconTheme}"]`);
+      if (targetRadio) {
+        targetRadio.checked = true;
+        document.querySelectorAll(".icon-preset-card").forEach(c => c.classList.remove("active"));
+        targetRadio.closest(".icon-preset-card")?.classList.add("active");
+      }
+    }
+
+    // 6. Khôi phục bài hát đếm ngược
+    if (draft.musicStageCountdown) {
+      const musicCdSelect = document.getElementById("music-countdown");
+      if (musicCdSelect) {
+        musicCdSelect.value = draft.musicStageCountdown;
+        musicCdSelect.dispatchEvent(new Event("change"));
+      }
+    }
+
+    // 7. Khôi phục mẫu QR code
+    if (draft.qrFrame) {
+      const qrSelect = document.getElementById("qr-frame-select");
+      if (qrSelect) qrSelect.value = draft.qrFrame;
+    }
+
+    // Hiển thị trạng thái khôi phục
+    const savedTime = draft.savedTime || (draft.savedAt ? new Date(draft.savedAt).toLocaleTimeString("vi-VN") : "trước đó");
+    updateDraftStatusUI("recovered", savedTime);
+
+    // Bật thanh thông báo khôi phục nháp
+    const alertBanner = document.getElementById("draft-recovery-alert");
+    const alertTimeText = document.getElementById("draft-alert-time-text");
+    if (alertBanner) {
+      if (alertTimeText) {
+        const dateStr = draft.savedAt ? new Date(draft.savedAt).toLocaleDateString("vi-VN") : "gần đây";
+        alertTimeText.textContent = `Bản nháp được lưu lúc ${savedTime} (${dateStr}) trên thiết bị này. Mọi nội dung đang chỉnh sửa dở đã được nạp lại đầy đủ!`;
+      }
+      alertBanner.style.display = "flex";
+    }
+
+    isFormDirty = true;
+    return true;
+  } catch (err) {
+    console.error("Lỗi khôi phục bản nháp:", err);
+    return false;
   }
 }
+
+/**
+ * Xóa sạch bản nháp và đưa về thiệp mẫu ban đầu
+ */
+function resetDraftToDefault() {
+  const confirmed = confirm(
+    "⚠️ BẠN CÓ CHẮC MUỐN ĐẶT LẠI TOÀN BỘ NỘI DUNG?\n\nThao tác này sẽ xóa sạch bản nháp tự động đang lưu và đưa toàn bộ nội dung về thiệp mẫu ban đầu.\nMọi thông tin bạn đã chỉnh sửa sẽ bị hủy bỏ."
+  );
+  if (!confirmed) return;
+
+  try {
+    localStorage.removeItem(DRAFT_STORAGE_KEY);
+    localStorage.removeItem(LEGACY_DRAFT_KEY);
+    isFormDirty = false;
+    showCreatorToast("Đã xóa nháp và đặt lại ban đầu", "🔄");
+    setTimeout(() => {
+      window.location.reload();
+    }, 500);
+  } catch (err) {
+    console.error("Lỗi xóa nháp:", err);
+  }
+}
+
+/**
+ * Hiển thị Toast thông báo nhanh góc dưới màn hình
+ */
+function showCreatorToast(msg, icon = "💾") {
+  const toast = document.getElementById("creator-toast");
+  const msgEl = document.getElementById("toast-msg");
+  const iconEl = document.getElementById("toast-icon");
+  if (!toast || !msgEl) return;
+
+  msgEl.textContent = msg;
+  if (iconEl) iconEl.textContent = icon;
+  toast.classList.add("show");
+
+  setTimeout(() => {
+    toast.classList.remove("show");
+  }, 2800);
+}
+
+/**
+ * Khởi tạo toàn bộ sự kiện cho hệ thống Draft Manager
+ */
+function initDraftManager() {
+  try {
+    const form = document.getElementById("creator-form");
+
+    // 1. Lắng nghe mọi thay đổi phím gõ / click trong Form để auto-save
+    if (form) {
+      form.addEventListener("input", () => triggerDraftAutoSave());
+      form.addEventListener("change", () => triggerDraftAutoSave());
+    }
+
+    // 2. Nút Lưu nháp thủ công trên Header
+    const btnManualSave = document.getElementById("btn-manual-save-draft");
+    if (btnManualSave) {
+      btnManualSave.addEventListener("click", () => {
+        saveDraft(true);
+        showCreatorToast("Đã lưu bản nháp thành công!", "✅");
+      });
+    }
+
+    // 3. Nút Đặt lại / Xóa nháp trên Header
+    const btnReset = document.getElementById("btn-reset-draft");
+    if (btnReset) {
+      btnReset.addEventListener("click", () => {
+        resetDraftToDefault();
+      });
+    }
+
+    // 4. Các nút trên thanh thông báo khôi phục bản nháp
+    const btnDismissAlert = document.getElementById("btn-dismiss-draft-alert");
+    if (btnDismissAlert) {
+      btnDismissAlert.addEventListener("click", () => {
+        const alertBanner = document.getElementById("draft-recovery-alert");
+        if (alertBanner) alertBanner.style.display = "none";
+        showCreatorToast("Bạn có thể tiếp tục chỉnh sửa bình thường!", "👍");
+      });
+    }
+
+    const btnResetFromAlert = document.getElementById("btn-alert-reset-draft");
+    if (btnResetFromAlert) {
+      btnResetFromAlert.addEventListener("click", () => {
+        resetDraftToDefault();
+      });
+    }
+
+    // 5. Phím tắt tiện lợi Ctrl+S / Cmd+S để lưu ngay
+    document.addEventListener("keydown", (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
+        e.preventDefault();
+        saveDraft(true);
+        showCreatorToast("Đã lưu nháp tức thì (Ctrl+S)!", "💾");
+      }
+    });
+
+    // 6. BẢO VỆ CHỐNG ẤN NHẦM THOÁT TRANG (beforeunload & pagehide)
+    window.addEventListener("beforeunload", (e) => {
+      if (isFormDirty) {
+        // Lưu đồng bộ ngay lập tức trước khi tab bị đóng
+        saveDraft(false);
+        e.preventDefault();
+        e.returnValue = "Bạn có thay đổi chưa lưu. Bạn có chắc chắn muốn rời khỏi trang không?";
+        return e.returnValue;
+      }
+    });
+
+    window.addEventListener("pagehide", () => {
+      if (isFormDirty) {
+        saveDraft(false);
+      }
+    });
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "hidden" && isFormDirty) {
+        saveDraft(false);
+      }
+    });
+
+    // 7. Bảo vệ Header Logo không làm gián đoạn người dùng
+    const logoHeader = document.getElementById("header-logo");
+    if (logoHeader) {
+      logoHeader.addEventListener("click", () => {
+        if (isFormDirty) {
+          showCreatorToast("Dữ liệu thiệp của bạn luôn được tự động lưu an toàn! 💖", "🛡️");
+        }
+      });
+    }
+
+    // 8. Tự động kiểm tra và khôi phục bản nháp đã lưu
+    loadAndRestoreDraft();
+  } catch (err) {
+    console.error("Lỗi khởi tạo Draft Manager:", err);
+  }
+}
+

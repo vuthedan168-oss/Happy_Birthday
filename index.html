@@ -22,13 +22,29 @@
   <!-- Header / Navigation -->
   <header class="creator-header">
     <div class="header-container">
-      <a href="gift.html" class="logo-group">
+      <div class="logo-group" id="header-logo" title="Birthday & Love Studio">
         <span class="logo-icon">🎂</span>
         <div>
           <h1 class="logo-title">Birthday & Love Studio</h1>
           <p class="logo-sub">Tạo thiệp tương tác, vòng quay may mắn & nhạc sinh nhật</p>
         </div>
-      </a>
+      </div>
+
+      <!-- Auto-Save Draft Status Indicator & Quick Actions -->
+      <div class="header-draft-status" id="header-draft-status">
+        <div class="draft-indicator-wrapper" id="draft-indicator-wrapper" title="Dữ liệu được tự động lưu liên tục vào trình duyệt của bạn">
+          <span class="draft-indicator-dot saved" id="draft-dot"></span>
+          <span class="draft-status-text" id="draft-status-text">Đã tự động lưu nháp</span>
+        </div>
+        <div class="draft-actions-group">
+          <button type="button" class="btn-draft-action" id="btn-manual-save-draft" title="Lưu nháp ngay lập tức (Ctrl+S)">
+            💾 Lưu nháp
+          </button>
+          <button type="button" class="btn-draft-action btn-draft-reset" id="btn-reset-draft" title="Xóa nháp và đặt lại nội dung mẫu ban đầu">
+            🔄 Đặt lại
+          </button>
+        </div>
+      </div>
       
       <div class="header-actions">
         <a href="gift.html" class="btn btn-outline" target="_blank" id="btn-view-demo">
@@ -44,6 +60,19 @@
   <!-- Main Creator Container -->
   <main class="creator-main">
     <div class="form-wrapper">
+
+      <!-- THÔNG BÁO TỰ ĐỘNG KHÔI PHỤC BẢN NHÁP (KHI CÓ DỮ LIỆU ĐANG LÀM DỞ) -->
+      <div id="draft-recovery-alert" class="draft-recovery-alert" style="display: none;">
+        <div class="draft-alert-icon">✨</div>
+        <div class="draft-alert-content">
+          <div class="draft-alert-title">Đã tự động khôi phục nội dung bạn đang làm dở!</div>
+          <div class="draft-alert-desc" id="draft-alert-time-text">Bản nháp được lưu lúc --:--:-- trên trình duyệt này.</div>
+        </div>
+        <div class="draft-alert-actions">
+          <button type="button" class="btn-alert-dismiss" id="btn-dismiss-draft-alert">👍 Tiếp tục sửa</button>
+          <button type="button" class="btn-alert-reset" id="btn-alert-reset-draft">🔄 Bắt đầu lại từ đầu</button>
+        </div>
+      </div>
 
       <div class="intro-card">
         <div class="intro-badge">✨ MIỄN PHÍ & CHẠY 100% TRÊN GITHUB PAGES ✨</div>
@@ -516,6 +545,12 @@ Chúc cậu tuổi mới ngập tràn niềm vui, nụ cười rạng rỡ và l
 
   <!-- Audio Element để thử nhạc -->
   <audio id="creator-audio-player"></audio>
+
+  <!-- Toast thông báo trạng thái lưu nháp -->
+  <div id="creator-toast" class="creator-toast">
+    <span class="toast-toast-icon" id="toast-icon">💾</span>
+    <span class="toast-toast-msg" id="toast-msg">Đã lưu bản nháp</span>
+  </div>
 
   <!-- Scripts -->
   <script src="config.js?v=3"></script>
