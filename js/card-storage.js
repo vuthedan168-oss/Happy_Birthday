@@ -45,8 +45,7 @@ const CardStorage = {
       const response = await fetch('https://bytebin.lucko.me/post', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'User-Agent': 'BirthdayCardCreator/1.0'
+          'Content-Type': 'application/json'
         },
         body: payload,
         signal: controller.signal

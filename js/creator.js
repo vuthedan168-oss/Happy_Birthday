@@ -10,14 +10,19 @@ async function uploadImageToCloud(file) {
     reader.onload = (e) => {
       const img = new Image();
       img.onload = () => {
-        // Giữ ảnh sắc nét (ByteBin hỗ trợ 5MB)
-        const maxWidth = 1080;
+        // Chuẩn hóa kích thước sắc nét (800px đủ độ nét Retina 2x cho khung ảnh Polaroid)
+        const maxWidth = 800;
         let width = img.width;
         let height = img.height;
 
-        if (width > maxWidth) {
-          height = (maxWidth * height) / width;
-          width = maxWidth;
+        if (width > maxWidth || height > maxWidth) {
+          if (width > height) {
+            height = Math.round((maxWidth * height) / width);
+            width = maxWidth;
+          } else {
+            width = Math.round((maxWidth * width) / height);
+            height = maxWidth;
+          }
         }
 
         const canvas = document.createElement('canvas');
@@ -26,8 +31,8 @@ async function uploadImageToCloud(file) {
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
         
-        // Quality 0.85 để ảnh sắc nét
-        resolve(canvas.toDataURL('image/jpeg', 0.85));
+        // Quality 0.78 sắc nét tuyệt đối mà dung lượng chỉ ~80-120KB
+        resolve(canvas.toDataURL('image/jpeg', 0.78));
       };
       img.onerror = () => reject(new Error('Failed to load image for compression'));
       img.src = e.target.result;
@@ -35,6 +40,77 @@ async function uploadImageToCloud(file) {
     reader.onerror = (e) => reject(new Error('Failed to read file'));
     reader.readAsDataURL(file);
   });
+}
+
+/**
+ * Nén lại chuỗi Base64 hình ảnh nếu quá nặng
+ */
+async function compressImageBase64(base64Url, maxDim = 720, quality = 0.72) {
+  if (!base64Url || typeof base64Url !== "string" || !base64Url.startsWith("data:image")) {
+    return base64Url;
+  }
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      let width = img.width;
+      let height = img.height;
+      if (width > maxDim || height > maxDim) {
+        if (width > height) {
+          height = Math.round((height * maxDim) / width);
+          width = maxDim;
+        } else {
+          width = Math.round((width * maxDim) / height);
+          height = maxDim;
+        }
+      }
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, width, height);
+      resolve(canvas.toDataURL("image/jpeg", quality));
+    };
+    img.onerror = () => resolve(base64Url);
+    img.src = base64Url;
+  });
+}
+
+/**
+ * Tự động tối ưu dữ liệu thiệp để luôn nhỏ hơn giới hạn 4.5MB của Cloud
+ */
+async function autoCompressDataPayload(cardData, onProgress = null) {
+  const cloned = JSON.parse(JSON.stringify(cardData));
+  let jsonStr = JSON.stringify(cloned);
+  let sizeKb = Math.round(jsonStr.length / 1024);
+
+  // Nếu tổng dung lượng vượt quá 3500KB, tự động nén toàn bộ ảnh Polaroid
+  if (sizeKb > 3500 && Array.isArray(cloned.gallery) && cloned.gallery.length > 0) {
+    if (onProgress) onProgress("⏳ Đang tối ưu dung lượng ảnh mây...");
+    for (let i = 0; i < cloned.gallery.length; i++) {
+      if (cloned.gallery[i].url && cloned.gallery[i].url.startsWith("data:image")) {
+        cloned.gallery[i].url = await compressImageBase64(cloned.gallery[i].url, 700, 0.7);
+      }
+    }
+    jsonStr = JSON.stringify(cloned);
+    sizeKb = Math.round(jsonStr.length / 1024);
+  }
+
+  // Nếu vẫn còn quá 4200KB, nén sâu hơn nữa
+  if (sizeKb > 4200 && Array.isArray(cloned.gallery) && cloned.gallery.length > 0) {
+    for (let i = 0; i < cloned.gallery.length; i++) {
+      if (cloned.gallery[i].url && cloned.gallery[i].url.startsWith("data:image")) {
+        cloned.gallery[i].url = await compressImageBase64(cloned.gallery[i].url, 560, 0.6);
+      }
+    }
+  }
+
+  // Tối ưu nhạc nếu file tải lên quá nặng
+  if (cloned.countdownMusicUrl && cloned.countdownMusicUrl.startsWith("data:") && sizeKb > 4000) {
+    cloned.countdownMusicUrl = "assets/audio/ngan-nam-anh-sang.mp3";
+    cloned.countdownMusicTitle = "Ngàn Năm Ánh Sáng";
+  }
+
+  return cloned;
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -568,8 +644,10 @@ function collectFormData() {
   const birthdayDate = document.getElementById("input-birthday-date")?.value.trim() || `${birthDay} Tháng ${birthMonth}`;
   const signature = document.getElementById("input-signature")?.value.trim() || `— ${sender}`;
   const customSlug = document.getElementById("input-custom-slug")?.value.trim() || "";
-  const startDate = document.getElementById("input-start-date")?.value || "";
-  const endDate = document.getElementById("input-end-date")?.value || "";
+  let startDate = document.getElementById("input-start-date")?.value || "";
+  let endDate = document.getElementById("input-end-date")?.value || "";
+  if (startDate && isNaN(Date.parse(startDate))) startDate = "";
+  if (endDate && isNaN(Date.parse(endDate))) endDate = "";
 
   // 4 điều ước may mắn
   const wish1 = document.getElementById("input-wish-1")?.value.trim() || "Hạnh phúc hơn";
@@ -759,43 +837,32 @@ function initFormSubmit() {
   const btnQuick = document.getElementById("btn-quick-generate");
 
   const openShareModal = async (triggerBtn = null) => {
+    const originalBtnHtml = triggerBtn ? triggerBtn.innerHTML : "";
     try {
+      if (triggerBtn) {
+        triggerBtn.dataset.originalHtml = originalBtnHtml;
+        triggerBtn.disabled = true;
+        triggerBtn.innerHTML = "⏳ Đang chuẩn bị dữ liệu...";
+      }
+
       const data = collectFormData();
       // Lưu vào Storage làm bản sao lưu với fallback
       saveToStorage("custom_birthday_card", data);
 
       if (triggerBtn) {
-        triggerBtn.dataset.originalHtml = triggerBtn.innerHTML;
-        triggerBtn.disabled = true;
-        triggerBtn.innerHTML = "⏳ Đang khởi tạo dữ liệu đám mây...";
+        triggerBtn.innerHTML = "⏳ Đang tối ưu & gửi lên mây...";
       }
 
-      const cloudData = { ...data };
-      const jsonPayload = JSON.stringify(cloudData);
-      const sizeKb = Math.round(jsonPayload.length / 1024);
-
-      // ByteBin hỗ trợ tối đa 5000KB (~5MB). Nếu vượt quá 4800KB, cảnh báo người dùng:
-      if (sizeKb > 4800) {
-        if (cloudData.countdownMusicUrl && cloudData.countdownMusicUrl.startsWith('data:')) {
-          alert("⚠️ File nhạc đếm ngược tải lên từ máy khá lớn, làm vượt quá giới hạn 5MB của dịch vụ chia sẻ trực tuyến miễn phí. Đường link online sẽ tự động dùng bài mặc định. Để bạn bè nghe được bài tùy chọn online, bạn có thể dán 'Link MP3' hoặc dùng file dưới 3MB nhé!");
-          cloudData.countdownMusicUrl = "assets/audio/ngan-nam-anh-sang.mp3";
-        }
-        if (cloudData.backgroundMusic && cloudData.backgroundMusic.startsWith('data:')) {
-          cloudData.backgroundMusic = "assets/audio/birthday.mp3";
-          cloudData.musicUrl = "assets/audio/birthday.mp3";
-        }
-      }
+      // Tự động nén ảnh nếu tổng dung lượng vượt quá ngưỡng Cloud (3.5MB - 5MB)
+      let cloudData = await autoCompressDataPayload(data, (msg) => {
+        if (triggerBtn) triggerBtn.innerHTML = msg;
+      });
 
       // Lưu lên Cloud Database
       const recordId = await window.CardStorage.saveToCloud(cloudData);
 
       // Sinh Link chia sẻ 100% Client-side qua ID
       const targetShareUrl = window.CardStorage.createShareUrl(recordId);
-
-      if (triggerBtn) {
-        triggerBtn.disabled = false;
-        triggerBtn.innerHTML = triggerBtn.dataset.originalHtml || "Tạo & Lấy Link";
-      }
 
       if (shareInput) shareInput.value = targetShareUrl;
       if (btnOpenLive) btnOpenLive.href = targetShareUrl;
@@ -917,6 +984,11 @@ function initFormSubmit() {
     } catch (error) {
       console.error("Lỗi khi mở modal chia sẻ:", error);
       alert("Đã xảy ra lỗi khi tạo thiệp: " + error.message);
+    } finally {
+      if (triggerBtn) {
+        triggerBtn.disabled = false;
+        triggerBtn.innerHTML = triggerBtn.dataset.originalHtml || originalBtnHtml || "✨ Tạo & Lấy Link";
+      }
     }
   };
 
