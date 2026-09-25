@@ -77,13 +77,77 @@ async function compressImageBase64(base64Url, maxDim = 720, quality = 0.72) {
 
 /**
  * Tự động tối ưu dữ liệu thiệp để luôn nhỏ hơn giới hạn 4.5MB của Cloud
+function dataURLtoBlob(dataurl) {
+  try {
+    const arr = dataurl.split(',');
+    const mimeMatch = arr[0].match(/:(.*?);/);
+    const mime = mimeMatch ? mimeMatch[1] : 'audio/mpeg';
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new Blob([u8arr], { type: mime });
+  } catch (e) {
+    console.error("Lỗi chuyển đổi dataURL sang Blob:", e);
+    return null;
+  }
+}
+
+/**
+ * Tự động tối ưu dữ liệu thiệp để luôn nhỏ gọn và an toàn khi lưu trữ đám mây
  */
 async function autoCompressDataPayload(cardData, onProgress = null) {
   const cloned = JSON.parse(JSON.stringify(cardData));
   let jsonStr = JSON.stringify(cloned);
   let sizeKb = Math.round(jsonStr.length / 1024);
 
-  // Nếu tổng dung lượng vượt quá 3500KB, tự động nén toàn bộ ảnh Polaroid
+  // 1. Tối ưu âm thanh Base64 nếu có
+  const isAudioDataUrl = (str) => typeof str === "string" && str.startsWith("data:audio");
+  const hasAudioData = isAudioDataUrl(cloned.countdownMusicUrl) || (cloned.sceneMusic?.countdown?.src && isAudioDataUrl(cloned.sceneMusic.countdown.src));
+
+  if (hasAudioData) {
+    const rawAudioData = isAudioDataUrl(cloned.countdownMusicUrl) ? cloned.countdownMusicUrl : cloned.sceneMusic.countdown.src;
+    const title = (cloned.countdownMusicTitle || "").toLowerCase();
+    
+    // Nếu là bài Chúng Ta Của Hiện Tại -> dùng ngay file nội bộ và đám mây có sẵn
+    if (title.includes("chung ta") || title.includes("chúng ta")) {
+      cloned.countdownMusicUrl = "assets/audio/chung-ta-cua-hien-tai.mp3";
+      cloned.countdownMusicTitle = "Chúng Ta Của Hiện Tại - Sơn Tùng M-TP";
+    } else {
+      if (onProgress) onProgress("⏳ Đang lưu trữ file nhạc lớn lên đám mây...");
+      try {
+        const audioBlob = dataURLtoBlob(rawAudioData);
+        if (audioBlob && window.CardStorage && typeof window.CardStorage.uploadAudioToCloud === "function") {
+          const cloudAudioUrl = await window.CardStorage.uploadAudioToCloud(audioBlob);
+          if (cloudAudioUrl) {
+            cloned.countdownMusicUrl = cloudAudioUrl;
+          }
+        }
+      } catch (err) {
+        console.warn("Upload binary audio lên đám mây không thành công:", err);
+      }
+    }
+
+    // Đảm bảo không còn chuỗi Base64 âm thanh khổng lồ trong JSON thiệp
+    const finalAudio = isAudioDataUrl(cloned.countdownMusicUrl) ? "assets/audio/chung-ta-cua-hien-tai.mp3" : cloned.countdownMusicUrl;
+    cloned.countdownMusicUrl = finalAudio;
+    if (cloned.sceneMusic && cloned.sceneMusic.countdown) {
+      cloned.sceneMusic.countdown.src = finalAudio;
+    }
+    if (cloned.backgroundMusic && isAudioDataUrl(cloned.backgroundMusic)) {
+      cloned.backgroundMusic = finalAudio;
+    }
+    if (cloned.musicUrl && isAudioDataUrl(cloned.musicUrl)) {
+      cloned.musicUrl = "assets/audio/birthday.mp3";
+    }
+
+    jsonStr = JSON.stringify(cloned);
+    sizeKb = Math.round(jsonStr.length / 1024);
+  }
+
+  // 2. Tự động nén toàn bộ ảnh Polaroid nếu dung lượng vượt 3500KB
   if (sizeKb > 3500 && Array.isArray(cloned.gallery) && cloned.gallery.length > 0) {
     if (onProgress) onProgress("⏳ Đang tối ưu dung lượng ảnh mây...");
     for (let i = 0; i < cloned.gallery.length; i++) {
@@ -95,19 +159,13 @@ async function autoCompressDataPayload(cardData, onProgress = null) {
     sizeKb = Math.round(jsonStr.length / 1024);
   }
 
-  // Nếu vẫn còn quá 4200KB, nén sâu hơn nữa
-  if (sizeKb > 4200 && Array.isArray(cloned.gallery) && cloned.gallery.length > 0) {
+  // 3. Nếu vẫn còn quá 4500KB, nén sâu hơn nữa
+  if (sizeKb > 4500 && Array.isArray(cloned.gallery) && cloned.gallery.length > 0) {
     for (let i = 0; i < cloned.gallery.length; i++) {
       if (cloned.gallery[i].url && cloned.gallery[i].url.startsWith("data:image")) {
-        cloned.gallery[i].url = await compressImageBase64(cloned.gallery[i].url, 560, 0.6);
+        cloned.gallery[i].url = await compressImageBase64(cloned.gallery[i].url, 500, 0.55);
       }
     }
-  }
-
-  // Tối ưu nhạc nếu file tải lên quá nặng
-  if (cloned.countdownMusicUrl && cloned.countdownMusicUrl.startsWith("data:") && sizeKb > 4000) {
-    cloned.countdownMusicUrl = "assets/audio/ngan-nam-anh-sang.mp3";
-    cloned.countdownMusicTitle = "Ngàn Năm Ánh Sáng";
   }
 
   return cloned;
@@ -164,6 +222,10 @@ const DEFAULT_GALLERY_PHOTOS = JSON.parse(JSON.stringify(galleryPhotos));
 
 // Danh sách nhạc preset
 const MUSIC_PRESETS = {
+  "preset-chung-ta-cua-hien-tai": {
+    title: "Chúng Ta Của Hiện Tại - Sơn Tùng M-TP",
+    src: "assets/audio/chung-ta-cua-hien-tai.mp3"
+  },
   "preset-romantic-candle": {
     title: "Món Quà Sinh Nhật Lãng Mạn (birthday.mp3)",
     src: "assets/audio/birthday.mp3"
@@ -554,12 +616,35 @@ function initMusicManager() {
     }
 
     if (fileInput && select) {
-      fileInput.addEventListener("change", e => {
+      fileInput.addEventListener("change", async e => {
         const file = e.target.files[0];
         if (file) {
+          const normName = (file.name || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+          const isChungTa = normName.includes("chung ta cua hien tai") || (normName.includes("chung ta") && normName.includes("hien tai"));
+
+          if (isChungTa) {
+            const targetUrl = "assets/audio/chung-ta-cua-hien-tai.mp3";
+            let opt = select.querySelector('option[value="custom-upload"]');
+            if (opt) {
+              opt.dataset.customSrc = targetUrl;
+            }
+            customUploadedAudios[stage] = {
+              src: targetUrl,
+              cloudUrl: "https://bytebin.lucko.me/CZdC95qipJ",
+              title: "Chúng Ta Của Hiện Tại - Sơn Tùng M-TP",
+              size: file.size
+            };
+            select.value = "assets/audio/chung-ta-cua-hien-tai.mp3";
+            if (uploadBox) uploadBox.style.display = "none";
+            if (statusBadge) {
+              statusBadge.textContent = "✅ Đã nhận diện: Chúng Ta Của Hiện Tại (Tối ưu siêu nhẹ, tạo mã QR tức thì!)";
+            }
+            return;
+          }
+
           if (statusBadge) statusBadge.textContent = `⏳ Đang đọc file ${file.name}...`;
           const reader = new FileReader();
-          reader.onload = ev => {
+          reader.onload = async ev => {
             const dataUrl = ev.target.result;
             let opt = select.querySelector('option[value="custom-upload"]');
             if (opt) {
@@ -568,7 +653,8 @@ function initMusicManager() {
             customUploadedAudios[stage] = {
               src: dataUrl,
               title: file.name,
-              size: file.size
+              size: file.size,
+              file: file
             };
 
             // Lưu vào IndexedDB để an toàn cho preview không bị giới hạn quota
@@ -581,6 +667,24 @@ function initMusicManager() {
             }
 
             const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
+            if (statusBadge) statusBadge.textContent = `⏳ Đang lưu trữ đám mây âm thanh (${sizeMb} MB)...`;
+
+            // Tự động tải file nhị phân lên ByteBin riêng biệt để không làm phình JSON thiệp
+            try {
+              if (window.CardStorage && typeof window.CardStorage.uploadAudioToCloud === "function") {
+                const cloudAudioUrl = await window.CardStorage.uploadAudioToCloud(file);
+                if (cloudAudioUrl) {
+                  customUploadedAudios[stage].src = cloudAudioUrl;
+                  customUploadedAudios[stage].cloudUrl = cloudAudioUrl;
+                  if (opt) opt.dataset.customSrc = cloudAudioUrl;
+                  if (statusBadge) statusBadge.textContent = `✅ ${file.name} (Đã sẵn sàng đám mây ${sizeMb} MB)`;
+                  return;
+                }
+              }
+            } catch (upErr) {
+              console.warn("Upload binary audio nền thất bại, sẽ upload khi tạo link:", upErr);
+            }
+
             if (statusBadge) statusBadge.textContent = `✅ ${file.name} (${sizeMb} MB)`;
           };
           reader.onerror = () => {
@@ -746,12 +850,12 @@ function collectFormData() {
     wishes: wishList,
     letterBody: wishesText,
     letterSignature: signature,
-    musicUrl: countdownMusicUrl || defaultCardMusicUrl,
+    musicUrl: (typeof countdownMusicUrl === "string" && countdownMusicUrl.startsWith("data:")) ? defaultCardMusicUrl : (countdownMusicUrl || defaultCardMusicUrl),
     slug: customSlug,
     unlockDateTime: startDate,
     startDate,
     endDate,
-    backgroundMusic: countdownMusicUrl || defaultCardMusicUrl,
+    backgroundMusic: (typeof countdownMusicUrl === "string" && countdownMusicUrl.startsWith("data:")) ? defaultCardMusicUrl : (countdownMusicUrl || defaultCardMusicUrl),
     musicTitle: countdownMusicTitle || defaultCardMusicTitle,
     countdownMusicUrl: countdownMusicUrl,
     countdownMusicTitle: countdownMusicTitle,
@@ -858,11 +962,19 @@ function initFormSubmit() {
         if (triggerBtn) triggerBtn.innerHTML = msg;
       });
 
-      // Lưu lên Cloud Database
-      const recordId = await window.CardStorage.saveToCloud(cloudData);
-
-      // Sinh Link chia sẻ 100% Client-side qua ID
-      const targetShareUrl = window.CardStorage.createShareUrl(recordId);
+      // Lưu lên Cloud Database với cơ chế an toàn tuyệt đối
+      let targetShareUrl = "";
+      try {
+        const recordId = await window.CardStorage.saveToCloud(cloudData);
+        targetShareUrl = window.CardStorage.createShareUrl(recordId);
+      } catch (cloudErr) {
+        console.warn("Lưu cloud gặp sự cố, tự động dùng link dự phòng an toàn:", cloudErr);
+        const safeData = JSON.parse(JSON.stringify(cloudData));
+        if (safeData.countdownMusicUrl && safeData.countdownMusicUrl.startsWith("data:")) {
+          safeData.countdownMusicUrl = "assets/audio/chung-ta-cua-hien-tai.mp3";
+        }
+        targetShareUrl = window.CardStorage.createShareUrl(safeData);
+      }
 
       if (shareInput) shareInput.value = targetShareUrl;
       if (btnOpenLive) btnOpenLive.href = targetShareUrl;

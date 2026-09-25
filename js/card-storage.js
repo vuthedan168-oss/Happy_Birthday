@@ -29,16 +29,43 @@ const CardStorage = {
     }
   },
 
+  // Tải file âm thanh nhị phân lên Cloud (hỗ trợ file nhạc lớn tới 10MB mà không làm phình JSON thiệp)
+  async uploadAudioToCloud(fileOrBlob) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 40000); // 40s timeout cho file âm thanh lớn
+    try {
+      const mime = fileOrBlob.type || 'audio/mpeg';
+      const response = await fetch('https://bytebin.lucko.me/post', {
+        method: 'POST',
+        headers: {
+          'Content-Type': mime
+        },
+        body: fileOrBlob,
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+      if (!response.ok) {
+        throw new Error('Máy chủ đám mây từ chối file âm thanh (Mã lỗi: ' + response.status + ').');
+      }
+      const data = await response.json();
+      return `https://bytebin.lucko.me/${data.key}`;
+    } catch (e) {
+      clearTimeout(timeoutId);
+      console.error("Lỗi khi tải file nhạc lên ByteBin:", e);
+      throw e;
+    }
+  },
+
   // Lưu dữ liệu lên Cloud Database
   async saveToCloud(cardData) {
     const payload = JSON.stringify(cardData);
     const sizeInKB = Math.round(payload.length / 1024);
-    if (sizeInKB > 5000) {
-      throw new Error(`Dữ liệu quá nặng (${sizeInKB}KB > 5000KB giới hạn). Hãy xóa bớt ảnh hoặc dùng "Thêm ảnh bằng Link URL"!`);
+    if (sizeInKB > 9500) {
+      throw new Error(`Dữ liệu thiệp quá nặng (${sizeInKB}KB > 9500KB giới hạn đám mây). Hãy tối ưu bớt ảnh chụp!`);
     }
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 20000); // 20s timeout
+    const timeoutId = setTimeout(() => controller.abort(), 25000); // 25s timeout
 
     try {
       // Đổi sang ByteBin (Miễn phí, Không cần Key, Tốc độ cao)
@@ -59,7 +86,7 @@ const CardStorage = {
     } catch (e) {
       clearTimeout(timeoutId);
       if (e.name === 'AbortError') {
-        throw new Error('Quá thời gian kết nối (20s). Do mạng chậm hoặc ảnh quá nặng!');
+        throw new Error('Quá thời gian kết nối (25s). Do mạng chậm hoặc ảnh quá nặng!');
       }
       console.error("Lỗi khi lưu dữ liệu thiệp lên cloud:", e);
       throw new Error(e.message || 'Lỗi mạng (Failed to fetch). Vui lòng thử lại sau.');
