@@ -858,6 +858,7 @@ body {
   box-shadow: 0 8px 22px rgba(168, 85, 247, 0.12);
 }
 
+.scene-music-card.stage-countdown { border-top: 4px solid #f59e0b; }
 .scene-music-card.stage-intro { border-top: 4px solid #f59e0b; }
 .scene-music-card.stage-cake { border-top: 4px solid #ec4899; }
 .scene-music-card.stage-wheel { border-top: 4px solid #8b5cf6; }

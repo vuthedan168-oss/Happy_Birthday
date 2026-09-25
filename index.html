@@ -171,8 +171,9 @@ Chúc cậu tuổi mới ngập tràn niềm vui, nụ cười rạng rỡ và l
             </div>
           </div>
 
+
           <!-- Quick Action Buttons for Countdown Lock -->
-          <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px;">
+          <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px;">
             <button type="button" class="btn-secondary" id="btn-quick-set-bday-time" style="padding: 8px 14px; font-size: 0.85rem; border-radius: 12px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color: #fff; cursor: pointer;">
               ⚡ Hẹn đúng 00:00 ngày sinh nhật
             </button>
@@ -202,53 +203,57 @@ Chúc cậu tuổi mới ngập tràn niềm vui, nụ cười rạng rỡ và l
           </div>
         </div>
 
-        <!-- SECTION 3: ÂM NHẠC THEO TỪNG GIAI ĐOẠN (SCENE-BY-SCENE MUSIC) -->
-        <div class="form-section highlight-section">
+        <!-- SECTION 3: ÂM THANH ĐOẠN CHỜ MỞ THIỆP -->
+        <div class="form-section highlight-section" id="section-countdown-music">
           <div class="section-heading">
-            <span class="heading-icon">🎵</span>
+            <span class="heading-icon">⏳🎵</span>
             <div>
-              <h3>Âm Nhạc Nền Toàn Bộ Thiệp</h3>
-              <p>Chọn hoặc tải nhạc nền (.mp3, .wav) xuyên suốt toàn bộ quá trình xem thiệp để tăng cảm xúc!</p>
+              <h3>Âm Thanh Đoạn Chờ Mở Thiệp</h3>
+              <p>Giai điệu phát trong lúc người nhận chờ đợi đếm ngược mở thiệp (khi thiệp chính thức mở sẽ tự động chuyển sang nhạc nền mặc định cảm xúc của thiệp).</p>
             </div>
           </div>
 
           <div class="scene-music-grid">
-            <!-- Nhạc Nền Chung -->
-            <div class="scene-music-card stage-bg" data-stage="bg">
+            <div class="scene-music-card stage-countdown" data-stage="countdown">
               <div class="scene-music-header">
-                <span class="scene-music-icon">🎵</span>
+                <span class="scene-music-icon">⏳🎵</span>
                 <div>
-                  <div class="scene-music-title">Nhạc Nền Toàn Bộ Thiệp</div>
-                  <div class="scene-music-desc">Phát xuyên suốt từ đầu đến cuối</div>
+                  <div class="scene-music-title">Âm Thanh Đoạn Chờ Mở Thiệp</div>
+                  <div class="scene-music-desc">Phát trong giai đoạn chờ đếm ngược trước khi người nhận mở thiệp</div>
                 </div>
               </div>
               <div class="form-group mb-2">
-                <select id="music-bg" class="form-control form-select select-stage-music" data-stage="bg">
-                  <option value="assets/audio/birthday.mp3" selected>Birthday - Somi (Gốc)</option>
+                <select id="music-countdown" class="form-control form-select select-stage-music" data-stage="countdown">
+                  <option value="assets/audio/ngan-nam-anh-sang.mp3" selected>✨ Ngàn Năm Ánh Sáng (Bản du dương, cảm xúc)</option>
+                  <option value="assets/audio/birthday.mp3">🎂 Birthday - Somi (Gốc)</option>
+                  <option value="assets/audio/Happy Birthday Remix.m4a">🎉 Happy Birthday Remix</option>
+                  <option value="assets/audio/Noi Nay Co Anh.m4a">💌 Nơi Này Có Anh</option>
+                  <option value="assets/audio/Yung Kai.m4a">🌸 Blue - Yung Kai</option>
                   <option value="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3">🎧 Sweet Lofi Memories</option>
                   <option value="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=romantic-piano-10738.mp3">🎻 Romantic Harp & Strings</option>
                   <option value="https://cdn.pixabay.com/download/audio/2022/10/14/audio_9939f792cb.mp3?filename=happy-birthday-party-124632.mp3">🎉 Upbeat Celebration</option>
-                  <option value="">🔔 Không có nhạc</option>
-                  <option value="assets/audio/ngan-nam-anh-sang.mp3">Ngàn Năm Ánh Sáng</option>
-                  <option value="assets/audio/happy birthday.mp3">Happy Birthday (Bản chuẩn)</option>
+                  <option value="">🔔 Không phát nhạc khi đếm ngược (Im lặng)</option>
                   <option value="custom-upload">📁 Tải file từ máy tính...</option>
                   <option value="custom-url">🔗 Nhập link MP3 tùy chỉnh...</option>
                 </select>
               </div>
-              <div class="stage-upload-box mb-2" style="display:none;" data-stage="bg">
-                <input type="file" class="form-control form-control-sm stage-file-input" accept="audio/*" data-stage="bg">
-                <small class="field-hint">Hỗ trợ file .mp3, .wav, .m4a từ máy</small>
+              <div class="stage-upload-box mb-2" style="display:none;" data-stage="countdown">
+                <input type="file" id="input-countdown-file" class="form-control form-control-sm stage-file-input" accept="audio/*,.mp3,.wav,.m4a,.ogg,.aac" data-stage="countdown">
+                <small class="field-hint">Hỗ trợ file .mp3, .wav, .m4a từ máy tính (khuyến nghị dưới 4MB)</small>
               </div>
-              <div class="stage-url-box mb-2" style="display:none;" data-stage="bg">
-                <input type="url" class="form-control form-control-sm stage-url-input" placeholder="https://.../music.mp3" data-stage="bg">
+              <div class="stage-url-box mb-2" style="display:none;" data-stage="countdown">
+                <input type="url" id="input-countdown-url" class="form-control form-control-sm stage-url-input" placeholder="https://domain.com/music.mp3" data-stage="countdown">
               </div>
               <div class="scene-music-actions">
-                <button type="button" class="audio-preview-btn" data-target="music-bg">▶️ Nghe thử</button>
-                <span class="audio-status-badge" data-stage="bg">Birthday - Somi</span>
+                <button type="button" class="audio-preview-btn" data-target="music-countdown">▶️ Nghe thử</button>
+                <span class="audio-status-badge" data-stage="countdown">Ngàn Năm Ánh Sáng</span>
+              </div>
+              <div style="margin-top: 12px;">
+                <button type="button" class="btn-secondary" id="btn-preview-cd-from-music" style="padding: 7px 14px; font-size: 0.84rem; border-radius: 10px; background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.4); color: #b45309; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                  👁️ Xem Thử Màn Chờ Với Nhạc Vừa Chọn
+                </button>
               </div>
             </div>
-
-
           </div>
         </div>
 

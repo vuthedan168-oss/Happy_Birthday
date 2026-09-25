@@ -68,6 +68,7 @@
 
   <!-- AUDIO ELEMENT -->
   <audio id="bg-audio" src="assets/audio/birthday.mp3" loop preload="auto"></audio>
+  <audio id="countdown-audio" loop preload="auto"></audio>
 
   <!-- PETALS CONTAINER -->
   <div id="petals-container" aria-hidden="true" style="pointer-events: none; position: fixed; inset: 0; z-index: 30; overflow: hidden;"></div>
@@ -124,6 +125,12 @@
     <p class="countdown-recipient-line font-serif" id="countdown-msg">
       Dành riêng cho <span id="countdown-recipient-highlight" class="countdown-highlight-name">Hương Giang</span> 🎂✨
     </p>
+
+    <!-- Pill hiển thị tên bài hát đếm ngược nếu có -->
+    <div class="countdown-music-pill" id="countdown-music-pill" style="display: none; align-items: center; justify-content: center; gap: 8px; margin: 6px auto 12px auto; padding: 5px 16px; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(251, 191, 36, 0.35); border-radius: 9999px; font-size: 0.82rem; color: #fde68a; backdrop-filter: blur(8px); max-width: max-content; z-index: 10;">
+      <span style="font-size: 0.95rem;">🎵</span>
+      <span id="countdown-music-track-name">Nhạc đếm ngược</span>
+    </div>
 
     <!-- Pill hiển thị ngày giờ mở thiệp chính thức -->
     <div class="countdown-target-pill" id="countdown-target-display">
@@ -182,7 +189,7 @@
     </div>
 
     <!-- Thanh tác vụ nút bấm theo phong cách Happy_Birthday -->
-    <div class="countdown-actions-bar" style="display: none !important;">
+    <div class="countdown-actions-bar" id="countdown-actions-bar">
       <a href="#" target="_blank" rel="noopener noreferrer" class="btn-lovegift-pill" id="btn-add-calendar" style="display: none;">
         📅 Đặt lời nhắc Google Calendar
       </a>

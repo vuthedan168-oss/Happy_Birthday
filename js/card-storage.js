@@ -149,4 +149,62 @@ const CardStorage = {
   }
 };
 
+/**
+ * Quản lý lưu trữ âm thanh dung lượng lớn qua IndexedDB (không bị giới hạn 5MB như localStorage)
+ */
+const CardAudioStorage = {
+  dbPromise: null,
+  getDB() {
+    if (!this.dbPromise) {
+      this.dbPromise = new Promise((resolve) => {
+        if (!window.indexedDB) return resolve(null);
+        try {
+          const req = indexedDB.open("BirthdayCardAudioDB", 1);
+          req.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains("audios")) {
+              db.createObjectStore("audios");
+            }
+          };
+          req.onsuccess = (e) => resolve(e.target.result);
+          req.onerror = () => resolve(null);
+        } catch (e) {
+          resolve(null);
+        }
+      });
+    }
+    return this.dbPromise;
+  },
+  async set(key, val) {
+    const db = await this.getDB();
+    if (!db) return false;
+    return new Promise((resolve) => {
+      try {
+        const tx = db.transaction("audios", "readwrite");
+        tx.objectStore("audios").put(val, key);
+        tx.oncomplete = () => resolve(true);
+        tx.onerror = () => resolve(false);
+      } catch (e) {
+        resolve(false);
+      }
+    });
+  },
+  async get(key) {
+    const db = await this.getDB();
+    if (!db) return null;
+    return new Promise((resolve) => {
+      try {
+        const tx = db.transaction("audios", "readonly");
+        const req = tx.objectStore("audios").get(key);
+        req.onsuccess = () => resolve(req.result || null);
+        req.onerror = () => resolve(null);
+      } catch (e) {
+        resolve(null);
+      }
+    });
+  }
+};
+
 window.CardStorage = CardStorage;
+window.CardAudioStorage = CardAudioStorage;
+

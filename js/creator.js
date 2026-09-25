@@ -92,8 +92,8 @@ const MUSIC_PRESETS = {
     src: "assets/audio/birthday.mp3"
   },
   "preset-piano": {
-    title: "Happy Birthday Piano Melody",
-    src: "assets/audio/happy-birthday.mp3"
+    title: "Happy Birthday Remix",
+    src: "assets/audio/Happy Birthday Remix.m4a"
   },
   "preset-lofi": {
     title: "Sweet Lofi Memories",
@@ -367,6 +367,15 @@ let currentPlayingStage = null;
 /**
  * Quản lý chọn nhạc & test nhạc theo từng giai đoạn
  */
+// Quản lý file âm thanh tùy chỉnh tải lên theo từng giai đoạn
+let customUploadedAudios = {
+  bg: null,
+  countdown: null
+};
+
+/**
+ * Quản lý chọn nhạc & test nhạc theo từng giai đoạn (Nhạc đếm ngược & Nhạc toàn bộ thiệp)
+ */
 function initMusicManager() {
   const audioPlayer = document.getElementById("creator-audio-player");
   const previewBtns = document.querySelectorAll(".audio-preview-btn");
@@ -377,7 +386,15 @@ function initMusicManager() {
       const selectEl = document.getElementById(targetId);
       if (!selectEl) return;
       
-      const trackUrl = selectEl.value;
+      let trackUrl = selectEl.value;
+      const stage = selectEl.getAttribute("data-stage") || (targetId.includes("countdown") ? "countdown" : "bg");
+
+      if (trackUrl === "custom-upload") {
+        trackUrl = customUploadedAudios[stage]?.src || selectEl.options[selectEl.selectedIndex]?.dataset?.customSrc || "";
+      } else if (trackUrl === "custom-url") {
+        const urlIn = document.querySelector(`.stage-url-input[data-stage="${stage}"]`);
+        trackUrl = urlIn?.value.trim() || "";
+      }
 
       if (btn.classList.contains("playing")) {
         audioPlayer.pause();
@@ -389,8 +406,8 @@ function initMusicManager() {
           b.classList.remove("playing");
         });
 
-        if (!trackUrl || trackUrl.startsWith("custom")) {
-          alert("Vui lòng chọn nhạc hợp lệ (chọn file tải lên hoặc điền URL)!");
+        if (!trackUrl || trackUrl === "custom-upload" || trackUrl === "custom-url") {
+          alert("Vui lòng chọn bài hát có sẵn hoặc tải file nhạc lên trước khi nghe thử!");
           return;
         }
 
@@ -406,7 +423,7 @@ function initMusicManager() {
     });
   });
 
-  const stages = ["bg"];
+  const stages = ["bg", "countdown"];
   stages.forEach(stage => {
     const select = document.getElementById(`music-${stage}`);
     const fileInput = document.querySelector(`.stage-file-input[data-stage="${stage}"]`);
@@ -419,15 +436,28 @@ function initMusicManager() {
       select.addEventListener("change", () => {
         const val = select.value;
         if (val === "custom-upload") {
-          uploadBox.style.display = "block";
-          urlBox.style.display = "none";
+          if (uploadBox) uploadBox.style.display = "block";
+          if (urlBox) urlBox.style.display = "none";
+          if (customUploadedAudios[stage]) {
+            if (statusBadge) statusBadge.textContent = `✅ ${customUploadedAudios[stage].title}`;
+          } else {
+            if (statusBadge) statusBadge.textContent = "Chưa chọn file";
+          }
         } else if (val === "custom-url") {
-          uploadBox.style.display = "none";
-          urlBox.style.display = "block";
+          if (uploadBox) uploadBox.style.display = "none";
+          if (urlBox) urlBox.style.display = "block";
+          if (urlInput && urlInput.value.trim()) {
+            if (statusBadge) statusBadge.textContent = "Link MP3 đã nhập";
+          } else {
+            if (statusBadge) statusBadge.textContent = "Chưa nhập link";
+          }
         } else {
-          uploadBox.style.display = "none";
-          urlBox.style.display = "none";
-          if (statusBadge) statusBadge.textContent = "Đã chọn nhạc có sẵn";
+          if (uploadBox) uploadBox.style.display = "none";
+          if (urlBox) urlBox.style.display = "none";
+          const selOpt = select.options[select.selectedIndex];
+          if (statusBadge) {
+            statusBadge.textContent = selOpt ? selOpt.textContent.trim() : "Đã chọn nhạc có sẵn";
+          }
         }
       });
     }
@@ -436,11 +466,35 @@ function initMusicManager() {
       fileInput.addEventListener("change", e => {
         const file = e.target.files[0];
         if (file) {
+          if (statusBadge) statusBadge.textContent = `⏳ Đang đọc file ${file.name}...`;
           const reader = new FileReader();
           reader.onload = ev => {
-            const opt = select.options[select.selectedIndex];
-            opt.value = ev.target.result;
-            if (statusBadge) statusBadge.textContent = file.name;
+            const dataUrl = ev.target.result;
+            let opt = select.querySelector('option[value="custom-upload"]');
+            if (opt) {
+              opt.dataset.customSrc = dataUrl;
+            }
+            customUploadedAudios[stage] = {
+              src: dataUrl,
+              title: file.name,
+              size: file.size
+            };
+
+            // Lưu vào IndexedDB để an toàn cho preview không bị giới hạn quota
+            if (window.CardAudioStorage) {
+              window.CardAudioStorage.set(`audio_${stage}`, {
+                src: dataUrl,
+                title: file.name,
+                stage: stage
+              });
+            }
+
+            const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
+            if (statusBadge) statusBadge.textContent = `✅ ${file.name} (${sizeMb} MB)`;
+          };
+          reader.onerror = () => {
+            alert("Lỗi khi đọc file âm thanh!");
+            if (statusBadge) statusBadge.textContent = "Lỗi đọc file";
           };
           reader.readAsDataURL(file);
         }
@@ -449,9 +503,12 @@ function initMusicManager() {
 
     if (urlInput && select) {
       urlInput.addEventListener("input", () => {
-        const opt = select.options[select.selectedIndex];
-        opt.value = urlInput.value.trim();
-        if (statusBadge) statusBadge.textContent = "Link MP3 đã nhập";
+        const val = urlInput.value.trim();
+        let opt = select.querySelector('option[value="custom-url"]');
+        if (opt) {
+          opt.dataset.customSrc = val;
+        }
+        if (statusBadge) statusBadge.textContent = val ? "Link MP3 đã nhập" : "Chưa nhập link";
       });
     }
   });
@@ -560,6 +617,29 @@ function collectFormData() {
     color: g.color || DEFAULT_WHEEL_COLORS[idx % DEFAULT_WHEEL_COLORS.length]
   }));
 
+  // Âm thanh đoạn chờ mở thiệp (Giai đoạn chờ đếm ngược)
+  const cdSelect = document.getElementById('music-countdown') || document.getElementById('music-bg');
+  let countdownMusicUrl = "assets/audio/ngan-nam-anh-sang.mp3";
+  let countdownMusicTitle = "Ngàn Năm Ánh Sáng";
+  if (cdSelect) {
+    if (cdSelect.value === "custom-upload") {
+      countdownMusicUrl = customUploadedAudios.countdown?.src || customUploadedAudios.bg?.src || cdSelect.options[cdSelect.selectedIndex]?.dataset?.customSrc || "";
+      countdownMusicTitle = customUploadedAudios.countdown?.title || customUploadedAudios.bg?.title || "Nhạc tải lên từ máy";
+    } else if (cdSelect.value === "custom-url") {
+      const urlInput = document.getElementById('input-countdown-url') || document.querySelector('.stage-url-input[data-stage="countdown"]') || document.querySelector('.stage-url-input[data-stage="bg"]');
+      countdownMusicUrl = urlInput?.value.trim() || "";
+      countdownMusicTitle = "Nhạc link MP3 tùy chỉnh";
+    } else {
+      countdownMusicUrl = cdSelect.value;
+      const selOpt = cdSelect.options[cdSelect.selectedIndex];
+      countdownMusicTitle = selOpt ? selOpt.textContent.trim().replace(/^[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\s]+/u, '') : "Ngàn Năm Ánh Sáng";
+    }
+  }
+
+  // Âm nhạc thiệp chính thức đã được thiết lập mặc định (Birthday - Somi, chuyển Yung Kai & Nơi Này Có Anh)
+  const defaultCardMusicUrl = "assets/audio/birthday.mp3";
+  const defaultCardMusicTitle = "Birthday - Somi";
+
   // Cấu trúc Data đầy đủ
   const cardData = {
     title,
@@ -572,12 +652,21 @@ function collectFormData() {
     wishes: wishList,
     letterBody: wishesText,
     letterSignature: signature,
-    musicUrl: document.getElementById('music-bg')?.value || "assets/audio/birthday.mp3",
+    musicUrl: countdownMusicUrl || defaultCardMusicUrl,
     slug: customSlug,
     unlockDateTime: startDate,
     startDate,
     endDate,
-    backgroundMusic: document.getElementById('music-bg')?.value || "assets/audio/birthday.mp3",
+    backgroundMusic: countdownMusicUrl || defaultCardMusicUrl,
+    musicTitle: countdownMusicTitle || defaultCardMusicTitle,
+    countdownMusicUrl: countdownMusicUrl,
+    countdownMusicTitle: countdownMusicTitle,
+    sceneMusic: {
+      countdown: { src: countdownMusicUrl, title: countdownMusicTitle },
+      intro: { src: defaultCardMusicUrl, title: defaultCardMusicTitle },
+      beats: { src: "assets/audio/Yung Kai.m4a", title: "Blue - Yung Kai" },
+      heart: { src: "assets/audio/Noi Nay Co Anh.m4a", title: "Nơi Này Có Anh" }
+    },
     luckyWheel: {
       enabled: true,
       spinLimit,
@@ -594,20 +683,47 @@ function collectFormData() {
 }
 
 /**
- * Lưu backup vào storage
+ * Lưu backup vào storage (an toàn với dữ liệu âm thanh lớn qua IndexedDB)
  */
 function saveToStorage(key, data) {
   try {
     const textOnlyData = { ...data };
 
-    // Loại bỏ Base64 Audio
-    if (textOnlyData.backgroundMusic && textOnlyData.backgroundMusic.startsWith('data:')) {
-      textOnlyData.backgroundMusic = '';
+    // Lưu âm thanh lớn vào IndexedDB trước để preview luôn phát đầy đủ không lo lỗi quota
+    if (window.CardAudioStorage) {
+      if (textOnlyData.countdownMusicUrl && textOnlyData.countdownMusicUrl.startsWith('data:')) {
+        window.CardAudioStorage.set('audio_countdown', {
+          src: textOnlyData.countdownMusicUrl,
+          title: textOnlyData.countdownMusicTitle,
+          stage: 'countdown'
+        });
+      }
+      if (textOnlyData.backgroundMusic && textOnlyData.backgroundMusic.startsWith('data:')) {
+        window.CardAudioStorage.set('audio_bg', {
+          src: textOnlyData.backgroundMusic,
+          title: textOnlyData.musicTitle,
+          stage: 'bg'
+        });
+      }
     }
 
-    localStorage.setItem(key, JSON.stringify(textOnlyData));
+    // Thử lưu vào localStorage (nếu dung lượng quá lớn thì fallback)
+    try {
+      localStorage.setItem(key, JSON.stringify(textOnlyData));
+    } catch (quotaErr) {
+      console.warn("localStorage quota exceeded, saving text-safe version with IndexedDB references:", quotaErr);
+      const safeData = { ...textOnlyData };
+      if (safeData.countdownMusicUrl && safeData.countdownMusicUrl.startsWith('data:')) {
+        safeData.countdownMusicUrl = 'indexeddb://audio_countdown';
+      }
+      if (safeData.backgroundMusic && safeData.backgroundMusic.startsWith('data:')) {
+        safeData.backgroundMusic = 'indexeddb://audio_bg';
+        safeData.musicUrl = 'indexeddb://audio_bg';
+      }
+      localStorage.setItem(key, JSON.stringify(safeData));
+    }
   } catch (finalErr) {
-    console.error("Lưu backup cấu hình text thất bại:", finalErr);
+    console.error("Lưu backup cấu hình thất bại:", finalErr);
   }
 }
 
@@ -638,14 +754,20 @@ function initFormSubmit() {
         triggerBtn.innerHTML = "⏳ Đang khởi tạo dữ liệu đám mây...";
       }
 
-      // Loại bỏ Base64 Audio cực nặng để không làm sập Cloud (100KB limit)
       const cloudData = { ...data };
-      if (cloudData.musicUrl && cloudData.musicUrl.startsWith('data:audio')) {
-        cloudData.musicUrl = "assets/audio/birthday.mp3";
-        alert("Lưu ý: Nhạc nền tải lên từ máy quá nặng để lưu trữ online. Thiệp đã tự động chuyển về nhạc mặc định. Hãy dùng 'Link URL' để chia sẻ nhạc tuỳ chọn nhé!");
-      }
-      if (cloudData.backgroundMusic && cloudData.backgroundMusic.startsWith('data:audio')) {
-        cloudData.backgroundMusic = "assets/audio/birthday.mp3";
+      const jsonPayload = JSON.stringify(cloudData);
+      const sizeKb = Math.round(jsonPayload.length / 1024);
+
+      // ByteBin hỗ trợ tối đa 5000KB (~5MB). Nếu vượt quá 4800KB, cảnh báo người dùng:
+      if (sizeKb > 4800) {
+        if (cloudData.countdownMusicUrl && cloudData.countdownMusicUrl.startsWith('data:')) {
+          alert("⚠️ File nhạc đếm ngược tải lên từ máy khá lớn, làm vượt quá giới hạn 5MB của dịch vụ chia sẻ trực tuyến miễn phí. Đường link online sẽ tự động dùng bài mặc định. Để bạn bè nghe được bài tùy chọn online, bạn có thể dán 'Link MP3' hoặc dùng file dưới 3MB nhé!");
+          cloudData.countdownMusicUrl = "assets/audio/ngan-nam-anh-sang.mp3";
+        }
+        if (cloudData.backgroundMusic && cloudData.backgroundMusic.startsWith('data:')) {
+          cloudData.backgroundMusic = "assets/audio/birthday.mp3";
+          cloudData.musicUrl = "assets/audio/birthday.mp3";
+        }
       }
 
       // Lưu lên Cloud Database
@@ -820,10 +942,26 @@ function initFormSubmit() {
 
   // Xem trước thiệp ngay
   if (btnPreview) {
-    btnPreview.addEventListener("click", () => {
+    btnPreview.addEventListener("click", async () => {
       try {
         const data = collectFormData();
         saveToStorage("custom_birthday_card", data);
+        if (window.CardAudioStorage) {
+          if (data.countdownMusicUrl && data.countdownMusicUrl.startsWith("data:")) {
+            await window.CardAudioStorage.set("audio_countdown", {
+              src: data.countdownMusicUrl,
+              title: data.countdownMusicTitle,
+              stage: "countdown"
+            });
+          }
+          if (data.backgroundMusic && data.backgroundMusic.startsWith("data:")) {
+            await window.CardAudioStorage.set("audio_bg", {
+              src: data.backgroundMusic,
+              title: data.musicTitle,
+              stage: "bg"
+            });
+          }
+        }
         // Khi xem trước, ta dùng localStorage fallback để nhanh, không cần gọi Cloud
         const viewUrl = new URL('gift.html', window.location.href).href;
         window.open(viewUrl, "_blank");
@@ -835,29 +973,43 @@ function initFormSubmit() {
   }
 
   // Xem trước Giai đoạn 0: Countdown Lock
+  const handlePreviewCountdown = async () => {
+    try {
+      const data = collectFormData();
+      if (!data.startDate) {
+        const demoDate = new Date(Date.now() + 2 * 86400000);
+        data.startDate = demoDate.toISOString().slice(0, 16);
+        data.unlockDateTime = data.startDate;
+      }
+      saveToStorage("custom_birthday_card", data);
+      if (window.CardAudioStorage && data.countdownMusicUrl && data.countdownMusicUrl.startsWith("data:")) {
+        await window.CardAudioStorage.set("audio_countdown", {
+          src: data.countdownMusicUrl,
+          title: data.countdownMusicTitle,
+          stage: "countdown"
+        });
+      }
+      // Khi xem trước, ta dùng localStorage fallback để nhanh, không cần gọi Cloud
+      const viewUrl = new URL('gift.html', window.location.href).href;
+
+      const previewCdUrl = viewUrl.includes("?")
+        ? `${viewUrl}&countdown=preview`
+        : `${viewUrl}?countdown=preview`;
+      window.open(previewCdUrl, "_blank");
+    } catch (err) {
+      console.error("Lỗi xem thử màn hình khóa:", err);
+      alert("Có lỗi khi xem thử màn hình khóa: " + err.message);
+    }
+  };
+
   const btnPreviewCd = document.getElementById("btn-preview-countdown-lock");
   if (btnPreviewCd) {
-    btnPreviewCd.addEventListener("click", () => {
-      try {
-        const data = collectFormData();
-        if (!data.startDate) {
-          const demoDate = new Date(Date.now() + 2 * 86400000);
-          data.startDate = demoDate.toISOString().slice(0, 16);
-          data.unlockDateTime = data.startDate;
-        }
-        saveToStorage("custom_birthday_card", data);
-        // Khi xem trước, ta dùng localStorage fallback để nhanh, không cần gọi Cloud
-        const viewUrl = new URL('gift.html', window.location.href).href;
+    btnPreviewCd.addEventListener("click", handlePreviewCountdown);
+  }
 
-        const previewCdUrl = viewUrl.includes("?")
-          ? `${viewUrl}&countdown=preview`
-          : `${viewUrl}?countdown=preview`;
-        window.open(previewCdUrl, "_blank");
-      } catch (err) {
-        console.error("Lỗi xem thử màn hình khóa:", err);
-        alert("Có lỗi khi xem thử màn hình khóa: " + err.message);
-      }
-    });
+  const btnPreviewCdFromMusic = document.getElementById("btn-preview-cd-from-music");
+  if (btnPreviewCdFromMusic) {
+    btnPreviewCdFromMusic.addEventListener("click", handlePreviewCountdown);
   }
 
   // Tự động hẹn giờ đúng 00:00 ngày sinh nhật

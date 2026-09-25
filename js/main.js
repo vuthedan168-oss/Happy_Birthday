@@ -600,6 +600,29 @@ document.addEventListener("DOMContentLoaded", async () => {
   window.currentAudio = new Audio(musicSrc);
   window.currentAudio.preload = 'auto';
 
+  // Khởi tạo nhạc nền hẹn giờ đếm ngược (Stage 0 Countdown - Âm thanh đoạn chờ mở thiệp)
+  const cdMusicSrc = (ACTIVE_CONFIG.countdownMusicUrl !== undefined)
+    ? ACTIVE_CONFIG.countdownMusicUrl
+    : (ACTIVE_CONFIG.musicUrl || 'assets/audio/ngan-nam-anh-sang.mp3');
+  const cdAudioEl = document.getElementById('countdown-audio');
+  if (cdAudioEl) {
+    if (cdMusicSrc) {
+      cdAudioEl.src = cdMusicSrc;
+      cdAudioEl.preload = 'auto';
+      cdAudioEl.loop = true;
+    } else {
+      cdAudioEl.removeAttribute('src');
+    }
+    window.countdownAudio = cdAudioEl;
+  } else if (cdMusicSrc) {
+    window.countdownAudio = new Audio(cdMusicSrc);
+    window.countdownAudio.loop = true;
+    window.countdownAudio.preload = 'auto';
+  }
+
+  // Khởi tạo hệ thống điều khiển âm thanh sớm
+  initAudioSystem();
+
   const lockStatus = checkCardLockStatus();
   const startOverlay = document.getElementById("start-overlay");
 
@@ -661,7 +684,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Xử lý khi người dùng chạm
     const handleStartClick = function () {
-      window.currentAudio.play().catch(() => {});
       startOverlay.style.opacity = '0';
       setTimeout(() => {
         startOverlay.style.display = 'none';
@@ -674,8 +696,23 @@ document.addEventListener("DOMContentLoaded", async () => {
       initStealthRecording();
 
       if (lockStatus.isLocked) {
+        // Giai đoạn 0: Phát nhạc hẹn giờ đếm ngược (Âm thanh đoạn chờ mở thiệp)
+        if (window.countdownAudio && ACTIVE_CONFIG.countdownMusicUrl) {
+          const currentCdSrc = window.countdownAudio.getAttribute("src") || window.countdownAudio.src || "";
+          if (!currentCdSrc.includes(ACTIVE_CONFIG.countdownMusicUrl)) {
+            window.countdownAudio.src = ACTIVE_CONFIG.countdownMusicUrl;
+            window.countdownAudio.load();
+          }
+          window.countdownAudio.volume = 0.6;
+          window.countdownAudio.play().catch(e => console.log("Countdown audio autoplay:", e));
+        }
         initStageCountdown(lockStatus);
       } else {
+        // Giai đoạn 1+: Phát nhạc thiệp chính và bắt đầu kỷ niệm
+        if (window.currentAudio) {
+          window.currentAudio.volume = 0.6;
+          window.currentAudio.play().catch(() => {});
+        }
         startCelebrationJourney();
       }
     };
@@ -690,8 +727,21 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   } else {
     if (lockStatus.isLocked) {
+      if (window.countdownAudio && ACTIVE_CONFIG.countdownMusicUrl) {
+        const currentCdSrc = window.countdownAudio.getAttribute("src") || window.countdownAudio.src || "";
+        if (!currentCdSrc.includes(ACTIVE_CONFIG.countdownMusicUrl)) {
+          window.countdownAudio.src = ACTIVE_CONFIG.countdownMusicUrl;
+          window.countdownAudio.load();
+        }
+        window.countdownAudio.volume = 0.6;
+        window.countdownAudio.play().catch(() => {});
+      }
       initStageCountdown(lockStatus);
     } else {
+      if (window.currentAudio) {
+        window.currentAudio.volume = 0.6;
+        window.currentAudio.play().catch(() => {});
+      }
       startCelebrationJourney();
     }
   }
@@ -708,6 +758,51 @@ async function initCardConfiguration() {
 
   const baseConfig = typeof BIRTHDAY_CONFIG !== "undefined" ? BIRTHDAY_CONFIG : {};
   ACTIVE_CONFIG = Object.assign({}, baseConfig, urlData || {});
+
+  // Nạp âm thanh từ CardAudioStorage (IndexedDB) nếu có lưu bài hát hẹn giờ
+  if (!ACTIVE_CONFIG.countdownMusicUrl || ACTIVE_CONFIG.countdownMusicUrl === "indexeddb://audio_countdown") {
+    if (window.CardAudioStorage) {
+      try {
+        const cachedCd = await window.CardAudioStorage.get("audio_countdown");
+        if (cachedCd && cachedCd.src) {
+          ACTIVE_CONFIG.countdownMusicUrl = cachedCd.src;
+          if (cachedCd.title) {
+            ACTIVE_CONFIG.countdownMusicTitle = cachedCd.title;
+          }
+          if (window.countdownAudio && cachedCd.src) {
+            window.countdownAudio.src = cachedCd.src;
+          }
+        }
+      } catch (e) {
+        console.warn("CardAudioStorage countdown read error:", e);
+      }
+    }
+  }
+
+  if (!ACTIVE_CONFIG.countdownMusicUrl && ACTIVE_CONFIG.sceneMusic && ACTIVE_CONFIG.sceneMusic.countdown && ACTIVE_CONFIG.sceneMusic.countdown.src) {
+    ACTIVE_CONFIG.countdownMusicUrl = ACTIVE_CONFIG.sceneMusic.countdown.src;
+    ACTIVE_CONFIG.countdownMusicTitle = ACTIVE_CONFIG.sceneMusic.countdown.title || ACTIVE_CONFIG.countdownMusicTitle;
+  }
+
+  if (window.countdownAudio && ACTIVE_CONFIG.countdownMusicUrl && !ACTIVE_CONFIG.countdownMusicUrl.startsWith("indexeddb://")) {
+    window.countdownAudio.src = ACTIVE_CONFIG.countdownMusicUrl;
+  }
+
+  if (!ACTIVE_CONFIG.musicUrl || ACTIVE_CONFIG.musicUrl === "indexeddb://audio_bg") {
+    if (window.CardAudioStorage) {
+      try {
+        const cachedBg = await window.CardAudioStorage.get("audio_bg");
+        if (cachedBg && cachedBg.src) {
+          ACTIVE_CONFIG.musicUrl = cachedBg.src;
+          if (cachedBg.title) {
+            ACTIVE_CONFIG.musicTitle = cachedBg.title;
+          }
+        }
+      } catch (e) {
+        console.warn("CardAudioStorage bg read error:", e);
+      }
+    }
+  }
 
   // Chuẩn hóa tên và lời chúc
   const receiver = ACTIVE_CONFIG.recipientName || "Hương Giang";
@@ -799,9 +894,14 @@ function changeStageMusic(newSrc) {
 function switchStage(stageName) {
   CURRENT_STAGE = stageName;
 
-  // Xử lý nhạc nền theo từng giai đoạn
-  if (["countdown", "opening", "quiz", "intro"].includes(stageName)) {
-    changeStageMusic("assets/audio/birthday.mp3");
+  // Xử lý nhạc nền theo từng giai đoạn (giữ nguyên nhạc nền thiệp, countdown tách riêng)
+  if (stageName === "countdown") {
+    // Đang ở màn hình hẹn giờ, nhạc hẹn giờ window.countdownAudio phát riêng biệt
+  } else if (["opening", "quiz", "intro"].includes(stageName)) {
+    const defaultTrack = (ACTIVE_CONFIG.sceneMusic && ACTIVE_CONFIG.sceneMusic.intro && ACTIVE_CONFIG.sceneMusic.intro.src)
+      || ACTIVE_CONFIG.musicUrl
+      || "assets/audio/birthday.mp3";
+    changeStageMusic(defaultTrack);
   } else if (["beats", "wish"].includes(stageName)) {
     changeStageMusic("assets/audio/Yung Kai.m4a");
   } else if (["heart", "letter", "final", "starlight"].includes(stageName)) {
@@ -843,15 +943,24 @@ function initAudioSystem() {
   if (window.currentAudio) {
     window.currentAudio.volume = 0.6;
   }
+  if (window.countdownAudio) {
+    window.countdownAudio.volume = 0.6;
+  }
 
-  if (audioBtn && window.currentAudio) {
+  if (audioBtn) {
+    if (audioBtn._hasAudioListener) return;
+    audioBtn._hasAudioListener = true;
+
     audioBtn.addEventListener("click", () => {
-      if (window.currentAudio.paused) {
-        window.currentAudio.play().then(() => {
+      const activeAudio = (IS_CARD_LOCKED && window.countdownAudio) ? window.countdownAudio : window.currentAudio;
+      if (!activeAudio) return;
+
+      if (activeAudio.paused) {
+        activeAudio.play().then(() => {
           if (audioIcon) audioIcon.textContent = "🔊";
-        });
+        }).catch(() => {});
       } else {
-        window.currentAudio.pause();
+        activeAudio.pause();
         if (audioIcon) audioIcon.textContent = "🔇";
       }
     });
@@ -2102,6 +2211,9 @@ function initStageCountdown(lockInfo) {
   IS_CARD_LOCKED = true;
   switchStage("countdown");
 
+  // Khởi tạo audio toggle cho màn hình countdown
+  initAudioSystem();
+
   const overlay = document.getElementById("stage-countdown");
   const titleEl = document.getElementById("countdown-title");
   const msgEl = document.getElementById("countdown-msg");
@@ -2112,6 +2224,41 @@ function initStageCountdown(lockInfo) {
   const targetDisplay = document.getElementById("countdown-target-display");
   const calendarBtn = document.getElementById("btn-add-calendar");
   const bypassBtn = document.getElementById("btn-bypass-cd");
+  const musicPill = document.getElementById("countdown-music-pill");
+  const musicTrackName = document.getElementById("countdown-music-track-name");
+
+  // Hiển thị pill bài hát hẹn giờ nếu có
+  const trackTitle = ACTIVE_CONFIG.countdownMusicTitle || "Giai điệu chờ mở thiệp 🎵";
+  if (musicTrackName) {
+    musicTrackName.textContent = trackTitle;
+  }
+  if (musicPill) {
+    musicPill.style.display = ACTIVE_CONFIG.countdownMusicUrl ? "inline-flex" : "none";
+  }
+
+  // Đảm bảo audio có bài hát chính xác theo cấu hình mới nhất
+  if (window.countdownAudio && ACTIVE_CONFIG.countdownMusicUrl) {
+    const currentSrc = window.countdownAudio.getAttribute("src") || window.countdownAudio.src || "";
+    if (!currentSrc.includes(ACTIVE_CONFIG.countdownMusicUrl)) {
+      window.countdownAudio.src = ACTIVE_CONFIG.countdownMusicUrl;
+      window.countdownAudio.load();
+    }
+  }
+
+  // Phát nhạc hẹn giờ đếm ngược
+  if (window.countdownAudio && ACTIVE_CONFIG.countdownMusicUrl && window.countdownAudio.paused) {
+    window.countdownAudio.volume = 0.6;
+    window.countdownAudio.play().catch(() => {});
+  }
+  const tryPlayCd = () => {
+    if (IS_CARD_LOCKED && window.countdownAudio && ACTIVE_CONFIG.countdownMusicUrl && window.countdownAudio.paused) {
+      window.countdownAudio.play().catch(() => {});
+    }
+  };
+  if (overlay) {
+    overlay.addEventListener("click", tryPlayCd, { once: true });
+    overlay.addEventListener("touchstart", tryPlayCd, { once: true });
+  }
 
   const receiver = ACTIVE_CONFIG.recipientName || "Hương Giang";
   const sender = ACTIVE_CONFIG.senderName || "Tớ";
@@ -2135,12 +2282,12 @@ function initStageCountdown(lockInfo) {
     if (timerBlocks) timerBlocks.style.display = "none";
     if (targetDisplay) targetDisplay.style.display = "none";
     if (msgEl) msgEl.textContent = "Thời gian tổ chức sự kiện thiệp trực tiếp đã hoàn tất.";
-    if (bypassBtn) bypassBtn.textContent = "📖 Xem lại kỷ niệm sinh nhật";
-    if (calendarBtn) calendarBtn.style.display = "none";
-
     if (bypassBtn) {
+      bypassBtn.style.display = "inline-flex";
+      bypassBtn.textContent = "📖 Xem lại kỷ niệm sinh nhật";
       bypassBtn.onclick = () => unlockAndStartCard();
     }
+    if (calendarBtn) calendarBtn.style.display = "none";
     return;
   }
 
@@ -2203,8 +2350,14 @@ function initStageCountdown(lockInfo) {
   if (COUNTDOWN_INTERVAL) clearInterval(COUNTDOWN_INTERVAL);
   COUNTDOWN_INTERVAL = setInterval(updateTimer, 1000);
 
-  // Nút mở thử nghiệm / Bypass dành cho người tạo
+  // Nút mở thử nghiệm / Bypass dành cho người tạo hoặc khi ở chế độ xem trước
   if (bypassBtn) {
+    if (lockInfo.isPreview) {
+      bypassBtn.style.display = "inline-flex";
+      bypassBtn.textContent = "✨ Mở khóa xem trước thiệp (Demo Mode)";
+    } else {
+      bypassBtn.style.display = "none";
+    }
     bypassBtn.onclick = () => {
       unlockAndStartCard();
     };
@@ -2218,6 +2371,20 @@ function unlockAndStartCard() {
   if (COUNTDOWN_INTERVAL) {
     clearInterval(COUNTDOWN_INTERVAL);
     COUNTDOWN_INTERVAL = null;
+  }
+
+  // Dần dần fade out và tắt nhạc hẹn giờ đếm ngược
+  if (window.countdownAudio) {
+    let vol = window.countdownAudio.volume;
+    const fadeOutCd = setInterval(() => {
+      vol = Math.max(0, vol - 0.12);
+      window.countdownAudio.volume = vol;
+      if (vol <= 0.05) {
+        clearInterval(fadeOutCd);
+        window.countdownAudio.pause();
+        window.countdownAudio.currentTime = 0;
+      }
+    }, 60);
   }
 
   // Âm thanh phép thuật khi mở khóa
@@ -2252,8 +2419,14 @@ function startCelebrationJourney() {
   IS_JOURNEY_STARTED = true;
   IS_CARD_LOCKED = false;
 
-  // 1. Khởi tạo âm thanh & nhạc nền
+  // 1. Khởi tạo âm thanh & nhạc nền thiệp chính
   initAudioSystem();
+  if (window.currentAudio && window.currentAudio.paused) {
+    window.currentAudio.volume = 0.6;
+    window.currentAudio.play().catch(e => console.log("Card audio play error:", e));
+  }
+  const audioIcon = document.getElementById("audio-icon");
+  if (audioIcon) audioIcon.textContent = "🔊";
 
   // 2. Khởi tạo hiệu ứng cánh hoa bay tự nhiên
   initFallingPetals();

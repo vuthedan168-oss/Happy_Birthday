@@ -148,7 +148,12 @@ Tớ chỉ mong cậu ăn ngon ngủ đủ, bớt lo một chút, và nhớ là 
   // Định dạng: "YYYY-MM-DDTHH:mm:ss", ví dụ: "2026-10-15T00:00:00"
   // Mẹo: Bạn cũng có thể mở link kèm ?countdown=preview để xem thử Giai đoạn 0 bất kỳ lúc nào!
   unlockDateTime: "",
-  endDate: "" // Ngày kết thúc cho phép xem thiệp (tùy chọn)
+  endDate: "", // Ngày kết thúc cho phép xem thiệp (tùy chọn)
+
+  // Nhạc nền riêng cho màn hình hẹn giờ đếm ngược (Giai đoạn 0)
+  // Có thể tải lên từ file MP3 hoặc chọn từ danh sách
+  countdownMusicUrl: "assets/audio/ngan-nam-anh-sang.mp3",
+  countdownMusicTitle: "Ngàn Năm Ánh Sáng"
 };
 
 // Đảm bảo tương thích Node/Browser
