@@ -252,7 +252,7 @@ function openSelfieModal() {
   if (modal) {
     modal.style.display = 'flex';
     const nameEl = document.getElementById('photobooth-recipient-name');
-    if (nameEl) nameEl.textContent = ACTIVE_CONFIG.recipientName || "Bạn";
+    if (nameEl) nameEl.textContent = (ACTIVE_CONFIG.recipientName && ACTIVE_CONFIG.recipientName !== "Hương Giang" && ACTIVE_CONFIG.recipientName !== "Thế Dân") ? ACTIVE_CONFIG.recipientName : "Thảo Uyên";
   }
   if (video) video.style.display = 'block';
   if (canvas) canvas.style.display = 'none';
@@ -353,12 +353,12 @@ function handleSelfieFileUpload(file) {
           drawDecor(p, topMargin + (canvas.height - topMargin) / 2, "🌸", 0); drawDecor(canvas.width - p, topMargin + (canvas.height - topMargin) / 2, "🌸", 0);
           drawDecor(canvas.width / 2, vTop, "🌸", 0); drawDecor(canvas.width / 2, vBottom, "🌸", 0);
 
-          const name = ACTIVE_CONFIG.recipientName || "Bạn";
+          const name = (ACTIVE_CONFIG.recipientName && ACTIVE_CONFIG.recipientName !== "Hương Giang" && ACTIVE_CONFIG.recipientName !== "Thế Dân") ? ACTIVE_CONFIG.recipientName : "Thảo Uyên";
           ctx.font = `bold ${canvas.width * 0.1}px 'Dancing Script', cursive`;
           ctx.fillStyle = '#ffd700';
           ctx.shadowColor = '#ffb300';
           ctx.shadowBlur = 10;
-          ctx.fillText(`Happy Birthday ${name}`, canvas.width / 2, topMargin / 2);
+          ctx.fillText(`Chúc Mừng Sinh Nhật ${name}`, canvas.width / 2, topMargin / 2);
           ctx.shadowBlur = 0;
         }
 
@@ -397,6 +397,15 @@ function openStoryExport() {
 
   const exportModal = document.getElementById('modal-story-export');
   const exportImg = document.getElementById('export-selfie-img');
+  const exportRecipient = document.getElementById('export-recipient');
+
+  if (exportRecipient) {
+    if (ACTIVE_CONFIG && ACTIVE_CONFIG.recipientName && ACTIVE_CONFIG.recipientName !== "Hương Giang" && ACTIVE_CONFIG.recipientName !== "Thế Dân") {
+      exportRecipient.textContent = ACTIVE_CONFIG.recipientName;
+    } else {
+      exportRecipient.textContent = "Thảo Uyên";
+    }
+  }
 
   if (selfieDataUrl && exportImg) {
     exportImg.src = selfieDataUrl;
@@ -994,6 +1003,14 @@ async function initCardConfiguration() {
   };
 
   setSafeText("opening-greeting", ACTIVE_CONFIG.openingGreeting || "Happy Birthday");
+  const exportRecipient = document.getElementById("export-recipient");
+  if (exportRecipient) {
+    exportRecipient.textContent = (ACTIVE_CONFIG.recipientName && ACTIVE_CONFIG.recipientName !== "Hương Giang" && ACTIVE_CONFIG.recipientName !== "Thế Dân") ? ACTIVE_CONFIG.recipientName : "Thảo Uyên";
+  }
+  const pbName = document.getElementById("photobooth-recipient-name");
+  if (pbName) {
+    pbName.textContent = (ACTIVE_CONFIG.recipientName && ACTIVE_CONFIG.recipientName !== "Hương Giang" && ACTIVE_CONFIG.recipientName !== "Thế Dân") ? ACTIVE_CONFIG.recipientName : "Thảo Uyên";
+  }
   setSafeText("cake-intro-line1", ACTIVE_CONFIG.cakeTitle || "Có một món quà nhỏ dành cho cậu…");
   setSafeText("cake-intro-line2", ACTIVE_CONFIG.cakeSubtitle || "Nhưng trước khi mở, thổi nến trước nhé 🎂");
   setSafeText("candle-hint", ACTIVE_CONFIG.cakePrompt || "👆 Nhấn giữ ngọn nến hoặc THỔI trực tiếp vào micro để dập tắt 💨");
