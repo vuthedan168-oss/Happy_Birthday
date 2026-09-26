@@ -131,9 +131,11 @@ Tớ chỉ mong cậu ăn ngon ngủ đủ, bớt lo một chút, và nhớ là 
 
   // 11. VÒNG QUAY MAY MẮN (LUCKY SPIN WHEEL - PHẦN THƯỞNG BÍ MẬT)
   enableLuckyWheel: true,
+  spinLimit: 2,
   luckyWheel: {
     title: "Vòng Quay May Mắn Sinh Nhật 🎡🎁",
     subtitle: "Chạm nút để quay nhận một món quà sinh nhật bí mật!",
+    spinLimit: 2, // Số lượt quay tối đa (2 lượt)
     prizes: [
       { id: 1, name: "1 Chầu Trà Sữa 🧋", message: "Được khao 1 ly trà sữa full topping bất kỳ lúc nào!", color: "#FF6B6B" },
       { id: 2, name: "1 Vé Xem Phim 🍿", message: "Một buổi đi xem phim rạp với combo bắp nước siêu to!", color: "#4ECDC4" },

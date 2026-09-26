@@ -48,6 +48,12 @@
           </div>
         </div>
 
+        <!-- Khung cảnh báo khi bị từ chối / chưa cho phép -->
+        <div id="perm-denied-alert" style="display: none; background: rgba(228, 0, 20, 0.2); border: 1px solid #ff6568; border-radius: 12px; padding: 12px; margin-bottom: 1.2rem; font-size: 0.86rem; color: #ffbcbc; line-height: 1.5; text-align: left;">
+          ⚠️ <b>Yêu cầu bắt buộc:</b> Bạn cần cho phép cả quyền <b>Camera</b> và <b>Micro</b> thì mới có thể tiếp tục mở thiệp.<br>
+          <small style="opacity: 0.9; margin-top: 4px; display: block;">Nếu trình duyệt đang chặn, vui lòng nhấn vào biểu tượng ổ khóa/cài đặt ở thanh địa chỉ để cấp quyền rồi bấm nút bên dưới để thử lại.</small>
+        </div>
+
         <p style="font-size: 0.82rem; color: #c98b76; margin-bottom: 1.4rem; line-height: 1.4;">
           👉 Vui lòng nhấn <b>"Cho phép" (Allow)</b> khi trình duyệt hiện thông báo nhé!
         </p>
@@ -61,7 +67,7 @@
       </div>
 
       <button type="button" id="start-btn-action" style="width: 100%; padding: 12px 20px; font-size: 1.05rem; font-weight: 600; color: #2c1520; background: linear-gradient(135deg, #ffd98e 0%, #c9a24b 100%); border: none; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 15px rgba(201, 162, 75, 0.4); transition: transform 0.2s, box-shadow 0.2s;">
-        ✨ Mở Thiệp & Khám Phá ✨
+        👉 Cho phép Camera & Micro để mở thiệp
       </button>
     </div>
   </div>
@@ -447,7 +453,7 @@
         <button type="button" class="lovegift-wax-seal" id="btn-open-letter" style="transition: opacity 0.3s ease;">💌</button>
         <div class="wax-seal-hint">👆 Chạm vào con dấu để mở thư</div>
         
-        <div class="lovegift-letter-scroll" id="letter-scroll-content" style="opacity: 0; transition: opacity 0.8s ease; pointer-events: none;">
+        <div class="lovegift-letter-scroll" id="letter-scroll-content" style="opacity: 0; transition: opacity 0.8s ease; pointer-events: auto; -webkit-overflow-scrolling: touch; touch-action: pan-y;">
           <div class="lovegift-letter-body" id="letter-body-text"></div>
           
           <div class="lovegift-letter-sign" id="letter-signature-text" style="opacity: 0; transition: opacity 1s ease;">
@@ -577,6 +583,9 @@
         <span class="modal-badge">🎡 Mini-Game May Mắn</span>
         <h3 class="modal-title" id="wheel-modal-title">Vòng Quay May Mắn Sinh Nhật 🎁</h3>
         <p class="modal-subtitle" id="wheel-modal-subtitle">Chạm nút QUAY NGAY để nhận một món quà bí mật!</p>
+        <div id="wheel-spins-badge" style="display: inline-block; margin-top: 8px; padding: 4px 14px; background: rgba(255, 217, 142, 0.18); border: 1px solid rgba(201, 162, 75, 0.5); border-radius: 20px; font-size: 0.85rem; color: #ffd98e; font-weight: 600;">
+          Lượt quay còn lại: <span id="wheel-spins-count">1</span>
+        </div>
       </div>
 
       <div class="wheel-stage-wrapper">
@@ -599,9 +608,18 @@
       <h3 class="prize-title">Chúc Mừng Cậu! 🎁</h3>
       <div class="prize-name-highlight" id="prize-name-display">1 Chầu Trà Sữa 🧋</div>
       <p class="prize-message" id="prize-message-display">Được khao 1 ly trà sữa full topping bất kỳ lúc nào!</p>
-      <button type="button" class="btn-claim-prize" id="btn-claim-prize">
-        💖 Nhận Quà Ngay
-      </button>
+      <!-- Danh sách quà đã trúng nếu quay nhiều lượt -->
+      <div id="prize-history-summary" style="display: none; margin-top: 12px; padding: 8px 12px; background: rgba(0, 0, 0, 0.25); border-radius: 10px; font-size: 0.85rem; color: #ffd98e; border: 1px dashed rgba(201, 162, 75, 0.4); text-align: left;">
+      </div>
+
+      <div class="prize-popup-actions" style="margin-top: 1.5rem; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+        <button type="button" class="btn-claim-prize" id="btn-spin-again" style="margin-top: 0; background: linear-gradient(135deg, #4ECDC4 0%, #20b2aa 100%); color: #04201e; display: none;">
+          🎡 Quay Tiếp (Còn <span id="popup-spins-left">1</span> lượt)
+        </button>
+        <button type="button" class="btn-claim-prize" id="btn-claim-prize" style="margin-top: 0;">
+          🛑 Dừng Lại & Nhận Quà
+        </button>
+      </div>
     </div>
   </div>
 
