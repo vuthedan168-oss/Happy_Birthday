@@ -210,68 +210,27 @@ function initVibeSwitcher() {
       mockupTitleEl.textContent = data.mockupTitle;
       mockupSubEl.textContent = data.mockupSub;
       mockupEl.style.background = data.mockupBg;
+
+      // Update CTA button to go to studio with this vibe
+      const vibeMap = {
+        romantic: 'party',
+        friend: 'bff',
+        family: 'family',
+        luxury: 'elegant',
+        cute: 'sweet'
+      };
+      const targetStudioVibe = vibeMap[vibeKey] || 'party';
+      const applyBtn = document.getElementById('btn-apply-vibe');
+      if (applyBtn) {
+        applyBtn.href = `studio.html?vibe=${targetStudioVibe}`;
+      }
     });
   });
 }
 
 /* ===================================================================
-   Modal Controller (Launch Studio)
+   Studio Controller
    =================================================================== */
 function initModal() {
-  const modal = document.getElementById('studio-modal');
-  const openBtns = document.querySelectorAll('.btn-open-studio');
-  const closeBtn = document.getElementById('modal-close');
-  const launchBtn = document.getElementById('btn-launch-app');
-  const urlInput = document.getElementById('app-url-input');
-
-  if (!modal) return;
-
-  // Retrieve saved URL or set fallback
-  const savedUrl = localStorage.getItem('birthday_studio_app_url') || '';
-  if (urlInput && savedUrl) {
-    urlInput.value = savedUrl;
-  }
-
-  function openModal() {
-    modal.classList.add('open');
-    document.body.style.overflow = 'hidden';
-  }
-
-  function closeModal() {
-    modal.classList.remove('open');
-    document.body.style.overflow = '';
-  }
-
-  openBtns.forEach((btn) => {
-    btn.addEventListener('click', (e) => {
-      e.preventDefault();
-      // If URL already set and user just clicks, can ask or open directly
-      const currentUrl = urlInput ? urlInput.value.trim() : '';
-      if (currentUrl && currentUrl.startsWith('http')) {
-        window.open(currentUrl, '_blank');
-      } else {
-        openModal();
-      }
-    });
-  });
-
-  if (closeBtn) closeBtn.addEventListener('click', closeModal);
-
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) closeModal();
-  });
-
-  if (launchBtn && urlInput) {
-    launchBtn.addEventListener('click', () => {
-      const targetUrl = urlInput.value.trim();
-      if (!targetUrl) {
-        alert('Vui lòng dán đường link Vercel hoặc link web của bạn vào ô trên để mở Studio!');
-        urlInput.focus();
-        return;
-      }
-      localStorage.setItem('birthday_studio_app_url', targetUrl);
-      window.open(targetUrl, '_blank');
-      closeModal();
-    });
-  }
+  // Direct navigation is handled via native anchor tags pointing to studio.html
 }

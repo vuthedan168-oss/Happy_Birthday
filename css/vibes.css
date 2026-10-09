@@ -1,0 +1,606 @@
+/* =========================================================
+ * VIBES.CSS - HỆ THỐNG MÀU SẮC & PHONG CÁCH THEO MỐI QUAN HỆ
+ * =========================================================
+ * Hỗ trợ 5 phong cách đặc trưng:
+ * 1. party   : Tiệc Tùng Rực Rỡ (Mặc định gốc - Hoàng Gia & Dạ Hội)
+ * 2. bff     : Bạn Thân Lầy Lội (Cyberpop Neon & Vàng Chanh - Trẻ trung, không sến)
+ * 3. family  : Gia Đình Ấm Áp (Nắng Mật Ong & Nâu Trầm - Tri ân bố mẹ, người thân)
+ * 4. elegant : Lịch Thiệp Tinh Tế (Xanh Sapphire & Bạc - Đồng nghiệp, trang trọng)
+ * 5. sweet   : Kẹo Ngọt Đáng Yêu (Hồng Đào & Dâu Tây Pastel - Em gái, bạn nữ kute)
+ * ========================================================= */
+
+/* =========================================================
+   1. BẢNG MÀU BIẾN CHO TỪNG VIBE (ÁP DỤNG LÊN BODY[DATA-VIBE])
+   ========================================================= */
+
+/* --- VIBE 2: BẠN THÂN LẦY LỘI (BFF & BANTER) --- */
+body[data-vibe="bff"] {
+  --color-gold: #00d2d3;
+  --color-gold-light: #54a0ff;
+  --color-rose: #c084fc;
+  --color-cream: #f0fdf4;
+  --color-bg-deep: #070e1b;
+  --primary-gold: #38bdf8;
+  --primary-rose: #a855f7;
+  --primary-pink: #06b6d4;
+  --border-glow: rgba(0, 210, 211, 0.45);
+}
+
+body[data-vibe="bff"].lovegift-stage-bg {
+  background: radial-gradient(58% 46% at 50% 40%, rgba(14, 116, 144, 0.5) 0%, rgba(15, 23, 42, 0.3) 42%, rgba(7, 14, 27, 0) 72%),
+              linear-gradient(180deg, #0e1e38 0%, #0c182b 52%, #070e1b 100%) !important;
+}
+
+body[data-vibe="bff"] .global-bg {
+  background:
+    radial-gradient(ellipse at 50% 15%, rgba(6, 182, 212, 0.25) 0%, transparent 45%),
+    radial-gradient(circle at 15% 25%, rgba(168, 85, 247, 0.2) 0%, transparent 40%),
+    radial-gradient(circle at 85% 30%, rgba(56, 189, 248, 0.22) 0%, transparent 45%),
+    radial-gradient(circle at 50% 85%, rgba(250, 204, 21, 0.15) 0%, transparent 50%),
+    linear-gradient(180deg, #0b1528 0%, #08101e 45%, #050a14 100%) !important;
+}
+
+body[data-vibe="bff"] .bunting-flag:nth-child(odd) {
+  background: linear-gradient(135deg, #00d2d3, #0984e3) !important;
+}
+body[data-vibe="bff"] .bunting-flag:nth-child(even) {
+  background: linear-gradient(135deg, #facc15, #e17055) !important;
+}
+body[data-vibe="bff"] .bunting-flag:nth-child(3n) {
+  background: linear-gradient(135deg, #a855f7, #6c5ce7) !important;
+}
+
+
+/* --- VIBE 3: GIA ĐÌNH ẤM ÁP (HEARTFELT FAMILY & WARMTH) --- */
+body[data-vibe="family"] {
+  --color-gold: #f59e0b;
+  --color-gold-light: #fde68a;
+  --color-rose: #d97706;
+  --color-cream: #fef3c7;
+  --color-bg-deep: #1a0f07;
+  --primary-gold: #f59e0b;
+  --primary-rose: #d97706;
+  --primary-pink: #b45309;
+  --border-glow: rgba(245, 158, 11, 0.45);
+}
+
+body[data-vibe="family"].lovegift-stage-bg {
+  background: radial-gradient(58% 46% at 50% 40%, rgba(180, 83, 9, 0.45) 0%, rgba(120, 53, 15, 0.25) 42%, rgba(26, 15, 7, 0) 72%),
+              linear-gradient(180deg, #2d180b 0%, #201108 52%, #140b05 100%) !important;
+}
+
+body[data-vibe="family"] .global-bg {
+  background:
+    radial-gradient(ellipse at 50% 15%, rgba(245, 158, 11, 0.25) 0%, transparent 45%),
+    radial-gradient(circle at 15% 25%, rgba(217, 119, 6, 0.2) 0%, transparent 40%),
+    radial-gradient(circle at 85% 30%, rgba(251, 191, 36, 0.22) 0%, transparent 45%),
+    radial-gradient(circle at 50% 85%, rgba(180, 83, 9, 0.15) 0%, transparent 50%),
+    linear-gradient(180deg, #26150a 0%, #1a0e07 45%, #100804 100%) !important;
+}
+
+body[data-vibe="family"] .bunting-flag:nth-child(odd) {
+  background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+}
+body[data-vibe="family"] .bunting-flag:nth-child(even) {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b) !important;
+}
+body[data-vibe="family"] .bunting-flag:nth-child(3n) {
+  background: linear-gradient(135deg, #b45309, #78350f) !important;
+}
+
+
+/* --- VIBE 4: LỊCH THIỆP TINH TẾ (ELEGANT & COLLEAGUES) --- */
+body[data-vibe="elegant"] {
+  --color-gold: #38bdf8;
+  --color-gold-light: #bae6fd;
+  --color-rose: #60a5fa;
+  --color-cream: #f8fafc;
+  --color-bg-deep: #030712;
+  --primary-gold: #38bdf8;
+  --primary-rose: #2563eb;
+  --primary-pink: #1d4ed8;
+  --border-glow: rgba(56, 189, 248, 0.45);
+}
+
+body[data-vibe="elegant"].lovegift-stage-bg {
+  background: radial-gradient(58% 46% at 50% 40%, rgba(30, 58, 138, 0.45) 0%, rgba(15, 23, 42, 0.3) 42%, rgba(3, 7, 18, 0) 72%),
+              linear-gradient(180deg, #0d1b33 0%, #091325 52%, #030712 100%) !important;
+}
+
+body[data-vibe="elegant"] .global-bg {
+  background:
+    radial-gradient(ellipse at 50% 15%, rgba(56, 189, 248, 0.22) 0%, transparent 45%),
+    radial-gradient(circle at 15% 25%, rgba(37, 99, 235, 0.2) 0%, transparent 40%),
+    radial-gradient(circle at 85% 30%, rgba(96, 165, 250, 0.18) 0%, transparent 45%),
+    radial-gradient(circle at 50% 85%, rgba(30, 58, 138, 0.15) 0%, transparent 50%),
+    linear-gradient(180deg, #0c172a 0%, #070f1e 45%, #020617 100%) !important;
+}
+
+body[data-vibe="elegant"] .bunting-flag:nth-child(odd) {
+  background: linear-gradient(135deg, #38bdf8, #1d4ed8) !important;
+}
+body[data-vibe="elegant"] .bunting-flag:nth-child(even) {
+  background: linear-gradient(135deg, #60a5fa, #2563eb) !important;
+}
+body[data-vibe="elegant"] .bunting-flag:nth-child(3n) {
+  background: linear-gradient(135deg, #94a3b8, #475569) !important;
+}
+
+
+/* --- VIBE 5: KẸO NGỌT DỄ THƯƠNG (CUTE & SWEET) --- */
+body[data-vibe="sweet"] {
+  --color-gold: #fb7185;
+  --color-gold-light: #fecdd3;
+  --color-rose: #f43f5e;
+  --color-cream: #fff1f2;
+  --color-bg-deep: #1a0812;
+  --primary-gold: #fb7185;
+  --primary-rose: #e11d48;
+  --primary-pink: #f43f5e;
+  --border-glow: rgba(251, 113, 133, 0.45);
+}
+
+body[data-vibe="sweet"].lovegift-stage-bg {
+  background: radial-gradient(58% 46% at 50% 40%, rgba(190, 24, 93, 0.45) 0%, rgba(136, 19, 55, 0.25) 42%, rgba(26, 8, 18, 0) 72%),
+              linear-gradient(180deg, #2e1022 0%, #220c19 52%, #14050f 100%) !important;
+}
+
+body[data-vibe="sweet"] .global-bg {
+  background:
+    radial-gradient(ellipse at 50% 15%, rgba(251, 113, 133, 0.25) 0%, transparent 45%),
+    radial-gradient(circle at 15% 25%, rgba(244, 63, 94, 0.2) 0%, transparent 40%),
+    radial-gradient(circle at 85% 30%, rgba(244, 114, 182, 0.2) 0%, transparent 45%),
+    radial-gradient(circle at 50% 85%, rgba(225, 29, 72, 0.15) 0%, transparent 50%),
+    linear-gradient(180deg, #270e1c 0%, #1c0914 45%, #10040b 100%) !important;
+}
+
+body[data-vibe="sweet"] .bunting-flag:nth-child(odd) {
+  background: linear-gradient(135deg, #fb7185, #f43f5e) !important;
+}
+body[data-vibe="sweet"] .bunting-flag:nth-child(even) {
+  background: linear-gradient(135deg, #f472b6, #ec4899) !important;
+}
+body[data-vibe="sweet"] .bunting-flag:nth-child(3n) {
+  background: linear-gradient(135deg, #fbcfe8, #f43f5e) !important;
+}
+
+
+/* =========================================================
+   2. GIAO DIỆN CHỌN VIBE TRONG STUDIO (CREATOR UI)
+   ========================================================= */
+
+.vibe-presets-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+  margin-top: 12px;
+}
+
+.vibe-card {
+  position: relative;
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 16px 14px;
+  cursor: pointer;
+  transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  user-select: none;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.vibe-card:hover {
+  transform: translateY(-3px);
+  border-color: #f59e0b;
+  background: #fffdf5;
+  box-shadow: 0 8px 20px rgba(245, 158, 11, 0.12);
+}
+
+.vibe-card.active {
+  border: 2px solid #f59e0b;
+  background: #fffbeb;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.25), 0 8px 22px rgba(245, 158, 11, 0.18);
+}
+
+.vibe-card input[type="radio"] {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  accent-color: #f59e0b;
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.vibe-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.vibe-icon {
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.vibe-title-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.vibe-title {
+  font-size: 1.02rem;
+  font-weight: 800;
+  color: #0f172a !important; /* Đen sẫm rõ nét */
+  letter-spacing: -0.2px;
+}
+
+.vibe-audience {
+  font-size: 0.78rem;
+  color: #64748b !important; /* Xám than đậm */
+  font-weight: 600;
+  margin-top: 1px;
+}
+
+.vibe-palette {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.vibe-color-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid #cbd5e1;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.vibe-desc {
+  font-size: 0.82rem;
+  color: #334155 !important; /* Xám xanh đậm nét, cực kỳ dễ đọc */
+  line-height: 1.45;
+  margin-top: 2px;
+}
+
+.btn-apply-vibe-preset {
+  margin-top: auto;
+  padding: 8px 12px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  border-radius: 10px;
+  background: #f8fafc;
+  border: 1.5px solid #cbd5e1;
+  color: #0f172a !important;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.btn-apply-vibe-preset:hover {
+  background: #fef3c7;
+  color: #b45309 !important;
+  border-color: #f59e0b;
+}
+
+.vibe-card.active .btn-apply-vibe-preset {
+  background: #fef3c7;
+  border-color: #f59e0b;
+  color: #92400e !important;
+}
+
+
+/* =========================================================
+   3. GIAO DIỆN THƯƠNG MẠI HÓA: VIETQR CHECKOUT & VIP SYSTEM (25K)
+   ========================================================= */
+
+/* VIP Badge trên Header */
+.vip-header-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #ffd98e 0%, #c9a24b 100%);
+  color: #2c1520;
+  font-weight: 700;
+  font-size: 0.84rem;
+  padding: 7px 15px;
+  border-radius: 50px;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(201, 162, 75, 0.35);
+  border: none;
+  transition: transform 0.2s, box-shadow 0.2s;
+  text-decoration: none;
+}
+
+.vip-header-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(201, 162, 75, 0.5);
+}
+
+.vip-status-unlocked {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35) !important;
+}
+
+/* Nút Chủ Sở Hữu */
+.btn-owner-admin {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1.5px solid rgba(56, 189, 248, 0.5);
+  color: #38bdf8;
+  font-weight: 700;
+  font-size: 0.82rem;
+  padding: 7px 14px;
+  border-radius: 50px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s ease;
+}
+
+.btn-owner-admin:hover {
+  background: rgba(56, 189, 248, 0.22);
+  border-color: #38bdf8;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
+}
+
+/* Badge VIP Lock trên thẻ Vibe */
+.vibe-card.vip-locked {
+  position: relative;
+}
+
+.vibe-card.vip-locked::after {
+  content: "👑 VIP 25k";
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: linear-gradient(135deg, #ffd98e 0%, #c9a24b 100%);
+  color: #2c1520;
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 20px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+}
+
+/* Badge VIP Lock trên Card Âm Nhạc */
+.scene-music-card.vip-locked {
+  position: relative;
+}
+
+.scene-music-card.vip-locked .scene-music-title::after {
+  content: " 🔒 VIP";
+  font-size: 0.72rem;
+  color: #d97706;
+  font-weight: 800;
+}
+
+/* Modal Thanh Toán VietQR */
+.payment-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 6, 14, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.2rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.payment-modal-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.payment-modal-card {
+  background: linear-gradient(180deg, #241426 0%, #150c18 100%);
+  border: 1.5px solid rgba(255, 217, 142, 0.4);
+  border-radius: 24px;
+  max-width: 440px;
+  width: 100%;
+  padding: 24px;
+  color: #fff;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.65), 0 0 35px rgba(201, 162, 75, 0.2);
+  position: relative;
+  max-height: 90vh;
+  overflow-y: auto;
+  text-align: center;
+}
+
+.payment-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #fff;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.payment-modal-close:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.payment-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255, 217, 142, 0.18);
+  border: 1px solid rgba(255, 217, 142, 0.4);
+  color: #ffd98e;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 50px;
+  margin-bottom: 8px;
+}
+
+.payment-modal-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 4px;
+}
+
+.payment-modal-subtitle {
+  font-size: 0.86rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 16px;
+  line-height: 1.4;
+}
+
+/* Khung hiển thị ảnh QR code */
+.payment-qr-frame {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 12px;
+  max-width: 260px;
+  margin: 0 auto 16px auto;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.payment-qr-img {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  display: block;
+}
+
+/* Thông tin chuyển khoản */
+.payment-info-box {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.payment-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.88rem;
+}
+
+.payment-info-label {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.payment-info-val {
+  font-weight: 700;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.payment-price-tag {
+  color: #ffd98e !important;
+  font-size: 1.15rem !important;
+  font-weight: 800 !important;
+}
+
+.btn-copy-chip {
+  background: rgba(255, 217, 142, 0.2);
+  border: 1px solid rgba(255, 217, 142, 0.4);
+  color: #ffd98e;
+  font-size: 0.72rem;
+  padding: 2px 7px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-copy-chip:hover {
+  background: rgba(255, 217, 142, 0.4);
+}
+
+/* Các nút kích hoạt */
+.btn-confirm-payment {
+  width: 100%;
+  padding: 12px 20px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #2c1520;
+  background: linear-gradient(135deg, #ffd98e 0%, #c9a24b 100%);
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  box-shadow: 0 4px 18px rgba(201, 162, 75, 0.4);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-confirm-payment:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(201, 162, 75, 0.6);
+}
+
+/* Ô nhập mã VIP code */
+.vip-code-input-group {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.15);
+  display: flex;
+  gap: 8px;
+}
+
+.vip-code-input {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  padding: 8px 12px;
+  color: #fff;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+}
+
+.vip-code-input:focus {
+  outline: none;
+  border-color: #ffd98e;
+}
+
+.btn-verify-vip-code {
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #fff;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.btn-verify-vip-code:hover {
+  background: rgba(255, 217, 142, 0.3);
+  color: #ffd98e;
+}

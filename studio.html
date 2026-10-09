@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Studio Tạo Thiệp Sinh Nhật & Kỷ Niệm 🎁✨</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✨</text></svg>">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600;700;800;900&family=Be+Vietnam+Pro:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="css/creator.css?v=4">
+  <link rel="stylesheet" href="css/vibes.css?v=5">
+  <script src="js/qrcode.min.js?v=4"></script>
+</head>
+<body>
+
+  <!-- Background Animated Bubbles -->
+  <div class="creator-bg-glow"></div>
+
+  <!-- Header / Navigation -->
+  <header class="creator-header">
+    <div class="header-container">
+      <div class="logo-group" id="header-logo" title="Birthday & Celebration Studio">
+        <span class="logo-icon">🎂</span>
+        <div>
+          <h1 class="logo-title">Birthday & Celebration Studio</h1>
+          <p class="logo-sub">Tạo thiệp tương tác, vòng quay may mắn & nhạc sinh nhật</p>
+        </div>
+      </div>
+
+      <!-- Auto-Save Draft Status Indicator & Quick Actions -->
+      <div class="header-draft-status" id="header-draft-status">
+        <div class="draft-indicator-wrapper" id="draft-indicator-wrapper" title="Dữ liệu được tự động lưu liên tục vào trình duyệt của bạn">
+          <span class="draft-indicator-dot saved" id="draft-dot"></span>
+          <span class="draft-status-text" id="draft-status-text">Đã tự động lưu nháp</span>
+        </div>
+        <div class="draft-actions-group">
+          <button type="button" class="btn-draft-action" id="btn-manual-save-draft" title="Lưu nháp ngay lập tức (Ctrl+S)">
+            💾 Lưu nháp
+          </button>
+          <button type="button" class="btn-draft-action btn-draft-reset" id="btn-reset-draft" title="Xóa nháp và đặt lại nội dung mẫu ban đầu">
+            🔄 Đặt lại
+          </button>
+        </div>
+      </div>
+      
+      <div class="header-actions">
+        <a href="index.html" class="btn btn-outline" style="text-decoration:none; display: inline-flex; align-items: center; gap: 4px;">
+          🏠 Trang Giới Thiệu
+        </a>
+        <button type="button" class="btn-owner-admin" id="btn-open-owner-modal" title="Dành riêng cho Chủ Sở Hữu (Cấp mã kích hoạt & quản lý VIP)">
+          🔑 Chủ Sở Hữu
+        </button>
+        <button type="button" class="vip-header-badge" id="btn-open-vip-modal" title="Nâng cấp gói VIP 25.000đ">
+          👑 Nâng Cấp VIP (25k)
+        </button>
+        <a href="gift.html" class="btn btn-outline" target="_blank" id="btn-view-demo">
+          👁️ Xem Thiệp Mẫu
+        </a>
+        <button type="button" class="btn btn-primary" id="btn-quick-generate">
+          ✨ Tạo & Lấy Link
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Creator Container -->
+  <main class="creator-main">
+    <div class="form-wrapper">
+
+      <!-- THÔNG BÁO TỰ ĐỘNG KHÔI PHỤC BẢN NHÁP (KHI CÓ DỮ LIỆU ĐANG LÀM DỞ) -->
+      <div id="draft-recovery-alert" class="draft-recovery-alert" style="display: none;">
+        <div class="draft-alert-icon">✨</div>
+        <div class="draft-alert-content">
+          <div class="draft-alert-title">Đã tự động khôi phục nội dung bạn đang làm dở!</div>
+          <div class="draft-alert-desc" id="draft-alert-time-text">Bản nháp được lưu lúc --:--:-- trên trình duyệt này.</div>
+        </div>
+        <div class="draft-alert-actions">
+          <button type="button" class="btn-alert-dismiss" id="btn-dismiss-draft-alert">👍 Tiếp tục sửa</button>
+          <button type="button" class="btn-alert-reset" id="btn-alert-reset-draft">🔄 Bắt đầu lại từ đầu</button>
+        </div>
+      </div>
+
+      <div class="intro-card">
+        <div class="intro-badge">✨ MIỄN PHÍ & CHẠY 100% TRÊN GITHUB PAGES ✨</div>
+        <h2>Tùy biến thiệp sinh nhật của riêng bạn</h2>
+        <p>Điền thông tin bên dưới để tạo thiệp chúc mừng độc nhất vô nhị. Người nhận sẽ được mở hộp quà 3D, thổi nến bánh kem, quay vòng quay trúng 6 món quà và nghe giai điệu ngọt ngào!</p>
+      </div>
+
+      <form id="creator-form" autocomplete="off" novalidate>
+        
+        <!-- SECTION 0: CHỌN VIBE & PHONG CÁCH MỐI QUAN HỆ -->
+        <div class="form-section">
+          <div class="section-heading">
+            <span class="heading-icon">🎭</span>
+            <div>
+              <h3>Chọn Vibe & Phong Cách Thiệp (Relationship & Mood)</h3>
+              <p>Tùy biến bảng màu và phong cách thiệp phù hợp cho bạn bè, gia đình, người thân hay tiệc tùng</p>
+            </div>
+          </div>
+
+          <div class="vibe-presets-grid" id="vibe-presets-container">
+            <!-- 1. Tiệc Tùng Rực Rỡ (Mặc định gốc) -->
+            <label class="vibe-card active" data-vibe="party">
+              <input type="radio" name="vibe-preset" value="party" checked>
+              <div class="vibe-header">
+                <span class="vibe-icon">🎉</span>
+                <div class="vibe-title-group">
+                  <span class="vibe-title">Tiệc Rực Rỡ</span>
+                  <span class="vibe-audience">Mọi người • Cổ điển</span>
+                </div>
+              </div>
+              <div class="vibe-palette">
+                <span class="vibe-color-dot" style="background: #18122c;" title="Nền Midnight"></span>
+                <span class="vibe-color-dot" style="background: #fbbf24;" title="Vàng Gold Hoàng Gia"></span>
+                <span class="vibe-color-dot" style="background: #f43f5e;" title="Hồng Dạ Hội"></span>
+              </div>
+              <p class="vibe-desc">Phong cách hoàng gia lung linh, phù hợp cho tất cả mọi dịp sinh nhật và bữa tiệc.</p>
+              <button type="button" class="btn-apply-vibe-preset" data-apply="party">⚡ Nạp gợi ý phong cách này</button>
+            </label>
+
+            <!-- 2. Bạn Thân Lầy Lội -->
+            <label class="vibe-card" data-vibe="bff">
+              <input type="radio" name="vibe-preset" value="bff">
+              <div class="vibe-header">
+                <span class="vibe-icon">😂</span>
+                <div class="vibe-title-group">
+                  <span class="vibe-title">Bạn Thân Lầy Lội</span>
+                  <span class="vibe-audience">BFF • Nhóm cạ cứng</span>
+                </div>
+              </div>
+              <div class="vibe-palette">
+                <span class="vibe-color-dot" style="background: #0b1528;" title="Nền Cyber Dark"></span>
+                <span class="vibe-color-dot" style="background: #00d2d3;" title="Xanh Cyan Neon"></span>
+                <span class="vibe-color-dot" style="background: #facc15;" title="Vàng Chanh"></span>
+                <span class="vibe-color-dot" style="background: #a855f7;" title="Tím Neon"></span>
+              </div>
+              <p class="vibe-desc">Trẻ trung, bùng nổ, không một chút sến súa. Rất hợp để troll và quẩy cùng bạn thân.</p>
+              <button type="button" class="btn-apply-vibe-preset" data-apply="bff">⚡ Nạp gợi ý phong cách này</button>
+            </label>
+
+            <!-- 3. Gia Đình Ấm Áp -->
+            <label class="vibe-card" data-vibe="family">
+              <input type="radio" name="vibe-preset" value="family">
+              <div class="vibe-header">
+                <span class="vibe-icon">🏡</span>
+                <div class="vibe-title-group">
+                  <span class="vibe-title">Gia Đình Ấm Áp</span>
+                  <span class="vibe-audience">Bố Mẹ • Người thân</span>
+                </div>
+              </div>
+              <div class="vibe-palette">
+                <span class="vibe-color-dot" style="background: #1a0f07;" title="Nền Gỗ Mun Ấm"></span>
+                <span class="vibe-color-dot" style="background: #f59e0b;" title="Nắng Mật Ong"></span>
+                <span class="vibe-color-dot" style="background: #d97706;" title="Hổ Phách Trầm"></span>
+                <span class="vibe-color-dot" style="background: #fef3c7;" title="Kem Sữa"></span>
+              </div>
+              <p class="vibe-desc">Trầm ấm, trang trọng, xúc động. Dành trọn tình cảm tri ân bố mẹ, người thân trong nhà.</p>
+              <button type="button" class="btn-apply-vibe-preset" data-apply="family">⚡ Nạp gợi ý phong cách này</button>
+            </label>
+
+            <!-- 4. Lịch Thiệp Tinh Tế -->
+            <label class="vibe-card" data-vibe="elegant">
+              <input type="radio" name="vibe-preset" value="elegant">
+              <div class="vibe-header">
+                <span class="vibe-icon">👔</span>
+                <div class="vibe-title-group">
+                  <span class="vibe-title">Lịch Thiệp Tinh Tế</span>
+                  <span class="vibe-audience">Đồng nghiệp • Bạn bè</span>
+                </div>
+              </div>
+              <div class="vibe-palette">
+                <span class="vibe-color-dot" style="background: #030712;" title="Nền Xanh Đêm"></span>
+                <span class="vibe-color-dot" style="background: #38bdf8;" title="Xanh Băng Sapphire"></span>
+                <span class="vibe-color-dot" style="background: #2563eb;" title="Navy Quý Phái"></span>
+                <span class="vibe-color-dot" style="background: #f8fafc;" title="Bạc Ánh Sao"></span>
+              </div>
+              <p class="vibe-desc">Hiện đại, tối giản và sang trọng. Dành tặng bạn bè, đồng nghiệp công ty hoặc cấp trên.</p>
+              <button type="button" class="btn-apply-vibe-preset" data-apply="elegant">⚡ Nạp gợi ý phong cách này</button>
+            </label>
+
+            <!-- 5. Kẹo Ngọt Đáng Yêu -->
+            <label class="vibe-card" data-vibe="sweet">
+              <input type="radio" name="vibe-preset" value="sweet">
+              <div class="vibe-header">
+                <span class="vibe-icon">🍓</span>
+                <div class="vibe-title-group">
+                  <span class="vibe-title">Kẹo Ngọt Dễ Thương</span>
+                  <span class="vibe-audience">Em gái • Bạn nữ kute</span>
+                </div>
+              </div>
+              <div class="vibe-palette">
+                <span class="vibe-color-dot" style="background: #1a0812;" title="Nền Thạch Anh Tím"></span>
+                <span class="vibe-color-dot" style="background: #fb7185;" title="Hồng Đào Pastel"></span>
+                <span class="vibe-color-dot" style="background: #f43f5e;" title="Dâu Tây"></span>
+                <span class="vibe-color-dot" style="background: #fff1f2;" title="Vani Ngọt"></span>
+              </div>
+              <p class="vibe-desc">Tươi vui, ngọt ngào, đáng yêu. Thích hợp cho em gái hoặc bạn nữ thích sự dễ thương.</p>
+              <button type="button" class="btn-apply-vibe-preset" data-apply="sweet">⚡ Nạp gợi ý phong cách này</button>
+            </label>
+          </div>
+        </div>
+
+        <!-- SECTION 1: THÔNG TIN CƠ BẢN -->
+        <div class="form-section">
+          <div class="section-heading">
+            <span class="heading-icon">💌</span>
+            <div>
+              <h3>Thông Tin Người Nhận & Lời Chúc</h3>
+              <p>Lời chúc ấm áp và tiêu đề rực rỡ dành cho người ấy</p>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="input-title">Tiêu đề thiệp: <span class="req">*</span></label>
+            <input type="text" id="input-title" class="form-control" placeholder="Tiêu đề, Ví dụ: Chúc mừng sinh nhật bạn thân!" required value="Chúc Mừng Sinh Nhật! 🎉🎂✨">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col">
+              <label for="input-recipient">Tên người nhận: <span class="req">*</span></label>
+              <input type="text" id="input-recipient" class="form-control" placeholder="Ví dụ: Hương Giang, My Baby, Cậu Bạn Thân..." required value="Hương Giang">
+            </div>
+            <div class="form-group col">
+              <label for="input-sender">Tên người gửi: <span class="req">*</span></label>
+              <input type="text" id="input-sender" class="form-control" placeholder="Ví dụ: Tớ, Anh, Bạn Thân..." required value="Tớ">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col">
+              <label for="input-birth-day">Ngày sinh nhật: <span class="req">*</span></label>
+              <input type="number" id="input-birth-day" class="form-control" min="1" max="31" value="17" placeholder="1 - 31" required>
+              <small class="field-hint">Kích hoạt vòng quay số Date Reel cuộn đến ngày này!</small>
+            </div>
+            <div class="form-group col">
+              <label for="input-birth-month">Tháng sinh: <span class="req">*</span></label>
+              <input type="number" id="input-birth-month" class="form-control" min="1" max="12" value="7" placeholder="1 - 12" required>
+              <small class="field-hint">Tháng sinh của người nhận</small>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="input-nickname">Biệt danh / Lời khen dễ thương:</label>
+            <input type="text" id="input-nickname" class="form-control" placeholder="Ví dụ: Cô bạn đáng yêu & rạng rỡ nhất ✨" value="Cô bạn đáng yêu & rạng rỡ nhất ✨">
+          </div>
+
+
+
+          <div class="form-group">
+            <label for="input-wishes">Nội dung bức thư (Lời chúc tâm tình, câu chuyện kỷ niệm): <span class="req">*</span></label>
+            <textarea id="input-wishes" class="form-control textarea-lg" rows="6" placeholder="Câu chúc, lời nhắn nhủ đến bạn đấy. Mỗi đoạn văn có thể xuống dòng..." required>Chúc mừng sinh nhật cậu nhé! 🎉🎂
+
+Năm vừa rồi chắc chẳng dễ dàng gì, vậy mà cậu vẫn đi tới được hôm nay — giỏi hơn cậu nghĩ nhiều đấy.
+
+Tớ chỉ mong cậu ăn ngon ngủ đủ, bớt lo một chút, và nhớ là luôn có người ở đây khi cậu cần.
+
+Chúc cậu tuổi mới ngập tràn niềm vui, nụ cười rạng rỡ và luôn hạnh phúc! 💖✨</textarea>
+            <small class="field-hint">💡 Lời chúc này sẽ hiển thị trên cuộn thư da vintage cổ điển cực kỳ sang trọng!</small>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col">
+              <label for="input-signature">Chữ ký kết thư:</label>
+              <input type="text" id="input-signature" class="form-control" placeholder="Ví dụ: — Tớ" value="— Tớ">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="input-custom-slug">Đường dẫn / Tên gợi nhớ (tùy chọn):</label>
+            <div class="input-with-prefix">
+              <span class="url-prefix">🔗</span>
+              <input type="text" id="input-custom-slug" class="form-control" placeholder="nhap-duong-dan-tai-day (ví dụ: huong-giang-hpbd)">
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 2: HẸN GIỜ & THỜI GIAN CHO PHÉP XEM -->
+        <div class="form-section">
+          <div class="section-heading">
+            <span class="heading-icon">⏳</span>
+            <div>
+              <h3>Giai Đoạn 0: Hẹn Giờ Mở Thiệp (Countdown Lock)</h3>
+              <p>Khóa bí mật: Người nhận mở sớm sẽ thấy màn hình đếm ngược hồi hộp chờ đến giờ G!</p>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col">
+              <label for="input-start-date">Ngày bắt đầu cho phép xem:</label>
+              <input type="datetime-local" id="input-start-date" class="form-control">
+              <small class="field-hint">Để trống nếu muốn người nhận có thể xem ngay lập tức bất cứ lúc nào.</small>
+            </div>
+            <div class="form-group col">
+              <label for="input-end-date">Ngày kết thúc cho phép xem (tùy chọn):</label>
+              <input type="datetime-local" id="input-end-date" class="form-control">
+              <small class="field-hint">Để trống nếu không giới hạn thời gian.</small>
+            </div>
+          </div>
+
+
+          <!-- Quick Action Buttons for Countdown Lock -->
+          <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px;">
+            <button type="button" class="btn-secondary" id="btn-quick-set-bday-time" style="padding: 8px 14px; font-size: 0.85rem; border-radius: 12px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color: #fff; cursor: pointer;">
+              ⚡ Hẹn đúng 00:00 ngày sinh nhật
+            </button>
+            <button type="button" class="btn-secondary" id="btn-preview-countdown-lock" style="padding: 8px 14px; font-size: 0.85rem; border-radius: 12px; background: rgba(251,191,36,0.15); border: 1px solid rgba(251,191,36,0.4); color: #fde68a; cursor: pointer;">
+              👁️ Xem Thử Màn Hình Khóa Đếm Ngược (Giai Đoạn 0)
+            </button>
+          </div>
+        </div>
+
+        
+        <!-- SECTION 2.5: CÂU HỎI TRẮC NGHIỆM ĐỘNG -->
+        <div class="form-section">
+          <div class="section-heading">
+            <span class="heading-icon">🕹️</span>
+            <div>
+              <h3>Câu Hỏi Trắc Nghiệm (Thử Thách Mở Tiệc)</h3>
+              <p>Thêm số lượng câu hỏi tùy thích để thử thách người nhận trước khi vào tiệc!</p>
+            </div>
+          </div>
+          <div id="quiz-questions-container">
+            <!-- Danh sách câu hỏi render động từ creator.js -->
+          </div>
+          <div class="quiz-actions-bar">
+            <button type="button" class="btn-add-q" id="btn-add-quiz-q">
+              ➕ Thêm Câu Hỏi Mới
+            </button>
+          </div>
+        </div>
+
+        <!-- SECTION 3: HỆ THỐNG ÂM NHẠC THEO TỪNG CHƯƠNG & BỐI CẢNH (VIP 25K) -->
+        <div class="form-section highlight-section" id="section-scene-music">
+          <div class="section-heading">
+            <span class="heading-icon">🎵✨</span>
+            <div>
+              <h3>Hệ Thống Âm Nhạc Theo Từng Chương (VIP Multi-Scene Music)</h3>
+              <p>Mỗi giai đoạn mang một màu sắc cảm xúc riêng. Tự động chuyển đổi giai điệu điện ảnh khi người nhận lướt qua từng chương của thiệp!</p>
+            </div>
+          </div>
+
+          <!-- VIP Lock / Unlocked Banner -->
+          <div class="vip-music-lock-banner" id="vip-music-lock-banner">
+            <div class="vip-banner-content">
+              <span class="vip-banner-crown">👑</span>
+              <div>
+                <div class="vip-banner-title">Đặc Quyền Gói VIP 25.000đ: Đổi Nhạc Theo Từng Chương & Bối Cảnh</div>
+                <div class="vip-banner-sub">Mở khóa toàn bộ 5 bối cảnh âm nhạc (Đếm ngược 00:00, Khởi đầu tiệc, Thổi nến, Chọn điều ước, Album ảnh, Bức thư tâm tình & Sao băng). Tải file nhạc riêng và lưu trữ vĩnh viễn!</div>
+              </div>
+            </div>
+            <button type="button" class="btn-unlock-vip-now" id="btn-unlock-music-vip">
+              ⚡ Mở Khóa VIP 25k
+            </button>
+          </div>
+
+          <div class="scene-music-grid">
+            <!-- CHƯƠNG 1: ĐẾM NGƯỢC HẸN GIỜ 00:00 -->
+            <div class="scene-music-card stage-countdown" data-stage="countdown">
+              <div class="scene-music-header">
+                <span class="scene-music-icon">⏳🎵</span>
+                <div>
+                  <div class="scene-music-title">Chương 1: Đếm Ngược 00:00</div>
+                  <div class="scene-music-desc">Phát lúc người nhận chờ đến giờ G để mở thiệp</div>
+                </div>
+              </div>
+              <div class="form-group mb-2">
+                <select id="music-countdown" class="form-control form-select select-stage-music" data-stage="countdown">
+                  <option value="assets/audio/ngan-nam-anh-sang.mp3" selected>✨ Ngàn Năm Ánh Sáng (Du dương, hoài niệm)</option>
+                  <option value="assets/audio/chung-ta-cua-hien-tai.mp3">💎 Chúng Ta Của Hiện Tại - Sơn Tùng M-TP</option>
+                  <option value="assets/audio/birthday.mp3">🎂 Birthday - Somi (Gốc)</option>
+                  <option value="assets/audio/Happy Birthday Remix.m4a">🎉 Happy Birthday Remix</option>
+                  <option value="assets/audio/Noi Nay Co Anh.m4a">💌 Nơi Này Có Anh</option>
+                  <option value="assets/audio/Yung Kai.m4a">🌸 Blue - Yung Kai</option>
+                  <option value="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3">🎧 Sweet Lofi Memories</option>
+                  <option value="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=romantic-piano-10738.mp3">🎻 Romantic Harp & Strings</option>
+                  <option value="https://cdn.pixabay.com/download/audio/2022/10/14/audio_9939f792cb.mp3?filename=happy-birthday-party-124632.mp3">🎉 Upbeat Celebration</option>
+                  <option value="">🔔 Không phát nhạc khi đếm ngược (Im lặng)</option>
+                  <option value="custom-upload">📁 Tải file từ máy tính...</option>
+                  <option value="custom-url">🔗 Nhập link MP3 tùy chỉnh...</option>
+                </select>
+              </div>
+              <div class="stage-upload-box mb-2" style="display:none;" data-stage="countdown">
+                <input type="file" id="input-countdown-file" class="form-control form-control-sm stage-file-input" accept="audio/*,.mp3,.wav,.m4a,.ogg,.aac" data-stage="countdown">
+                <small class="field-hint">Hỗ trợ file .mp3, .wav, .m4a từ máy tính</small>
+              </div>
+              <div class="stage-url-box mb-2" style="display:none;" data-stage="countdown">
+                <input type="url" id="input-countdown-url" class="form-control form-control-sm stage-url-input" placeholder="https://domain.com/music.mp3" data-stage="countdown">
+              </div>
+              <div class="scene-music-actions">
+                <button type="button" class="audio-preview-btn" data-target="music-countdown">▶️ Nghe thử</button>
+                <span class="audio-status-badge" data-stage="countdown">Ngàn Năm Ánh Sáng</span>
+              </div>
+            </div>
+
+            <!-- CHƯƠNG 2: MỞ ĐẦU & THỔI NẾN BÁNH KEM -->
+            <div class="scene-music-card stage-intro" data-stage="intro">
+              <div class="scene-music-header">
+                <span class="scene-music-icon">🎂🎉</span>
+                <div>
+                  <div class="scene-music-title">Chương 2: Mở Đầu & Thổi Nến</div>
+                  <div class="scene-music-desc">Cuộn ngày sinh nhật, câu đố quiz & thổi nến 3D</div>
+                </div>
+              </div>
+              <div class="form-group mb-2">
+                <select id="music-intro" class="form-control form-select select-stage-music" data-stage="intro">
+                  <option value="assets/audio/birthday.mp3" selected>🎂 Birthday - Somi (Sôi động, ngọt ngào)</option>
+                  <option value="assets/audio/Happy Birthday Remix.m4a">🎉 Happy Birthday Remix (Bùng nổ)</option>
+                  <option value="assets/audio/Yung Kai.m4a">🌸 Blue - Yung Kai (Sâu lắng)</option>
+                  <option value="assets/audio/Noi Nay Co Anh.m4a">💌 Nơi Này Có Anh</option>
+                  <option value="assets/audio/chung-ta-cua-hien-tai.mp3">💎 Chúng Ta Của Hiện Tại</option>
+                  <option value="assets/audio/ngan-nam-anh-sang.mp3">✨ Ngàn Năm Ánh Sáng</option>
+                  <option value="https://cdn.pixabay.com/download/audio/2022/10/14/audio_9939f792cb.mp3?filename=happy-birthday-party-124632.mp3">🎈 Upbeat Celebration</option>
+                  <option value="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=romantic-piano-10738.mp3">🎻 Romantic Harp & Piano</option>
+                  <option value="custom-upload">📁 Tải file từ máy tính...</option>
+                  <option value="custom-url">🔗 Nhập link MP3 tùy chỉnh...</option>
+                </select>
+              </div>
+              <div class="stage-upload-box mb-2" style="display:none;" data-stage="intro">
+                <input type="file" id="input-intro-file" class="form-control form-control-sm stage-file-input" accept="audio/*,.mp3,.wav,.m4a,.ogg,.aac" data-stage="intro">
+                <small class="field-hint">Hỗ trợ file .mp3, .wav, .m4a từ máy tính</small>
+              </div>
+              <div class="stage-url-box mb-2" style="display:none;" data-stage="intro">
+                <input type="url" id="input-intro-url" class="form-control form-control-sm stage-url-input" placeholder="https://domain.com/music.mp3" data-stage="intro">
+              </div>
+              <div class="scene-music-actions">
+                <button type="button" class="audio-preview-btn" data-target="music-intro">▶️ Nghe thử</button>
+                <span class="audio-status-badge" data-stage="intro">Birthday - Somi</span>
+              </div>
+            </div>
+
+            <!-- CHƯƠNG 3: NHỊP CẢM XÚC & CHỌN ĐIỀU ƯỚC -->
+            <div class="scene-music-card stage-beats" data-stage="beats">
+              <div class="scene-music-header">
+                <span class="scene-music-icon">💫🕯️</span>
+                <div>
+                  <div class="scene-music-title">Chương 3: Nhịp Cảm Xúc & Điều Ước</div>
+                  <div class="scene-music-desc">Khoảnh khắc nến vừa tắt và lật mở 4 thẻ bài điều ước</div>
+                </div>
+              </div>
+              <div class="form-group mb-2">
+                <select id="music-beats" class="form-control form-select select-stage-music" data-stage="beats">
+                  <option value="assets/audio/Yung Kai.m4a" selected>🌸 Blue - Yung Kai (Sâu lắng, ấm áp)</option>
+                  <option value="assets/audio/Noi Nay Co Anh.m4a">💌 Nơi Này Có Anh</option>
+                  <option value="assets/audio/chung-ta-cua-hien-tai.mp3">💎 Chúng Ta Của Hiện Tại</option>
+                  <option value="assets/audio/ngan-nam-anh-sang.mp3">✨ Ngàn Năm Ánh Sáng</option>
+                  <option value="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3">🎧 Sweet Lofi Memories</option>
+                  <option value="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=romantic-piano-10738.mp3">🎻 Romantic Harp & Piano</option>
+                  <option value="assets/audio/birthday.mp3">🎂 Birthday - Somi</option>
+                  <option value="custom-upload">📁 Tải file từ máy tính...</option>
+                  <option value="custom-url">🔗 Nhập link MP3 tùy chỉnh...</option>
+                </select>
+              </div>
+              <div class="stage-upload-box mb-2" style="display:none;" data-stage="beats">
+                <input type="file" id="input-beats-file" class="form-control form-control-sm stage-file-input" accept="audio/*,.mp3,.wav,.m4a,.ogg,.aac" data-stage="beats">
+                <small class="field-hint">Hỗ trợ file .mp3, .wav, .m4a từ máy tính</small>
+              </div>
+              <div class="stage-url-box mb-2" style="display:none;" data-stage="beats">
+                <input type="url" id="input-beats-url" class="form-control form-control-sm stage-url-input" placeholder="https://domain.com/music.mp3" data-stage="beats">
+              </div>
+              <div class="scene-music-actions">
+                <button type="button" class="audio-preview-btn" data-target="music-beats">▶️ Nghe thử</button>
+                <span class="audio-status-badge" data-stage="beats">Blue - Yung Kai</span>
+              </div>
+            </div>
+
+            <!-- CHƯƠNG 4: ALBUM TRÁI TIM KỶ NIỆM POLAROID -->
+            <div class="scene-music-card stage-heart" data-stage="heart">
+              <div class="scene-music-header">
+                <span class="scene-music-icon">💖📸</span>
+                <div>
+                  <div class="scene-music-title">Chương 4: Trái Tim Kỷ Niệm</div>
+                  <div class="scene-music-desc">Lật mở từng bức ảnh Polaroid kèm cánh hoa rơi</div>
+                </div>
+              </div>
+              <div class="form-group mb-2">
+                <select id="music-heart" class="form-control form-select select-stage-music" data-stage="heart">
+                  <option value="assets/audio/Noi Nay Co Anh.m4a" selected>💌 Nơi Này Có Anh - Sơn Tùng M-TP</option>
+                  <option value="assets/audio/chung-ta-cua-hien-tai.mp3">💎 Chúng Ta Của Hiện Tại</option>
+                  <option value="assets/audio/Yung Kai.m4a">🌸 Blue - Yung Kai</option>
+                  <option value="assets/audio/ngan-nam-anh-sang.mp3">✨ Ngàn Năm Ánh Sáng</option>
+                  <option value="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3">🎧 Sweet Lofi Memories</option>
+                  <option value="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=romantic-piano-10738.mp3">🎻 Romantic Harp & Piano</option>
+                  <option value="assets/audio/birthday.mp3">🎂 Birthday - Somi</option>
+                  <option value="custom-upload">📁 Tải file từ máy tính...</option>
+                  <option value="custom-url">🔗 Nhập link MP3 tùy chỉnh...</option>
+                </select>
+              </div>
+              <div class="stage-upload-box mb-2" style="display:none;" data-stage="heart">
+                <input type="file" id="input-heart-file" class="form-control form-control-sm stage-file-input" accept="audio/*,.mp3,.wav,.m4a,.ogg,.aac" data-stage="heart">
+                <small class="field-hint">Hỗ trợ file .mp3, .wav, .m4a từ máy tính</small>
+              </div>
+              <div class="stage-url-box mb-2" style="display:none;" data-stage="heart">
+                <input type="url" id="input-heart-url" class="form-control form-control-sm stage-url-input" placeholder="https://domain.com/music.mp3" data-stage="heart">
+              </div>
+              <div class="scene-music-actions">
+                <button type="button" class="audio-preview-btn" data-target="music-heart">▶️ Nghe thử</button>
+                <span class="audio-status-badge" data-stage="heart">Nơi Này Có Anh</span>
+              </div>
+            </div>
+
+            <!-- CHƯƠNG 5: BỨC THƯ VINTAGE & BẦU TRỜI SAO BĂNG -->
+            <div class="scene-music-card stage-letter" data-stage="letter">
+              <div class="scene-music-header">
+                <span class="scene-music-icon">💌🌌</span>
+                <div>
+                  <div class="scene-music-title">Chương 5: Thư Tay & Sao Băng</div>
+                  <div class="scene-music-desc">Dòng tâm tình gõ máy chữ & phóng sao băng ước nguyện</div>
+                </div>
+              </div>
+              <div class="form-group mb-2">
+                <select id="music-letter" class="form-control form-select select-stage-music" data-stage="letter">
+                  <option value="assets/audio/chung-ta-cua-hien-tai.mp3" selected>💎 Chúng Ta Của Hiện Tại - Sơn Tùng M-TP</option>
+                  <option value="assets/audio/ngan-nam-anh-sang.mp3">✨ Ngàn Năm Ánh Sáng</option>
+                  <option value="assets/audio/Noi Nay Co Anh.m4a">💌 Nơi Này Có Anh</option>
+                  <option value="assets/audio/Yung Kai.m4a">🌸 Blue - Yung Kai</option>
+                  <option value="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=romantic-piano-10738.mp3">🎻 Romantic Harp & Piano</option>
+                  <option value="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3">🎧 Sweet Lofi Memories</option>
+                  <option value="custom-upload">📁 Tải file từ máy tính...</option>
+                  <option value="custom-url">🔗 Nhập link MP3 tùy chỉnh...</option>
+                </select>
+              </div>
+              <div class="stage-upload-box mb-2" style="display:none;" data-stage="letter">
+                <input type="file" id="input-letter-file" class="form-control form-control-sm stage-file-input" accept="audio/*,.mp3,.wav,.m4a,.ogg,.aac" data-stage="letter">
+                <small class="field-hint">Hỗ trợ file .mp3, .wav, .m4a từ máy tính</small>
+              </div>
+              <div class="stage-url-box mb-2" style="display:none;" data-stage="letter">
+                <input type="url" id="input-letter-url" class="form-control form-control-sm stage-url-input" placeholder="https://domain.com/music.mp3" data-stage="letter">
+              </div>
+              <div class="scene-music-actions">
+                <button type="button" class="audio-preview-btn" data-target="music-letter">▶️ Nghe thử</button>
+                <span class="audio-status-badge" data-stage="letter">Chúng Ta Của Hiện Tại</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 4: VÒNG QUAY MAY MẮN (6 QUÀ TÙY CHỈNH) -->
+        <div class="form-section highlight-section">
+          <div class="section-heading">
+            <span class="heading-icon">🎡</span>
+            <div>
+              <h3>Vòng Quay May Mắn (Lucky Spin Wheel)</h3>
+              <p>Món quà bất ngờ thú vị! Nhập 6 phần quà và lời nhắn tương ứng</p>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col">
+              <label for="input-spin-limit">Số lượt quay tối đa/lần:</label>
+              <input type="number" id="input-spin-limit" class="form-control" min="1" max="10" value="2" placeholder="2">
+            </div>
+            <div class="form-group col">
+              <label for="select-spin-mode">Chế độ kết quả:</label>
+              <select id="select-spin-mode" class="form-control form-select">
+                <option value="weighted" selected>Quay theo tỷ lệ % từng món quà</option>
+                <option value="fixed-1">Bắt buộc trúng Quà 1</option>
+                <option value="fixed-2">Bắt buộc trúng Quà 2</option>
+                <option value="fixed-3">Bắt buộc trúng Quà 3</option>
+                <option value="random">Ngẫu nhiên đều 6 ô (16.6%)</option>
+              </select>
+            </div>
+          </div>
+
+          <h4 class="sub-heading-title">✨ Nhập 6 quà tùy chỉnh</h4>
+
+          <div class="gifts-grid" id="gifts-inputs-container">
+            <!-- Quà 1 -->
+            <div class="gift-item-card">
+              <div class="gift-badge">Quà 1 🎂</div>
+              <div class="form-group">
+                <label>Tên quà 1:</label>
+                <input type="text" class="form-control gift-name" value="Bánh kem" placeholder="Ví dụ: Bánh kem, Trà sữa...">
+              </div>
+              <div class="form-group">
+                <label>Kết quả khi quay trúng 1:</label>
+                <textarea class="form-control gift-msg" rows="2" placeholder="Lời nhắn khi trúng...">Chúc mừng cậu đã may mắn trúng bánh kem nhé! Nhắn tớ liền để nhận quà nha 🎂✨</textarea>
+              </div>
+              <div class="form-group">
+                <label>Tỷ lệ 1 (%):</label>
+                <input type="number" class="form-control gift-rate" min="0" max="100" value="20">
+              </div>
+            </div>
+
+            <!-- Quà 2 -->
+            <div class="gift-item-card">
+              <div class="gift-badge">Quà 2 🧸</div>
+              <div class="form-group">
+                <label>Tên quà 2:</label>
+                <input type="text" class="form-control gift-name" value="Gấu bông" placeholder="Ví dụ: Gấu bông...">
+              </div>
+              <div class="form-group">
+                <label>Kết quả khi quay trúng 2:</label>
+                <textarea class="form-control gift-msg" rows="2">Chúc mừng cậu đã trúng một em gấu bông siêu đáng yêu 🧸! Nhắn tớ liền để nhận nha!</textarea>
+              </div>
+              <div class="form-group">
+                <label>Tỷ lệ 2 (%):</label>
+                <input type="number" class="form-control gift-rate" min="0" max="100" value="20">
+              </div>
+            </div>
+
+            <!-- Quà 3 -->
+            <div class="gift-item-card">
+              <div class="gift-badge">Quà 3 💸</div>
+              <div class="form-group">
+                <label>Tên quà 3:</label>
+                <input type="text" class="form-control gift-name" value="300.000đ" placeholder="Ví dụ: 300.000đ...">
+              </div>
+              <div class="form-group">
+                <label>Kết quả khi quay trúng 3:</label>
+                <textarea class="form-control gift-msg" rows="2">Oaaa! Cậu vừa hốt trọn 300.000đ vào túi rồi! Liên hệ ngay để nhận quà nào 💸</textarea>
+              </div>
+              <div class="form-group">
+                <label>Tỷ lệ 3 (%):</label>
+                <input type="number" class="form-control gift-rate" min="0" max="100" value="15">
+              </div>
+            </div>
+
+            <!-- Quà 4 -->
+            <div class="gift-item-card">
+              <div class="gift-badge">Quà 4 🧧</div>
+              <div class="form-group">
+                <label>Tên quà 4:</label>
+                <input type="text" class="form-control gift-name" value="400.000đ" placeholder="Ví dụ: 400.000đ...">
+              </div>
+              <div class="form-group">
+                <label>Kết quả khi quay trúng 4:</label>
+                <textarea class="form-control gift-msg" rows="2">Xịn quá trời luôn! Cậu vừa ẵm ngay 400.000đ vào ví 🔥 Liên hệ ngay để nhận quà nha!</textarea>
+              </div>
+              <div class="form-group">
+                <label>Tỷ lệ 4 (%):</label>
+                <input type="number" class="form-control gift-rate" min="0" max="100" value="15">
+              </div>
+            </div>
+
+            <!-- Quà 5 -->
+            <div class="gift-item-card">
+              <div class="gift-badge">Quà 5 🎁</div>
+              <div class="form-group">
+                <label>Tên quà 5:</label>
+                <input type="text" class="form-control gift-name" value="Quà ngẫu nhiên" placeholder="Ví dụ: Quà ngẫu nhiên...">
+              </div>
+              <div class="form-group">
+                <label>Kết quả khi quay trúng 5:</label>
+                <textarea class="form-control gift-msg" rows="2">Bạn vừa trúng một phần quà ngẫu nhiên 🎉 Vui lòng liên hệ để nhận quà nhé!</textarea>
+              </div>
+              <div class="form-group">
+                <label>Tỷ lệ 5 (%):</label>
+                <input type="number" class="form-control gift-rate" min="0" max="100" value="15">
+              </div>
+            </div>
+
+            <!-- Quà 6 -->
+            <div class="gift-item-card">
+              <div class="gift-badge">Quà 6 ⭐</div>
+              <div class="form-group">
+                <label>Tên quà 6:</label>
+                <input type="text" class="form-control gift-name" value="Tự chọn quà" placeholder="Ví dụ: Tự chọn quà...">
+              </div>
+              <div class="form-group">
+                <label>Kết quả khi quay trúng 6:</label>
+                <textarea class="form-control gift-msg" rows="2">Bạn vừa nhận được quyền tự chọn quà tặng 🎁 Mau nhắn tin chọn quà nào!</textarea>
+              </div>
+              <div class="form-group">
+                <label>Tỷ lệ 6 (%):</label>
+                <input type="number" class="form-control gift-rate" min="0" max="100" value="15">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 5: BỘ ICON & STICKER TƯƠNG TÁC CHO NGƯỜI DÙNG -->
+        <div class="form-section">
+          <div class="section-heading">
+            <span class="heading-icon">💖</span>
+            <div>
+              <h3>Chọn Bộ Icon Tương Tác (Sticker Picker)</h3>
+              <p>Người nhận có thể bấm vào thanh dock để thả các icon này bay bổng khắp màn hình</p>
+            </div>
+          </div>
+
+          <div class="icon-presets-wrapper">
+            <label class="icon-preset-card active">
+              <input type="radio" name="icon-theme" value="birthday" checked>
+              <div class="preset-emojis">🎂 🎉 🎈 🎁 🍰 🕯️</div>
+              <div class="preset-name">Tiệc Sinh Nhật Rực Rỡ</div>
+            </label>
+
+            <label class="icon-preset-card">
+              <input type="radio" name="icon-theme" value="love">
+              <div class="preset-emojis">💖 💕 💌 💘 🥰 🌸</div>
+              <div class="preset-name">Ngọt Ngào & Lãng Mạn</div>
+            </label>
+
+            <label class="icon-preset-card">
+              <input type="radio" name="icon-theme" value="cute">
+              <div class="preset-emojis">🐱 🐶 🐰 🐻 🦄 🐾</div>
+              <div class="preset-name">Thú Cưng Siêu Dễ Thương</div>
+            </label>
+
+            <label class="icon-preset-card">
+              <input type="radio" name="icon-theme" value="magic">
+              <div class="preset-emojis">✨ ⭐ 🌟 🌙 🪄 💫</div>
+              <div class="preset-name">Ánh Sao & Phép Thuật</div>
+            </label>
+          </div>
+
+          <div class="form-group" style="margin-top: 15px;">
+            <label for="input-custom-icons">Hoặc tự nhập các icon theo ý muốn (cách nhau bởi dấu cách):</label>
+            <input type="text" id="input-custom-icons" class="form-control" placeholder="💖 🎂 ✨ 🌸 🎉 🧸">
+          </div>
+        </div>
+
+        <!-- SECTION 6: ALBUM ẢNH KỶ NIỆM (POLAROID) -->
+        <div class="form-section">
+          <div class="section-heading">
+            <span class="heading-icon">📸</span>
+            <div>
+              <h3>Album Ảnh Kỷ Niệm (Polaroid Photos)</h3>
+              <p>Thoải mái thay thế bằng ảnh riêng của bạn (tải từ điện thoại hoặc dán link ảnh, không bắt buộc dùng ảnh mẫu ban đầu). Gói VIP hỗ trợ tải ảnh sắc nét không giới hạn!</p>
+            </div>
+          </div>
+
+          <div id="polaroid-items-list" class="polaroid-list">
+            <!-- Render danh sách ảnh -->
+          </div>
+
+          <div class="photo-action-buttons">
+            <button type="button" class="btn btn-outline btn-sm" id="btn-add-photo-url">
+              ➕ Thêm ảnh bằng Link URL
+            </button>
+            <label class="btn btn-outline btn-sm upload-label">
+              <span id="upload-text-status">📁 Tải ảnh từ thiết bị</span>
+              <input type="file" id="input-photo-upload" accept="image/*" multiple style="display: none;">
+            </label>
+          </div>
+        </div>
+
+        <!-- NÚT HOÀN TẤT & TẠO LINK -->
+        <div class="submit-actions-panel">
+          <button type="button" class="btn btn-secondary btn-lg" id="btn-preview-card">
+            👁️ Xem Trước Thiệp
+          </button>
+          <button type="submit" class="btn btn-primary btn-lg" id="btn-create-share-link">
+            ✨ Tạo & Lấy Link
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </main>
+
+  <!-- MODAL KẾT QUẢ TẠO LINK CHIA SẺ -->
+  <div class="share-modal" id="share-modal">
+    <div class="modal-card">
+      <button type="button" class="modal-close" id="modal-close-btn">&times;</button>
+      <div class="modal-icon">🎉</div>
+      <h3 class="modal-title">Thiệp Đã Sẵn Sàng Gửi Đi!</h3>
+      <p class="modal-desc">Đường link dưới đây chứa trọn vẹn thiệp chúc mừng, nhạc, ảnh và vòng quay 6 món quà mà bạn vừa tạo:</p>
+
+      <div class="copy-url-group">
+        <input type="text" id="share-url-input" class="form-control url-input" readonly>
+        <button type="button" class="btn btn-primary" id="btn-copy-url">
+          📋 Copy Link
+        </button>
+      </div>
+      <div id="copy-success-msg" class="copy-success-badge" style="display: none;">
+        ✅ Đã sao chép link vào bộ nhớ tạm! Mau gửi cho người ấy nào!
+      </div>
+
+      
+      <div class="qr-frame-picker" style="margin-bottom: 12px; text-align: center;">
+        <label for="qr-frame-select" style="color: #334155; font-size: 0.9em; font-weight: 600; display: inline-block; margin-bottom: 6px;">Mẫu Khung QR Code:</label>
+        <select id="qr-frame-select" class="form-control form-select" style="max-width: 250px; margin: 0 auto;">
+          <option value="none" selected>Mặc định (Không khung)</option>
+          <option value="heart">💖 Trái Tim Ngọt Ngào</option>
+          <option value="teddy">🧸 Gấu Bông Đáng Yêu</option>
+          <option value="gift">🎁 Hộp Quà Sinh Nhật</option>
+        </select>
+      </div>
+      
+      <div id="qr-code-container" style="text-align:center; margin: 15px 0; min-height: 200px;">
+        <p style="font-size: 0.9em; color: #64748b; font-weight: 500; margin-bottom: 10px;">Hoặc quét mã QR Code để mở thiệp:</p>
+        <canvas id="qrcode" style="display: block; margin: 15px auto; width: 180px; height: 180px; background: #fff; border-radius: 12px; padding: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);"></canvas>
+      </div>
+      <div class="modal-action-row">
+        <a href="#" target="_blank" class="btn btn-outline" id="btn-open-live-link">
+          🔗 Mở xem trực tiếp
+        </a>
+      </div>
+
+      <!-- VIP Banner trong Modal -->
+      <div style="margin-top: 15px; padding: 12px; background: rgba(255,217,142,0.12); border: 1px dashed rgba(201,162,75,0.4); border-radius: 12px; text-align: center;">
+        <span style="font-size: 0.86rem; color: #334155; font-weight: 600;">👑 Muốn lưu thiệp vĩnh viễn & mở khóa trọn bộ 5 Vibes?</span>
+        <button type="button" id="btn-open-vip-share" style="margin-top: 6px; display: inline-block; padding: 6px 14px; background: linear-gradient(135deg, #ffd98e 0%, #c9a24b 100%); border: none; border-radius: 20px; font-weight: 700; font-size: 0.8rem; color: #2c1520; cursor: pointer;">
+          Nâng cấp VIP chỉ 25k ✨
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL THANH TOÁN VIETQR 25K (THƯƠNG MẠI HÓA VIP) -->
+  <div class="payment-modal-overlay" id="payment-modal">
+    <div class="payment-modal-card">
+      <button type="button" class="payment-modal-close" id="btn-close-payment-modal">&times;</button>
+      <div class="payment-badge-pill">👑 GÓI VIP SINH NHẬT ĐẶC BIỆT</div>
+      <h3 class="payment-modal-title">Nâng Cấp Thiệp VIP 25.000đ</h3>
+      <p class="payment-modal-subtitle">Mở khóa trọn bộ 5 Vibes độc quyền, đổi nhạc theo từng chương, không giới hạn ảnh & lưu trữ vĩnh viễn!</p>
+
+      <div class="payment-qr-frame">
+        <img src="assets/images/payment-qr.png" alt="Mã VietQR Techcombank 25.000đ" class="payment-qr-img" id="payment-qr-image">
+        <small style="color: #64748b; font-size: 0.75rem; margin-top: 6px; font-weight: 600;">Quét bằng app Techcombank / MoMo / Mọi Ngân Hàng</small>
+      </div>
+
+      <div class="payment-info-box">
+        <div class="payment-info-row">
+          <span class="payment-info-label">Ngân hàng:</span>
+          <span class="payment-info-val">🏦 TECHCOMBANK</span>
+        </div>
+        <div class="payment-info-row">
+          <span class="payment-info-label">Số tiền:</span>
+          <span class="payment-info-val payment-price-tag">25.000 đ</span>
+        </div>
+        <div class="payment-info-row">
+          <span class="payment-info-label">Mã thiết bị:</span>
+          <span class="payment-info-val">
+            <span id="payment-device-id" style="font-family: monospace; font-weight: 700; color: #ffd98e;">DEV-XXXX</span>
+          </span>
+        </div>
+        <div class="payment-info-row">
+          <span class="payment-info-label">Nội dung CK:</span>
+          <span class="payment-info-val">
+            <span id="payment-transfer-code">VIP BDAY 6868</span>
+            <button type="button" class="btn-copy-chip" id="btn-copy-transfer-code" title="Sao chép nội dung">Copy</button>
+          </span>
+        </div>
+      </div>
+
+      <div style="background: rgba(255, 217, 142, 0.1); border: 1px solid rgba(255, 217, 142, 0.25); border-radius: 12px; padding: 10px; margin: 12px 0; font-size: 0.76rem; color: #fde68a; text-align: left; line-height: 1.45;">
+        🔒 <b>Khóa độc quyền theo thiết bị</b>: Mỗi mã VIP được cấp riêng cho Mã thiết bị trên (chống chia sẻ key). Sau khi chuyển khoản, nhập mã kích hoạt nhận được vào ô dưới đây để mở khóa ngay!
+      </div>
+
+      <div class="vip-code-input-group">
+        <input type="text" class="vip-code-input" id="input-vip-code" placeholder="Nhập mã kích hoạt VIP...">
+        <button type="button" class="btn-verify-vip-code" id="btn-verify-vip-code">Kích hoạt</button>
+      </div>
+
+      <div style="margin-top: 10px;">
+        <button type="button" class="btn-confirm-payment" id="btn-confirm-payment" style="font-size: 0.82rem; padding: 9px 14px;">
+          💬 Hướng dẫn nhận mã sau khi chuyển khoản
+        </button>
+      </div>
+
+      <small style="display: block; font-size: 0.74rem; color: rgba(255,255,255,0.5); margin-top: 8px;">
+        Hỗ trợ 24/7 • Kích hoạt mở khóa độc quyền trên thiết bị này
+      </small>
+    </div>
+  </div>
+
+  <!-- MODAL BẢNG ĐIỀU KHIỂN CHỦ SỞ HỮU (DÀNH CHO BẠN - VŨ THẾ DÂN) -->
+  <div class="payment-modal-overlay" id="owner-admin-modal">
+    <div class="payment-modal-card" style="border-color: #38bdf8; max-width: 480px;">
+      <button type="button" class="payment-modal-close" id="btn-close-owner-modal">&times;</button>
+      <div class="payment-badge-pill" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);">🔑 CỔNG QUẢN LÝ CHỦ SỞ HỮU</div>
+      <h3 class="payment-modal-title" style="color: #38bdf8;">Bảng Cấp Mã VIP Cho Khách Hàng</h3>
+      <p class="payment-modal-subtitle">Dành riêng cho Chủ sở hữu: Nhập mã thiết bị của khách để tạo mã kích hoạt độc quyền (chống chia sẻ).</p>
+
+      <div style="background: rgba(255,255,255,0.06); padding: 16px; border-radius: 16px; margin: 15px 0; text-align: left;">
+        <label style="font-size: 0.82rem; font-weight: 700; color: #94a3b8; display: block; margin-bottom: 6px;">
+          1. Mã Thiết Bị Của Khách (từ nội dung CK VietQR):
+        </label>
+        <div style="display: flex; gap: 8px;">
+          <input type="text" id="owner-input-client-id" class="form-control" placeholder="Ví dụ: DEV-84A2-9E1F hoặc 84A2" style="background: #0f172a; border-color: #334155; color: #38bdf8; font-weight: 700; font-family: monospace;">
+          <button type="button" id="btn-owner-generate-key" class="btn btn-primary" style="white-space: nowrap; padding: 8px 14px; font-weight: 700;">⚡ Tạo Mã</button>
+        </div>
+
+        <div id="owner-generated-result-box" style="display: none; margin-top: 14px; background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.35); padding: 12px; border-radius: 12px;">
+          <div style="font-size: 0.78rem; color: #94a3b8; font-weight: 600;">Mã kích hoạt VIP (Chỉ mở được trên thiết bị khách này):</div>
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 6px;">
+            <span id="owner-result-key-text" style="font-family: monospace; font-size: 1.15rem; font-weight: 800; color: #38bdf8; letter-spacing: 1px;">VIP-XXXX-YYYY</span>
+            <button type="button" id="btn-owner-copy-key" class="btn-copy-chip" style="background: #38bdf8; color: #0f172a; font-weight: 800;">Sao chép</button>
+          </div>
+          <small style="display: block; margin-top: 6px; font-size: 0.72rem; color: #94a3b8;">Gửi mã này cho khách. Người khác không thể dùng mã này trên thiết bị khác.</small>
+        </div>
+      </div>
+
+      <div style="border-top: 1px dashed rgba(255,255,255,0.15); padding-top: 15px; text-align: center;">
+        <div style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 8px;">Mở khóa toàn quyền cho thiết bị này (Máy của bạn):</div>
+        <button type="button" id="btn-owner-self-activate" style="width: 100%; padding: 10px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; border-radius: 12px; color: #fff; font-weight: 800; font-size: 0.88rem; cursor: pointer;">
+          👑 Mở Khóa VIP Vĩnh Viễn Trên Máy Của Tôi (Chủ Sở Hữu)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Audio Element để thử nhạc -->
+  <audio id="creator-audio-player"></audio>
+
+  <!-- Toast thông báo trạng thái lưu nháp -->
+  <div id="creator-toast" class="creator-toast">
+    <span class="toast-toast-icon" id="toast-icon">💾</span>
+    <span class="toast-toast-msg" id="toast-msg">Đã lưu bản nháp</span>
+  </div>
+
+  <!-- Scripts -->
+  <script src="config.js?v=5"></script>
+  <script src="js/card-storage.js?v=5"></script>
+  <script src="js/creator.js?v=5"></script>
+  <script>
+    // Tự động nhận diện Vibe và gói VIP từ URL
+    window.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      const vibe = params.get('vibe');
+      if (vibe) {
+        setTimeout(() => {
+          const vibeCard = document.querySelector(`.vibe-card[data-vibe="${vibe}"]`);
+          if (vibeCard) {
+            vibeCard.click();
+            vibeCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 300);
+      }
+      if (params.get('vip') === '1') {
+        setTimeout(() => {
+          const btnVip = document.getElementById('btn-open-vip-modal');
+          if (btnVip) btnVip.click();
+        }, 500);
+      }
+    });
+  </script>
+</body>
+</html>

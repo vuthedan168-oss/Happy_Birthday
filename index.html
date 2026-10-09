@@ -47,7 +47,7 @@
 
       <div class="nav-actions">
         <a href="#pricing" class="btn btn-outline btn-sm">Bảng Giá</a>
-        <button class="btn btn-primary btn-sm btn-open-studio" id="nav-btn-studio">🚀 Mở Studio</button>
+        <a href="studio.html" class="btn btn-primary btn-sm" id="nav-btn-studio">🚀 Mở Studio</a>
       </div>
     </div>
   </header>
@@ -70,9 +70,9 @@
         </p>
 
         <div class="hero-cta">
-          <button class="btn btn-primary btn-lg btn-open-studio" id="hero-btn-primary">
+          <a href="studio.html" class="btn btn-primary btn-lg" id="hero-btn-primary">
             <span>🚀</span> Trải Nghiệm Tạo Thiệp Ngay
-          </button>
+          </a>
           <a href="#vibes" class="btn btn-outline btn-lg" id="hero-btn-secondary">
             <span>🎁</span> Khám Phá 5 Vibe Đặc Quyền
           </a>
@@ -139,9 +139,9 @@
               <li><span class="icon">✨</span><span>Ánh nến lung linh & pháo hoa trái tim bùng nổ</span></li>
             </ul>
 
-            <button class="btn btn-primary btn-open-studio" id="btn-apply-vibe">
+            <a href="studio.html?vibe=party" class="btn btn-primary" id="btn-apply-vibe">
               <span>✨</span> Dùng Vibe Này Tạo Thiệp
-            </button>
+            </a>
           </div>
 
           <div class="vibe-mockup" id="vibe-mockup" style="background: linear-gradient(135deg, #4c0519 0%, #1e1b4b 100%);">
@@ -226,7 +226,7 @@
               <li><span class="cross-icon">✕</span> Không có link bí danh riêng đẹp mắt</li>
             </ul>
 
-            <button class="btn btn-outline" style="width: 100%;" class="btn-open-studio">Trải Nghiệm Miễn Phí</button>
+            <a href="studio.html?vibe=party" class="btn btn-outline" style="width: 100%; text-decoration: none; text-align: center; display: inline-block;">Trải Nghiệm Miễn Phí</a>
           </div>
 
           <!-- VIP Plan -->
@@ -245,9 +245,9 @@
               <li class="active"><span class="check-icon">✓</span> Quét mã VietQR Techcombank mở khóa tức thì</li>
             </ul>
 
-            <button class="btn btn-primary btn-open-studio" style="width: 100%;">
+            <a href="studio.html?vip=1" class="btn btn-primary" style="width: 100%; text-decoration: none; text-align: center; display: inline-block;">
               <span>🔥</span> Mở Khóa Gói VIP 25K
-            </button>
+            </a>
           </div>
         </div>
       </div>
@@ -266,7 +266,7 @@
           </p>
 
           <div class="contact-buttons">
-            <button class="btn btn-primary btn-open-studio">🚀 Vào Web Tạo Thiệp</button>
+            <a href="studio.html" class="btn btn-primary" style="text-decoration: none;">🚀 Vào Web Tạo Thiệp</a>
             <a href="https://github.com/vuthedan168-oss" target="_blank" class="btn btn-outline">🐙 GitHub Profile</a>
           </div>
         </div>
@@ -282,32 +282,7 @@
     </div>
   </footer>
 
-  <!-- Modal: Launch App Studio -->
-  <div class="modal-overlay" id="studio-modal">
-    <div class="modal-card">
-      <button class="modal-close" id="modal-close">&times;</button>
-      <div class="modal-icon">🚀</div>
-      <h3 class="modal-title">Chào Mừng Đến Studio!</h3>
-      <p class="modal-desc">
-        Hệ thống ứng dụng tạo thiệp trực tuyến đã sẵn sàng. 
-        Bạn có thể mở ứng dụng chính để bắt đầu thiết kế thiệp sinh nhật độc quyền ngay bây giờ.
-      </p>
 
-      <div class="modal-url-box">
-        <label for="app-url-input">🌐 Đường Link Web Ứng Dụng (Vercel / Hosting):</label>
-        <input type="text" id="app-url-input" class="modal-input" placeholder="https://happy-birthday-xxx.vercel.app">
-      </div>
-
-      <div class="modal-actions">
-        <button class="btn btn-primary btn-lg" id="btn-launch-app">
-          ✨ Bắt Đầu Tạo Thiệp
-        </button>
-        <button class="btn btn-outline" onclick="document.getElementById('studio-modal').classList.remove('open')">
-          Đóng Lại
-        </button>
-      </div>
-    </div>
-  </div>
 
   <!-- Scripts -->
   <script src="js/landing.js"></script>
