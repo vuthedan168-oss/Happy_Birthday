@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Universal Birthday Studio ✨ Nền Tảng Thiệp Sinh Nhật Tương Tác 3D Cao Cấp</title>
+  <meta name="description" content="Universal Birthday Studio - Nền tảng tạo thiệp sinh nhật tương tác 3D cá nhân hóa độc quyền với 5 Vibe cảm xúc, photobooth kỷ niệm, bánh kem thổi nến sống động và âm nhạc tùy biến.">
+  <meta name="keywords" content="thiep sinh nhat 3d, tao thiep sinh nhat, birthday studio, qua tang sinh nhat, thoi nen ao">
+  <meta name="author" content="Vu The Dan (DAN168)">
+  
+  <!-- Open Graph Meta -->
+  <meta property="og:title" content="Universal Birthday Studio ✨ Nền Tảng Thiệp Sinh Nhật Tương Tác 3D">
+  <meta property="og:description" content="Trải nghiệm tạo thiệp sinh nhật 3D điện ảnh với 5 Vibe cảm xúc, tùy chỉnh âm nhạc 3 chương và hiệu ứng thổi nến tương tác!">
+  <meta property="og:type" content="website">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="css/landing.css">
+</head>
+<body>
+
+  <!-- Ambient Glow & Dynamic Particles -->
+  <canvas id="particles-canvas"></canvas>
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+  <div class="ambient-glow glow-3"></div>
+
+  <!-- Navbar -->
+  <header class="navbar" id="main-navbar">
+    <div class="container nav-container">
+      <a href="#" class="nav-brand" id="brand-link">
+        <div class="brand-icon">🎂</div>
+        <span class="brand-name">Birthday <span class="gradient-text">Studio</span></span>
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="#hero">Trang Chủ</a></li>
+        <li><a href="#vibes">5 Vibe Cảm Xúc</a></li>
+        <li><a href="#journey">3 Chương Thiệp</a></li>
+        <li><a href="#pricing">Gói VIP Studio</a></li>
+        <li><a href="#author">Tác Giả</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <a href="#pricing" class="btn btn-outline btn-sm">Bảng Giá</a>
+        <button class="btn btn-primary btn-sm btn-open-studio" id="nav-btn-studio">🚀 Mở Studio</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <main>
+    <section class="hero" id="hero">
+      <div class="container">
+        <div class="hero-badge" id="hero-badge">
+          <span>✨</span> NỀN TẢNG THIỆP SINH NHẬT TƯƠNG TÁC #1 VIỆT NAM
+        </div>
+
+        <h1 class="hero-title" id="main-heading">
+          Biến Lời Chúc Thành <span class="gradient-text">Hành Trình Cảm Xúc</span> 3D Khó Quên
+        </h1>
+
+        <p class="hero-desc">
+          Universal Birthday Studio trao cho bạn không gian sáng tạo thiệp sinh nhật điện ảnh độc quyền. 
+          Khám phá 5 Vibe cảm xúc riêng biệt, ghép nhạc 3 chương theo từng giai đoạn và thổi nến tương tác sống động.
+        </p>
+
+        <div class="hero-cta">
+          <button class="btn btn-primary btn-lg btn-open-studio" id="hero-btn-primary">
+            <span>🚀</span> Trải Nghiệm Tạo Thiệp Ngay
+          </button>
+          <a href="#vibes" class="btn btn-outline btn-lg" id="hero-btn-secondary">
+            <span>🎁</span> Khám Phá 5 Vibe Đặc Quyền
+          </a>
+        </div>
+
+        <div class="hero-stats">
+          <div class="stat-card">
+            <div class="stat-number gradient-text">10,000+</div>
+            <div class="stat-label">Thiệp Đã Được Tạo & Gửi Đi</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number gradient-gold">5 VIBES</div>
+            <div class="stat-label">Cảm Xúc Thiết Kế Độc Quyền</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number gradient-text">100%</div>
+            <div class="stat-label">Cá Nhân Hóa Từng Khoảnh Khắc</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5 Vibes Section -->
+    <section class="section" id="vibes">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag">BỘ SƯU TẬP ĐẶC BIỆT</span>
+          <h2 class="section-title">5 Vibe Cảm Xúc Cho Mọi Mối Quan Hệ</h2>
+          <p class="section-desc">Không chỉ là người yêu, thiệp sinh nhật của bạn giờ đây đã sẵn sàng tôn vinh tình bạn tri kỷ, gia đình ấm áp, phong thái hoàng gia và nét tinh nghịch tuổi mới.</p>
+        </div>
+
+        <!-- Vibe Tab Buttons -->
+        <div class="vibe-tabs" id="vibe-tab-group">
+          <button class="vibe-tab-btn active" data-vibe="romantic" id="tab-romantic">
+            <span>💖</span> Lãng Mạn & Ngọt Ngào
+          </button>
+          <button class="vibe-tab-btn" data-vibe="friend" id="tab-friend">
+            <span>⚡</span> Bạn Thân Lầy Lội
+          </button>
+          <button class="vibe-tab-btn" data-vibe="family" id="tab-family">
+            <span>🌿</span> Gia Đình Ấm Áp
+          </button>
+          <button class="vibe-tab-btn" data-vibe="luxury" id="tab-luxury">
+            <span>👑</span> Sang Trọng & Quý Phái
+          </button>
+          <button class="vibe-tab-btn" data-vibe="cute" id="tab-cute">
+            <span>🎈</span> Kẹo Ngọt Đáng Yêu
+          </button>
+        </div>
+
+        <!-- Vibe Display Card -->
+        <div class="vibe-display-card" id="vibe-display-container">
+          <div class="vibe-info">
+            <div class="vibe-badge" id="vibe-badge" style="background: rgba(236, 72, 153, 0.2); color: #f472b6;">
+              Dành cho Người Yêu / Crush
+            </div>
+            <h3 id="vibe-title">Lãng Mạn & Ngọt Ngào</h3>
+            <p id="vibe-desc">Không gian ngập tràn hoa hồng, hiệu ứng cánh hoa bay dịu dàng, giai điệu ballad du dương và những mật thư lời chúc thổ lộ tình cảm chân thành.</p>
+            
+            <ul class="vibe-features-list" id="vibe-perks">
+              <li><span class="icon">🌹</span><span>Hiệu ứng cánh hoa hồng & trái tim 3D bay bổng</span></li>
+              <li><span class="icon">💌</span><span>Thư tình bí mật kèm đếm ngược kỷ niệm yêu</span></li>
+              <li><span class="icon">🎵</span><span>Tích hợp giai điệu lãng mạn (Nơi Này Có Anh, Yung Kai...)</span></li>
+              <li><span class="icon">✨</span><span>Ánh nến lung linh & pháo hoa trái tim bùng nổ</span></li>
+            </ul>
+
+            <button class="btn btn-primary btn-open-studio" id="btn-apply-vibe">
+              <span>✨</span> Dùng Vibe Này Tạo Thiệp
+            </button>
+          </div>
+
+          <div class="vibe-mockup" id="vibe-mockup" style="background: linear-gradient(135deg, #4c0519 0%, #1e1b4b 100%);">
+            <div class="vibe-mockup-inner">
+              <div class="mockup-cake-icon" id="vibe-mockup-icon">💖</div>
+              <div class="mockup-title" id="vibe-mockup-title">Happy Birthday My Love</div>
+              <div class="mockup-sub" id="vibe-mockup-sub">“Cảm ơn vì đã đến và làm dịu êm thế giới của anh...”</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3 Chapters Journey -->
+    <section class="section" id="journey">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag">TRẢI NGHIỆM ĐIỆN ẢNH</span>
+          <h2 class="section-title">Hành Trình 3 Chương Của Chiếc Thiệp</h2>
+          <p class="section-desc">Không đơn thuần là một website đọc chữ, mỗi thiệp sinh nhật là một chuyến du hành cảm xúc được thiết kế bài bản theo từng chặng.</p>
+        </div>
+
+        <div class="chapters-grid">
+          <div class="chapter-card">
+            <div class="chapter-number">01</div>
+            <h3 class="chapter-title">Chương 1: Mở Thiệp & Lời Chúc</h3>
+            <p class="chapter-desc">Đồng hồ đếm ngược chạm mốc sinh nhật. Người nhận giải mã mật thư bí mật để hé lộ bức thư chúc mừng riêng tư được đệm theo bài hát mở đầu êm dịu.</p>
+            <ul class="chapter-perks">
+              <li><span>✓</span> Giải đố Quiz tương tác gợi nhắc kỷ niệm</li>
+              <li><span>✓</span> Thư tay cảm xúc hiển thị từng dòng tinh tế</li>
+              <li><span>✓</span> Nhạc nền Chương 1 mở đầu ấn tượng</li>
+            </ul>
+          </div>
+
+          <div class="chapter-card">
+            <div class="chapter-number">02</div>
+            <h3 class="chapter-title">Chương 2: Photobooth Kỷ Niệm 3D</h3>
+            <p class="chapter-desc">Khu vực trưng bày những tấm ảnh đáng nhớ nhất. Người nhận có thể dán sticker vui nhộn, lật xem từng trang nhật ký tình cảm trên nền giai điệu riêng biệt.</p>
+            <ul class="chapter-perks">
+              <li><span>✓</span> Album ảnh 4 góc nhìn chuẩn kỷ niệm</li>
+              <li><span>✓</span> Sticker trang trí sinh động, dễ thương</li>
+              <li><span>✓</span> Tùy biến nhạc nền Chương 2 độc lập</li>
+            </ul>
+          </div>
+
+          <div class="chapter-card">
+            <div class="chapter-number">03</div>
+            <h3 class="chapter-title">Chương 3: Bánh Kem & Thổi Nến Ảo</h3>
+            <p class="chapter-desc">Cao trào của bữa tiệc! Chiếc bánh kem ảo xuất hiện với ngọn nến lung linh. Người nhận ước nguyện, thổi tắt nến ảo và bùng nổ pháo hoa chúc mừng rực rỡ.</p>
+            <ul class="chapter-perks">
+              <li><span>✓</span> Thổi nến tắt thật sự kèm hiệu ứng khói</li>
+              <li><span>✓</span> Bùng nổ pháo hoa đa sắc & tiếng reo hò</li>
+              <li><span>✓</span> Khúc ca Happy Birthday rộn rã Chương 3</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pricing & VIP Packages -->
+    <section class="section" id="pricing">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag">BẢNG GIÁ DỊCH VỤ</span>
+          <h2 class="section-title">Chọn Gói Studio Phù Hợp</h2>
+          <p class="section-desc">Mở khóa toàn bộ kho tài nguyên đặc quyền với mức chi phí chỉ bằng một ly trà sữa.</p>
+        </div>
+
+        <div class="pricing-grid">
+          <!-- Free Plan -->
+          <div class="pricing-card">
+            <h3 class="pricing-title">Gói Tiêu Chuẩn</h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">Thích hợp cho nhu cầu tạo thiệp sinh nhật nhanh chóng cơ bản.</p>
+            <div class="pricing-price">0đ <span>/ vĩnh viễn</span></div>
+            
+            <ul class="pricing-list">
+              <li class="active"><span class="check-icon">✓</span> Tạo thiệp phong cách Lãng Mạn cơ bản</li>
+              <li class="active"><span class="check-icon">✓</span> Tải lên 4 ảnh kỷ niệm</li>
+              <li class="active"><span class="check-icon">✓</span> Bánh kem và hiệu ứng thổi nến</li>
+              <li><span class="cross-icon">✕</span> Khóa 4 phong cách Vibe cao cấp</li>
+              <li><span class="cross-icon">✕</span> Khóa tùy biến nhạc từng chương</li>
+              <li><span class="cross-icon">✕</span> Không có link bí danh riêng đẹp mắt</li>
+            </ul>
+
+            <button class="btn btn-outline" style="width: 100%;" class="btn-open-studio">Trải Nghiệm Miễn Phí</button>
+          </div>
+
+          <!-- VIP Plan -->
+          <div class="pricing-card vip">
+            <div class="vip-ribbon">⭐ PHỔ BIẾN NHẤT</div>
+            <h3 class="pricing-title gradient-gold">VIP Studio Độc Quyền</h3>
+            <p style="color: #cbd5e1; font-size: 0.9rem;">Trọn gói tính năng cao cấp không giới hạn cho thiệp sinh nhật đỉnh cao.</p>
+            <div class="pricing-price gradient-gold">25.000đ <span>/ thiệp trọn đời</span></div>
+
+            <ul class="pricing-list">
+              <li class="active"><span class="check-icon">✓</span> <strong>Mở khóa toàn bộ 5 Vibe cảm xúc</strong></li>
+              <li class="active"><span class="check-icon">✓</span> <strong>Tùy chỉnh nhạc riêng cho Chương 1, 2, 3</strong></li>
+              <li class="active"><span class="check-icon">✓</span> Upload file nhạc MP3 từ máy tính cá nhân</li>
+              <li class="active"><span class="check-icon">✓</span> Link bí danh rút gọn siêu đẹp (Custom Slug)</li>
+              <li class="active"><span class="check-icon">✓</span> Lưu trữ đám mây Cloud Database vĩnh viễn</li>
+              <li class="active"><span class="check-icon">✓</span> Quét mã VietQR Techcombank mở khóa tức thì</li>
+            </ul>
+
+            <button class="btn btn-primary btn-open-studio" style="width: 100%;">
+              <span>🔥</span> Mở Khóa Gói VIP 25K
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Author & Contact -->
+    <section class="section" id="author">
+      <div class="container">
+        <div class="author-card">
+          <div class="author-avatar">👨‍💻</div>
+          <h2 class="author-name">Vũ Thế Dân</h2>
+          <div class="author-role">Founder & Lead Developer • DAN168</div>
+          <p class="author-bio">
+            Universal Birthday Studio được xây dựng với sứ mệnh đem lại trải nghiệm công nghệ xúc động và ý nghĩa nhất cho người nhận trong ngày sinh nhật. 
+            Mọi thắc mắc, yêu cầu làm thiệp riêng hoặc hợp tác thương mại vui lòng liên hệ trực tiếp.
+          </p>
+
+          <div class="contact-buttons">
+            <button class="btn btn-primary btn-open-studio">🚀 Vào Web Tạo Thiệp</button>
+            <a href="https://github.com/vuthedan168-oss" target="_blank" class="btn btn-outline">🐙 GitHub Profile</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <p>© 2026 <strong>Universal Birthday Studio</strong>. Bản quyền thuộc về Vũ Thế Dân (DAN168). All Rights Reserved.</p>
+      <p style="margin-top: 0.5rem; opacity: 0.7;">Được thiết kế với công nghệ Web Audio API, Canvas Particles & Cloud Storage.</p>
+    </div>
+  </footer>
+
+  <!-- Modal: Launch App Studio -->
+  <div class="modal-overlay" id="studio-modal">
+    <div class="modal-card">
+      <button class="modal-close" id="modal-close">&times;</button>
+      <div class="modal-icon">🚀</div>
+      <h3 class="modal-title">Chào Mừng Đến Studio!</h3>
+      <p class="modal-desc">
+        Hệ thống ứng dụng tạo thiệp trực tuyến đã sẵn sàng. 
+        Bạn có thể mở ứng dụng chính để bắt đầu thiết kế thiệp sinh nhật độc quyền ngay bây giờ.
+      </p>
+
+      <div class="modal-url-box">
+        <label for="app-url-input">🌐 Đường Link Web Ứng Dụng (Vercel / Hosting):</label>
+        <input type="text" id="app-url-input" class="modal-input" placeholder="https://happy-birthday-xxx.vercel.app">
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-primary btn-lg" id="btn-launch-app">
+          ✨ Bắt Đầu Tạo Thiệp
+        </button>
+        <button class="btn btn-outline" onclick="document.getElementById('studio-modal').classList.remove('open')">
+          Đóng Lại
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/landing.js"></script>
+</body>
+</html>

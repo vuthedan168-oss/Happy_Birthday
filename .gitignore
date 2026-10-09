@@ -1,0 +1,15 @@
+# OS & Editor
+.DS_Store
+Thumbs.db
+*.swp
+*.bak
+.vscode/
+.idea/
+
+# Node
+node_modules/
+package-lock.json
+
+# Local scripts
+*.ps1
+*.py
