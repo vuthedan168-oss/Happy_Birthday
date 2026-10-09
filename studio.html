@@ -9,7 +9,7 @@
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600;700;800;900&family=Be+Vietnam+Pro:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&family=Dancing+Script:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
   
   <link rel="stylesheet" href="css/creator.css?v=4">
   <link rel="stylesheet" href="css/vibes.css?v=5">
@@ -48,20 +48,25 @@
       </div>
       
       <div class="header-actions">
-        <a href="index.html" class="btn btn-outline" style="text-decoration:none; display: inline-flex; align-items: center; gap: 4px;">
-          🏠 Trang Giới Thiệu
+        <a href="index.html" class="btn-header-item btn-header-outline" id="btn-nav-home" title="Quay lại trang giới thiệu">
+          <span class="btn-icon">🏠</span>
+          <span class="btn-text">Giới Thiệu</span>
         </a>
-        <button type="button" class="btn-owner-admin" id="btn-open-owner-modal" title="Dành riêng cho Chủ Sở Hữu (Cấp mã kích hoạt & quản lý VIP)">
-          🔑 Chủ Sở Hữu
-        </button>
-        <button type="button" class="vip-header-badge" id="btn-open-vip-modal" title="Nâng cấp gói VIP 25.000đ">
-          👑 Nâng Cấp VIP (25k)
-        </button>
-        <a href="gift.html" class="btn btn-outline" target="_blank" id="btn-view-demo">
-          👁️ Xem Thiệp Mẫu
+        <a href="gift.html" class="btn-header-item btn-header-outline" target="_blank" id="btn-view-demo" title="Mở trang thiệp 3D mẫu">
+          <span class="btn-icon">👁️</span>
+          <span class="btn-text">Thiệp Mẫu</span>
         </a>
-        <button type="button" class="btn btn-primary" id="btn-quick-generate">
-          ✨ Tạo & Lấy Link
+        <button type="button" class="btn-header-item btn-header-admin btn-owner-admin" id="btn-open-owner-modal" title="Dành riêng cho Chủ Sở Hữu (Cấp mã kích hoạt & quản lý VIP)">
+          <span class="btn-icon">🔑</span>
+          <span class="btn-text">Chủ Sở Hữu</span>
+        </button>
+        <button type="button" class="btn-header-item btn-header-vip vip-header-badge" id="btn-open-vip-modal" title="Nâng cấp gói VIP 25.000đ mở khóa 5 Vibe">
+          <span class="btn-icon">👑</span>
+          <span class="btn-text">Gói VIP 25K</span>
+        </button>
+        <button type="button" class="btn-header-item btn-header-primary" id="btn-quick-generate" title="Tạo thiệp và nhận link chia sẻ ngay">
+          <span class="btn-icon">✨</span>
+          <span class="btn-text">Tạo & Lấy Link</span>
         </button>
       </div>
     </div>
@@ -889,8 +894,8 @@ Chúc cậu tuổi mới ngập tràn niềm vui, nụ cười rạng rỡ và l
       </div>
 
       <div style="border-top: 1px dashed rgba(255,255,255,0.15); padding-top: 15px; text-align: center;">
-        <div style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 8px;">Mở khóa toàn quyền cho thiết bị này (Máy của bạn):</div>
-        <button type="button" id="btn-owner-self-activate" style="width: 100%; padding: 10px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; border-radius: 12px; color: #fff; font-weight: 800; font-size: 0.88rem; cursor: pointer;">
+        <div style="font-size: 0.82rem; color: #94a3b8; margin-bottom: 8px;">Mở khóa toàn quyền cho thiết bị này (Máy của bạn):</div>
+        <button type="button" id="btn-owner-self-activate" style="width: 100%; padding: 12px 16px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; border-radius: 12px; color: #ffffff; font-family: 'Be Vietnam Pro', sans-serif; font-weight: 700; font-size: 0.92rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35); transition: all 0.2s;">
           👑 Mở Khóa VIP Vĩnh Viễn Trên Máy Của Tôi (Chủ Sở Hữu)
         </button>
       </div>
