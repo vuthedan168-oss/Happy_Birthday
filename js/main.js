@@ -2685,9 +2685,25 @@ function checkCardLockStatus() {
     urlParams.get("lock") === "1" ||
     hash.includes("countdown=preview");
 
-  // 2. Lấy cấu hình từ ACTIVE_CONFIG
-  const unlockTimeStr = ACTIVE_CONFIG.unlockDateTime || ACTIVE_CONFIG.startDate || "";
-  const endTimeStr = ACTIVE_CONFIG.endDate || "";
+  // 2. Lấy cấu hình từ URL query > ACTIVE_CONFIG > LocalStorage independent dates
+  const urlStart = urlParams.get("start");
+  const urlEnd = urlParams.get("end");
+
+  let unlockTimeStr = urlStart || ACTIVE_CONFIG.unlockDateTime || ACTIVE_CONFIG.startDate || "";
+  let endTimeStr = urlEnd || ACTIVE_CONFIG.endDate || "";
+
+  if (!urlStart && (isPreview || urlParams.get("id") === "preview" || !urlParams.get("id"))) {
+    try {
+      const datesStr = localStorage.getItem("custom_birthday_card_dates");
+      if (datesStr) {
+        const d = JSON.parse(datesStr);
+        if (d && d.startDate) {
+          unlockTimeStr = d.startDate;
+          if (d.endDate) endTimeStr = d.endDate;
+        }
+      }
+    } catch (e) {}
+  }
 
   let unlockDate = null;
   if (unlockTimeStr) {

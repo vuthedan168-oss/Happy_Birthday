@@ -1682,8 +1682,33 @@ function saveToStorage(key, data) {
         safeData.backgroundMusic = 'indexeddb://audio_bg';
         safeData.musicUrl = 'indexeddb://audio_bg';
       }
-      localStorage.setItem(key, JSON.stringify(safeData));
+      if (Array.isArray(safeData.gallery)) {
+        safeData.gallery = safeData.gallery.map(p => ({
+          url: p.url && p.url.startsWith('data:') ? 'assets/images/photo1.jpg' : p.url,
+          caption: p.caption || ''
+        }));
+      }
+      if (safeData.sceneMusic) {
+        Object.keys(safeData.sceneMusic).forEach(stg => {
+          if (safeData.sceneMusic[stg]?.src?.startsWith('data:')) {
+            safeData.sceneMusic[stg].src = 'indexeddb://audio_' + stg;
+          }
+        });
+      }
+      try {
+        localStorage.setItem(key, JSON.stringify(safeData));
+      } catch (safeErr) {
+        console.warn("Lưu safeData vẫn đầy, lưu tối giản text:", safeErr);
+      }
     }
+    // Luôn lưu mốc ngày giờ vào key độc lập siêu nhẹ để không bao giờ bị lỗi quota
+    try {
+      localStorage.setItem("custom_birthday_card_dates", JSON.stringify({
+        startDate: data.startDate || "",
+        endDate: data.endDate || "",
+        unlockDateTime: data.startDate || data.unlockDateTime || ""
+      }));
+    } catch (eDate) {}
   } catch (finalErr) {
     console.error("Lưu backup cấu hình thất bại:", finalErr);
   }
@@ -1953,8 +1978,11 @@ function initFormSubmit() {
           }
         }
         // Khi xem trước, ta dùng localStorage fallback để nhanh, không cần gọi Cloud
-        const viewUrl = new URL('gift.html', window.location.href).href;
-        window.open(viewUrl, "_blank");
+        const viewUrl = new URL('gift.html', window.location.href);
+        viewUrl.searchParams.set("id", "preview");
+        if (data.startDate) viewUrl.searchParams.set("start", data.startDate);
+        if (data.endDate) viewUrl.searchParams.set("end", data.endDate);
+        window.open(viewUrl.href, "_blank");
       } catch (err) {
         console.error("Lỗi xem trước thiệp:", err);
         alert("Có lỗi khi xem trước: " + err.message);
@@ -1966,11 +1994,6 @@ function initFormSubmit() {
   const handlePreviewCountdown = async () => {
     try {
       const data = collectFormData();
-      if (!data.startDate) {
-        const demoDate = new Date(Date.now() + 2 * 86400000);
-        data.startDate = demoDate.toISOString().slice(0, 16);
-        data.unlockDateTime = data.startDate;
-      }
       saveToStorage("custom_birthday_card", data);
       if (window.CardAudioStorage && data.countdownMusicUrl && data.countdownMusicUrl.startsWith("data:")) {
         await window.CardAudioStorage.set("audio_countdown", {
@@ -1980,12 +2003,11 @@ function initFormSubmit() {
         });
       }
       // Khi xem trước, ta dùng localStorage fallback để nhanh, không cần gọi Cloud
-      const viewUrl = new URL('gift.html', window.location.href).href;
-
-      const previewCdUrl = viewUrl.includes("?")
-        ? `${viewUrl}&countdown=preview`
-        : `${viewUrl}?countdown=preview`;
-      window.open(previewCdUrl, "_blank");
+      const viewUrl = new URL('gift.html', window.location.href);
+      viewUrl.searchParams.set("countdown", "preview");
+      if (data.startDate) viewUrl.searchParams.set("start", data.startDate);
+      if (data.endDate) viewUrl.searchParams.set("end", data.endDate);
+      window.open(viewUrl.href, "_blank");
     } catch (err) {
       console.error("Lỗi xem thử màn hình khóa:", err);
       alert("Có lỗi khi xem thử màn hình khóa: " + err.message);
@@ -2046,55 +2068,6 @@ function initFormSubmit() {
         startInput.scrollIntoView({ behavior: "smooth", block: "center" });
       }
     });
-  }
-
-  // Cập nhật thẻ trạng thái đếm ngược trực tiếp cho người dùng
-  const updateCountdownDateStatusHint = () => {
-    const startInput = document.getElementById("input-start-date");
-    const hintEl = document.getElementById("countdown-status-hint");
-    if (!startInput || !hintEl) return;
-
-    const val = startInput.value;
-    if (!val) {
-      hintEl.style.display = "none";
-      return;
-    }
-
-    const targetDate = new Date(val);
-    if (isNaN(targetDate.getTime())) {
-      hintEl.style.display = "none";
-      return;
-    }
-
-    const now = new Date();
-    const diff = targetDate.getTime() - now.getTime();
-    hintEl.style.display = "block";
-
-    const daysOfWeek = ["Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"];
-    const dayName = daysOfWeek[targetDate.getDay()];
-    const dateFormatted = `${String(targetDate.getHours()).padStart(2, '0')}:${String(targetDate.getMinutes()).padStart(2, '0')} • ${dayName}, ${String(targetDate.getDate()).padStart(2, '0')}/${String(targetDate.getMonth() + 1).padStart(2, '0')}/${targetDate.getFullYear()}`;
-
-    if (diff <= 0) {
-      hintEl.innerHTML = `⚠️ <b>Lưu ý mốc thời gian:</b> Mốc <b>${dateFormatted}</b> đã qua so với hiện tại.<br>👉 Khi người nhận mở link thiệp thực tế, thiệp sẽ mở trực tiếp vào hành trình sinh nhật mà không cần chờ đếm ngược! Bấm <i>Xem Thử Màn Hình Khóa</i> bên dưới để kiểm tra giao diện đếm ngược mốc này.`;
-      hintEl.style.color = "#fef08a";
-      hintEl.style.background = "rgba(234, 179, 8, 0.15)";
-      hintEl.style.border = "1px solid rgba(234, 179, 8, 0.35)";
-    } else {
-      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-      const mins = Math.floor((diff / (1000 * 60)) % 60);
-      hintEl.innerHTML = `⏳ <b>Màn đếm ngược sẽ kích hoạt:</b> Thiệp khóa đếm ngược còn <b>${days} ngày ${hours} giờ ${mins} phút</b> nữa (Mở vào: <b>${dateFormatted}</b>).`;
-      hintEl.style.color = "#7dd3fc";
-      hintEl.style.background = "rgba(14, 165, 233, 0.15)";
-      hintEl.style.border = "1px solid rgba(14, 165, 233, 0.35)";
-    }
-  };
-
-  const startInputEl = document.getElementById("input-start-date");
-  if (startInputEl) {
-    startInputEl.addEventListener("input", updateCountdownDateStatusHint);
-    startInputEl.addEventListener("change", updateCountdownDateStatusHint);
-    setTimeout(updateCountdownDateStatusHint, 500);
   }
 
   // Đóng Modal
@@ -2259,6 +2232,17 @@ function saveDraft(showStatus = true) {
       } catch (syncErr) {
         console.warn("Đồng bộ custom_birthday_card trong saveDraft:", syncErr);
       }
+
+      // Lưu mốc thời gian độc lập siêu nhẹ
+      try {
+        const sVal = document.getElementById("input-start-date")?.value || "";
+        const eVal = document.getElementById("input-end-date")?.value || "";
+        localStorage.setItem("custom_birthday_card_dates", JSON.stringify({
+          startDate: sVal,
+          endDate: eVal,
+          unlockDateTime: sVal
+        }));
+      } catch (dErr) {}
     } catch (quotaError) {
       console.warn("Storage quota vượt quá giới hạn, lưu bản nháp an toàn ký tự:", quotaError);
       // Nếu có ảnh base64 quá lớn, dùng link placeholder an toàn để không làm mất chữ viết

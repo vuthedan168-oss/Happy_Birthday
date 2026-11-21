@@ -157,6 +157,24 @@ const CardStorage = {
         }
       }
 
+      // Đọc mốc ngày giờ độc lập siêu nhẹ từ localStorage nếu có
+      try {
+        const dateStr = localStorage.getItem("custom_birthday_card_dates");
+        if (dateStr) {
+          const dates = JSON.parse(dateStr);
+          if (dates) {
+            if (!resultData) resultData = {};
+            if (dates.startDate !== undefined && dates.startDate !== "") {
+              resultData.startDate = dates.startDate;
+              resultData.unlockDateTime = dates.startDate;
+            }
+            if (dates.endDate !== undefined) {
+              resultData.endDate = dates.endDate;
+            }
+          }
+        }
+      } catch (eDates) {}
+
       // Luôn đồng bộ mốc ngày giờ và thông tin từ bản nháp Studio nếu đang ở chế độ xem trước (preview)
       const isPreviewMode = binId === "preview" || params.get("countdown") === "preview" || !binId;
       if (isPreviewMode) {
@@ -194,6 +212,19 @@ const CardStorage = {
             console.warn("Lỗi đọc draft đồng bộ preview:", draftErr);
           }
         }
+      }
+
+      // Ưu tiên cao nhất: Tham số start & end trực tiếp từ URL query nếu có
+      const paramStart = params.get("start");
+      const paramEnd = params.get("end");
+      if (paramStart) {
+        if (!resultData) resultData = {};
+        resultData.startDate = paramStart;
+        resultData.unlockDateTime = paramStart;
+      }
+      if (paramEnd) {
+        if (!resultData) resultData = {};
+        resultData.endDate = paramEnd;
       }
 
       if (resultData) {
