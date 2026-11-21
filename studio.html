@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="css/creator.css?v=4">
   <link rel="stylesheet" href="css/vibes.css?v=5">
   <script src="js/qrcode.min.js?v=4"></script>
+  <script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
 
@@ -306,11 +307,16 @@ Chúc cậu tuổi mới ngập tràn niềm vui, nụ cười rạng rỡ và l
             </div>
           </div>
 
+          <!-- Thông báo tình trạng thời gian đếm ngược thời gian thực -->
+          <div id="countdown-status-hint" style="display: none; margin-top: 10px; padding: 10px 14px; border-radius: 12px; font-size: 0.85rem; line-height: 1.45;"></div>
 
           <!-- Quick Action Buttons for Countdown Lock -->
           <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px;">
             <button type="button" class="btn-secondary" id="btn-quick-set-bday-time" style="padding: 8px 14px; font-size: 0.85rem; border-radius: 12px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color: #fff; cursor: pointer;">
               ⚡ Hẹn đúng 00:00 ngày sinh nhật
+            </button>
+            <button type="button" class="btn-secondary" id="btn-jump-to-countdown-music" style="padding: 8px 14px; font-size: 0.85rem; border-radius: 12px; background: rgba(56,189,248,0.15); border: 1px solid rgba(56,189,248,0.4); color: #bae6fd; cursor: pointer;">
+              🎵 Chỉnh Nhạc Cho Giai Đoạn 0 Này ⬇️
             </button>
             <button type="button" class="btn-secondary" id="btn-preview-countdown-lock" style="padding: 8px 14px; font-size: 0.85rem; border-radius: 12px; background: rgba(251,191,36,0.15); border: 1px solid rgba(251,191,36,0.4); color: #fde68a; cursor: pointer;">
               👁️ Xem Thử Màn Hình Khóa Đếm Ngược (Giai Đoạn 0)
@@ -363,13 +369,13 @@ Chúc cậu tuổi mới ngập tràn niềm vui, nụ cười rạng rỡ và l
           </div>
 
           <div class="scene-music-grid">
-            <!-- CHƯƠNG 1: ĐẾM NGƯỢC HẸN GIỜ 00:00 -->
+            <!-- GIAI ĐOẠN 0: ĐANG CHỜ ĐẾN GIỜ G (MÀN KHÓA ĐẾM NGƯỢC) -->
             <div class="scene-music-card stage-countdown" data-stage="countdown">
               <div class="scene-music-header">
                 <span class="scene-music-icon">⏳🎵</span>
                 <div>
-                  <div class="scene-music-title">Chương 1: Đếm Ngược 00:00</div>
-                  <div class="scene-music-desc">Phát lúc người nhận chờ đến giờ G để mở thiệp</div>
+                  <div class="scene-music-title">⏳ Giai Đoạn 0: Đang Chờ Đến Giờ G (Màn Khóa Đếm Ngược)</div>
+                  <div class="scene-music-desc">Nhạc nền & tên bài hát hiển thị trên màn hình đếm ngược chờ đến sinh nhật</div>
                 </div>
               </div>
               <div class="form-group mb-2">
@@ -385,7 +391,7 @@ Chúc cậu tuổi mới ngập tràn niềm vui, nụ cười rạng rỡ và l
                   <option value="https://cdn.pixabay.com/download/audio/2022/10/14/audio_9939f792cb.mp3?filename=happy-birthday-party-124632.mp3">🎉 Upbeat Celebration</option>
                   <option value="">🔔 Không phát nhạc khi đếm ngược (Im lặng)</option>
                   <option value="custom-upload">📁 Tải file từ máy tính...</option>
-                  <option value="custom-url">🔗 Nhập link MP3 tùy chỉnh...</option>
+                  <option value="custom-url">🔗 Link YouTube / TikTok / MP3 tùy chỉnh...</option>
                 </select>
               </div>
               <div class="stage-upload-box mb-2" style="display:none;" data-stage="countdown">
@@ -393,7 +399,8 @@ Chúc cậu tuổi mới ngập tràn niềm vui, nụ cười rạng rỡ và l
                 <small class="field-hint">Hỗ trợ file .mp3, .wav, .m4a từ máy tính</small>
               </div>
               <div class="stage-url-box mb-2" style="display:none;" data-stage="countdown">
-                <input type="url" id="input-countdown-url" class="form-control form-control-sm stage-url-input" placeholder="https://domain.com/music.mp3" data-stage="countdown">
+                <input type="url" id="input-countdown-url" class="form-control form-control-sm stage-url-input" placeholder="Dán link YouTube, TikTok hoặc MP3..." data-stage="countdown">
+                <small class="field-hint" style="display:block; margin-top:4px; font-size:0.75rem; color:#64748b;">Hỗ trợ link video YouTube (cả Shorts), link TikTok hoặc link MP3</small>
               </div>
               <div class="scene-music-actions">
                 <button type="button" class="audio-preview-btn" data-target="music-countdown">▶️ Nghe thử</button>
@@ -401,12 +408,12 @@ Chúc cậu tuổi mới ngập tràn niềm vui, nụ cười rạng rỡ và l
               </div>
             </div>
 
-            <!-- CHƯƠNG 2: MỞ ĐẦU & THỔI NẾN BÁNH KEM -->
+            <!-- CHƯƠNG 1: MỞ ĐẦU & THỔI NẾN BÁNH KEM -->
             <div class="scene-music-card stage-intro" data-stage="intro">
               <div class="scene-music-header">
                 <span class="scene-music-icon">🎂🎉</span>
                 <div>
-                  <div class="scene-music-title">Chương 2: Mở Đầu & Thổi Nến</div>
+                  <div class="scene-music-title">Chương 1: Mở Đầu & Thổi Nến Bánh Kem</div>
                   <div class="scene-music-desc">Cuộn ngày sinh nhật, câu đố quiz & thổi nến 3D</div>
                 </div>
               </div>
@@ -421,7 +428,7 @@ Chúc cậu tuổi mới ngập tràn niềm vui, nụ cười rạng rỡ và l
                   <option value="https://cdn.pixabay.com/download/audio/2022/10/14/audio_9939f792cb.mp3?filename=happy-birthday-party-124632.mp3">🎈 Upbeat Celebration</option>
                   <option value="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=romantic-piano-10738.mp3">🎻 Romantic Harp & Piano</option>
                   <option value="custom-upload">📁 Tải file từ máy tính...</option>
-                  <option value="custom-url">🔗 Nhập link MP3 tùy chỉnh...</option>
+                  <option value="custom-url">🔗 Link YouTube / TikTok / MP3 tùy chỉnh...</option>
                 </select>
               </div>
               <div class="stage-upload-box mb-2" style="display:none;" data-stage="intro">
@@ -429,7 +436,8 @@ Chúc cậu tuổi mới ngập tràn niềm vui, nụ cười rạng rỡ và l
                 <small class="field-hint">Hỗ trợ file .mp3, .wav, .m4a từ máy tính</small>
               </div>
               <div class="stage-url-box mb-2" style="display:none;" data-stage="intro">
-                <input type="url" id="input-intro-url" class="form-control form-control-sm stage-url-input" placeholder="https://domain.com/music.mp3" data-stage="intro">
+                <input type="url" id="input-intro-url" class="form-control form-control-sm stage-url-input" placeholder="Dán link YouTube, TikTok hoặc MP3..." data-stage="intro">
+                <small class="field-hint" style="display:block; margin-top:4px; font-size:0.75rem; color:#64748b;">Hỗ trợ link video YouTube (cả Shorts), link TikTok hoặc link MP3</small>
               </div>
               <div class="scene-music-actions">
                 <button type="button" class="audio-preview-btn" data-target="music-intro">▶️ Nghe thử</button>
@@ -437,12 +445,12 @@ Chúc cậu tuổi mới ngập tràn niềm vui, nụ cười rạng rỡ và l
               </div>
             </div>
 
-            <!-- CHƯƠNG 3: NHỊP CẢM XÚC & CHỌN ĐIỀU ƯỚC -->
+            <!-- CHƯƠNG 2: NHỊP CẢM XÚC & CHỌN ĐIỀU ƯỚC -->
             <div class="scene-music-card stage-beats" data-stage="beats">
               <div class="scene-music-header">
                 <span class="scene-music-icon">💫🕯️</span>
                 <div>
-                  <div class="scene-music-title">Chương 3: Nhịp Cảm Xúc & Điều Ước</div>
+                  <div class="scene-music-title">Chương 2: Nhịp Cảm Xúc & Điều Ước</div>
                   <div class="scene-music-desc">Khoảnh khắc nến vừa tắt và lật mở 4 thẻ bài điều ước</div>
                 </div>
               </div>
@@ -456,7 +464,7 @@ Chúc cậu tuổi mới ngập tràn niềm vui, nụ cười rạng rỡ và l
                   <option value="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=romantic-piano-10738.mp3">🎻 Romantic Harp & Piano</option>
                   <option value="assets/audio/birthday.mp3">🎂 Birthday - Somi</option>
                   <option value="custom-upload">📁 Tải file từ máy tính...</option>
-                  <option value="custom-url">🔗 Nhập link MP3 tùy chỉnh...</option>
+                  <option value="custom-url">🔗 Link YouTube / TikTok / MP3 tùy chỉnh...</option>
                 </select>
               </div>
               <div class="stage-upload-box mb-2" style="display:none;" data-stage="beats">
@@ -464,7 +472,8 @@ Chúc cậu tuổi mới ngập tràn niềm vui, nụ cười rạng rỡ và l
                 <small class="field-hint">Hỗ trợ file .mp3, .wav, .m4a từ máy tính</small>
               </div>
               <div class="stage-url-box mb-2" style="display:none;" data-stage="beats">
-                <input type="url" id="input-beats-url" class="form-control form-control-sm stage-url-input" placeholder="https://domain.com/music.mp3" data-stage="beats">
+                <input type="url" id="input-beats-url" class="form-control form-control-sm stage-url-input" placeholder="Dán link YouTube, TikTok hoặc MP3..." data-stage="beats">
+                <small class="field-hint" style="display:block; margin-top:4px; font-size:0.75rem; color:#64748b;">Hỗ trợ link video YouTube (cả Shorts), link TikTok hoặc link MP3</small>
               </div>
               <div class="scene-music-actions">
                 <button type="button" class="audio-preview-btn" data-target="music-beats">▶️ Nghe thử</button>
@@ -472,13 +481,13 @@ Chúc cậu tuổi mới ngập tràn niềm vui, nụ cười rạng rỡ và l
               </div>
             </div>
 
-            <!-- CHƯƠNG 4: ALBUM TRÁI TIM KỶ NIỆM POLAROID -->
+            <!-- CHƯƠNG 3: ALBUM TRÁI TIM KỶ NIỆM POLAROID -->
             <div class="scene-music-card stage-heart" data-stage="heart">
               <div class="scene-music-header">
                 <span class="scene-music-icon">💖📸</span>
                 <div>
-                  <div class="scene-music-title">Chương 4: Trái Tim Kỷ Niệm</div>
-                  <div class="scene-music-desc">Lật mở từng bức ảnh Polaroid kèm cánh hoa rơi</div>
+                  <div class="scene-music-title">Chương 3: Trái Tim Kỷ Niệm (Heart Mosaic)</div>
+                  <div class="scene-music-desc">Lật mở từng bức ảnh kỷ niệm ghép thành trái tim 3D</div>
                 </div>
               </div>
               <div class="form-group mb-2">
@@ -491,7 +500,7 @@ Chúc cậu tuổi mới ngập tràn niềm vui, nụ cười rạng rỡ và l
                   <option value="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=romantic-piano-10738.mp3">🎻 Romantic Harp & Piano</option>
                   <option value="assets/audio/birthday.mp3">🎂 Birthday - Somi</option>
                   <option value="custom-upload">📁 Tải file từ máy tính...</option>
-                  <option value="custom-url">🔗 Nhập link MP3 tùy chỉnh...</option>
+                  <option value="custom-url">🔗 Link YouTube / TikTok / MP3 tùy chỉnh...</option>
                 </select>
               </div>
               <div class="stage-upload-box mb-2" style="display:none;" data-stage="heart">
@@ -499,7 +508,8 @@ Chúc cậu tuổi mới ngập tràn niềm vui, nụ cười rạng rỡ và l
                 <small class="field-hint">Hỗ trợ file .mp3, .wav, .m4a từ máy tính</small>
               </div>
               <div class="stage-url-box mb-2" style="display:none;" data-stage="heart">
-                <input type="url" id="input-heart-url" class="form-control form-control-sm stage-url-input" placeholder="https://domain.com/music.mp3" data-stage="heart">
+                <input type="url" id="input-heart-url" class="form-control form-control-sm stage-url-input" placeholder="Dán link YouTube, TikTok hoặc MP3..." data-stage="heart">
+                <small class="field-hint" style="display:block; margin-top:4px; font-size:0.75rem; color:#64748b;">Hỗ trợ link video YouTube (cả Shorts), link TikTok hoặc link MP3</small>
               </div>
               <div class="scene-music-actions">
                 <button type="button" class="audio-preview-btn" data-target="music-heart">▶️ Nghe thử</button>
@@ -507,12 +517,12 @@ Chúc cậu tuổi mới ngập tràn niềm vui, nụ cười rạng rỡ và l
               </div>
             </div>
 
-            <!-- CHƯƠNG 5: BỨC THƯ VINTAGE & BẦU TRỜI SAO BĂNG -->
+            <!-- CHƯƠNG 4: BỨC THƯ VINTAGE & BẦU TRỜI SAO BĂNG -->
             <div class="scene-music-card stage-letter" data-stage="letter">
               <div class="scene-music-header">
                 <span class="scene-music-icon">💌🌌</span>
                 <div>
-                  <div class="scene-music-title">Chương 5: Thư Tay & Sao Băng</div>
+                  <div class="scene-music-title">Chương 4: Thư Tay Vintage & Bầu Trời Sao Băng</div>
                   <div class="scene-music-desc">Dòng tâm tình gõ máy chữ & phóng sao băng ước nguyện</div>
                 </div>
               </div>
@@ -525,7 +535,7 @@ Chúc cậu tuổi mới ngập tràn niềm vui, nụ cười rạng rỡ và l
                   <option value="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=romantic-piano-10738.mp3">🎻 Romantic Harp & Piano</option>
                   <option value="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3">🎧 Sweet Lofi Memories</option>
                   <option value="custom-upload">📁 Tải file từ máy tính...</option>
-                  <option value="custom-url">🔗 Nhập link MP3 tùy chỉnh...</option>
+                  <option value="custom-url">🔗 Link YouTube / TikTok / MP3 tùy chỉnh...</option>
                 </select>
               </div>
               <div class="stage-upload-box mb-2" style="display:none;" data-stage="letter">
@@ -533,7 +543,8 @@ Chúc cậu tuổi mới ngập tràn niềm vui, nụ cười rạng rỡ và l
                 <small class="field-hint">Hỗ trợ file .mp3, .wav, .m4a từ máy tính</small>
               </div>
               <div class="stage-url-box mb-2" style="display:none;" data-stage="letter">
-                <input type="url" id="input-letter-url" class="form-control form-control-sm stage-url-input" placeholder="https://domain.com/music.mp3" data-stage="letter">
+                <input type="url" id="input-letter-url" class="form-control form-control-sm stage-url-input" placeholder="Dán link YouTube, TikTok hoặc MP3..." data-stage="letter">
+                <small class="field-hint" style="display:block; margin-top:4px; font-size:0.75rem; color:#64748b;">Hỗ trợ link video YouTube (cả Shorts), link TikTok hoặc link MP3</small>
               </div>
               <div class="scene-music-actions">
                 <button type="button" class="audio-preview-btn" data-target="music-letter">▶️ Nghe thử</button>
@@ -904,6 +915,7 @@ Chúc cậu tuổi mới ngập tràn niềm vui, nụ cười rạng rỡ và l
 
   <!-- Audio Element để thử nhạc -->
   <audio id="creator-audio-player"></audio>
+  <div id="yt-preview-player" style="position:fixed;bottom:-9999px;left:-9999px;width:1px;height:1px;opacity:0.001;pointer-events:none;"></div>
 
   <!-- Toast thông báo trạng thái lưu nháp -->
   <div id="creator-toast" class="creator-toast">

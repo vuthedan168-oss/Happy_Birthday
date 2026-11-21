@@ -130,8 +130,8 @@ async function autoCompressDataPayload(cardData, onProgress = null) {
       }
     }
 
-    // Đảm bảo không còn chuỗi Base64 âm thanh khổng lồ trong JSON thiệp
-    const finalAudio = isAudioDataUrl(cloned.countdownMusicUrl) ? "assets/audio/chung-ta-cua-hien-tai.mp3" : cloned.countdownMusicUrl;
+    // Đảm bảo không còn chuỗi Base64 âm thanh khổng lồ trong JSON thiệp nếu upload cloud lỗi
+    const finalAudio = isAudioDataUrl(cloned.countdownMusicUrl) ? "assets/audio/ngan-nam-anh-sang.mp3" : cloned.countdownMusicUrl;
     cloned.countdownMusicUrl = finalAudio;
     if (cloned.sceneMusic && cloned.sceneMusic.countdown) {
       cloned.sceneMusic.countdown.src = finalAudio;
@@ -260,6 +260,113 @@ const MUSIC_PRESETS = {
 
 let currentAudioSrc = "assets/audio/birthday.mp3";
 let currentAudioTitle = "Món Quà Sinh Nhật Lãng Mạn";
+
+// =========================================================
+// HỖ TRỢ TRÍCH XUẤT VÀ PHÁT NHẠC TỪ YOUTUBE & TIKTOK
+// =========================================================
+function extractYouTubeId(url) {
+  if (!url || typeof url !== "string") return null;
+  const trimmed = url.trim();
+  if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed)) return trimmed;
+  const match = trimmed.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|v\/|shorts\/))([a-zA-Z0-9_-]{11})/i);
+  return match ? match[1] : null;
+}
+
+function isTikTokUrl(url) {
+  if (!url || typeof url !== "string") return false;
+  return /tiktok\.com/i.test(url.trim());
+}
+
+async function resolveTikTokAudio(url) {
+  try {
+    const res = await fetch(`https://www.tikwm.com/api/?url=${encodeURIComponent(url.trim())}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (data && data.code === 0 && data.data) {
+      return {
+        musicUrl: data.data.music || data.data.play,
+        title: data.data.music_info?.title || data.data.title || "Nhạc TikTok",
+        author: data.data.music_info?.author || data.data.author?.nickname || ""
+      };
+    }
+  } catch (e) {
+    console.warn("Lỗi trích xuất nhạc TikTok:", e);
+  }
+  return null;
+}
+
+let ytPreviewPlayer = null;
+let isYtPreviewReady = false;
+
+function initYouTubePreview() {
+  const container = document.getElementById("yt-preview-player");
+  if (!container) return;
+  const setup = () => {
+    if (ytPreviewPlayer) return;
+    try {
+      ytPreviewPlayer = new YT.Player("yt-preview-player", {
+        height: "100",
+        width: "100",
+        playerVars: {
+          autoplay: 0,
+          controls: 0,
+          disablekb: 1,
+          loop: 1
+        },
+        events: {
+          onReady: (e) => {
+            isYtPreviewReady = true;
+            e.target.setVolume(70);
+          },
+          onStateChange: (e) => {
+            if (e.data === YT.PlayerState.ENDED) {
+              e.target.playVideo();
+            }
+          }
+        }
+      });
+    } catch (e) {
+      console.warn("YouTube preview init error:", e);
+    }
+  };
+
+  if (window.YT && window.YT.Player) {
+    setup();
+  } else {
+    const prevReady = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = () => {
+      if (typeof prevReady === "function") prevReady();
+      setup();
+    };
+  }
+}
+
+function playYouTubePreview(videoId) {
+  if (!ytPreviewPlayer || !isYtPreviewReady) {
+    initYouTubePreview();
+    setTimeout(() => {
+      if (ytPreviewPlayer && typeof ytPreviewPlayer.loadVideoById === "function") {
+        ytPreviewPlayer.loadVideoById(videoId);
+        ytPreviewPlayer.playVideo();
+      }
+    }, 800);
+    return;
+  }
+  try {
+    ytPreviewPlayer.loadVideoById(videoId);
+    ytPreviewPlayer.playVideo();
+  } catch (e) {
+    console.warn("Play YouTube preview error:", e);
+  }
+}
+
+function pauseYouTubePreview() {
+  if (ytPreviewPlayer && isYtPreviewReady && typeof ytPreviewPlayer.pauseVideo === "function") {
+    try {
+      ytPreviewPlayer.pauseVideo();
+    } catch (e) {}
+  }
+}
 
 /**
  * Quản lý danh sách ảnh kỷ niệm
@@ -540,6 +647,7 @@ let customUploadedAudios = {
  * Quản lý chọn nhạc & test nhạc theo từng giai đoạn (5 chương VIP)
  */
 function initMusicManager() {
+  initYouTubePreview();
   const audioPlayer = document.getElementById("creator-audio-player");
   const previewBtns = document.querySelectorAll(".audio-preview-btn");
 
@@ -561,6 +669,7 @@ function initMusicManager() {
 
       if (btn.classList.contains("playing")) {
         audioPlayer.pause();
+        pauseYouTubePreview();
         btn.textContent = "▶️ Nghe thử";
         btn.classList.remove("playing");
       } else {
@@ -568,9 +677,28 @@ function initMusicManager() {
           b.textContent = "▶️ Nghe thử";
           b.classList.remove("playing");
         });
+        audioPlayer.pause();
+        pauseYouTubePreview();
+
+        if (trackUrl === "custom-url") {
+          const urlIn = document.querySelector(`.stage-url-input[data-stage="${stage}"]`);
+          const rawUrl = urlIn?.value.trim() || "";
+          const ytId = extractYouTubeId(rawUrl);
+          if (ytId) {
+            playYouTubePreview(ytId);
+            btn.textContent = "⏸️ Dừng lại";
+            btn.classList.add("playing");
+            return;
+          }
+          if (urlIn?.dataset?.directAudio) {
+            trackUrl = urlIn.dataset.directAudio;
+          } else {
+            trackUrl = rawUrl;
+          }
+        }
 
         if (!trackUrl || trackUrl === "custom-upload" || trackUrl === "custom-url") {
-          alert("Vui lòng chọn bài hát có sẵn hoặc tải file nhạc lên trước khi nghe thử!");
+          alert("Vui lòng chọn bài hát có sẵn hoặc dán link YouTube, TikTok, MP3 trước khi nghe thử!");
           return;
         }
 
@@ -599,7 +727,7 @@ function initMusicManager() {
       select.addEventListener("change", (e) => {
         const val = select.value;
         const isVipOnlyStage = stage !== "countdown";
-        const isVipOnlyFeature = val === "custom-upload" || val === "custom-url";
+        const isVipOnlyFeature = stage !== "countdown" && (val === "custom-upload" || val === "custom-url");
 
         // Khóa tính năng nếu chưa kích hoạt VIP
         if ((isVipOnlyStage || isVipOnlyFeature) && !VIP_SYSTEM.isVip()) {
@@ -734,14 +862,69 @@ function initMusicManager() {
     }
 
     if (urlInput && select) {
-      urlInput.addEventListener("input", () => {
+      let debounceTimer = null;
+      const handleUrlInput = async () => {
         const val = urlInput.value.trim();
         let opt = select.querySelector('option[value="custom-url"]');
         if (opt) {
           opt.dataset.customSrc = val;
         }
-        if (statusBadge) statusBadge.textContent = val ? "Link MP3 đã nhập" : "Chưa nhập link";
+        if (!val) {
+          if (statusBadge) statusBadge.textContent = "Chưa nhập link";
+          urlInput.dataset.title = "";
+          urlInput.dataset.directAudio = "";
+          urlInput.dataset.youtubeId = "";
+          return;
+        }
+
+        const ytId = extractYouTubeId(val);
+        if (ytId) {
+          urlInput.dataset.youtubeId = ytId;
+          urlInput.dataset.directAudio = "";
+          if (statusBadge) statusBadge.textContent = "⏳ Đang kết nối YouTube...";
+          try {
+            const ytRes = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${ytId}&format=json`);
+            if (ytRes.ok) {
+              const ytData = await ytRes.json();
+              const ytTitle = ytData.title || "Nhạc YouTube";
+              urlInput.dataset.title = ytTitle;
+              if (statusBadge) statusBadge.textContent = `🎵 YouTube: ${ytTitle}`;
+              return;
+            }
+          } catch (e) {}
+          urlInput.dataset.title = "Nhạc YouTube";
+          if (statusBadge) statusBadge.textContent = `🎵 YouTube: Video (${ytId})`;
+          return;
+        }
+
+        if (isTikTokUrl(val)) {
+          urlInput.dataset.youtubeId = "";
+          if (statusBadge) statusBadge.textContent = "⏳ Đang trích xuất nhạc TikTok...";
+          const ttData = await resolveTikTokAudio(val);
+          if (ttData && ttData.musicUrl) {
+            urlInput.dataset.directAudio = ttData.musicUrl;
+            urlInput.dataset.title = ttData.title;
+            if (opt) opt.dataset.customSrc = ttData.musicUrl;
+            if (statusBadge) statusBadge.textContent = `🎵 TikTok: ${ttData.title}`;
+            return;
+          } else {
+            urlInput.dataset.title = "Nhạc TikTok";
+            if (statusBadge) statusBadge.textContent = "✅ Đã nhận link TikTok";
+            return;
+          }
+        }
+
+        urlInput.dataset.youtubeId = "";
+        urlInput.dataset.directAudio = "";
+        urlInput.dataset.title = "Nhạc MP3";
+        if (statusBadge) statusBadge.textContent = "✅ Link MP3 đã nhập";
+      };
+
+      urlInput.addEventListener("input", () => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(handleUrlInput, 400);
       });
+      urlInput.addEventListener("change", handleUrlInput);
     }
   });
 
@@ -1346,8 +1529,18 @@ function collectFormData() {
         title = customUploadedAudios[stage]?.title || "Nhạc tải lên từ máy";
       } else if (sel.value === "custom-url") {
         const urlInput = document.querySelector(`.stage-url-input[data-stage="${stage}"]`);
-        url = urlInput?.value.trim() || defaultUrl;
-        title = "Nhạc link MP3 tùy chỉnh";
+        const rawUrl = urlInput?.value.trim() || defaultUrl;
+        const ytId = extractYouTubeId(rawUrl);
+        if (ytId) {
+          url = rawUrl;
+          title = urlInput?.dataset?.title || "Nhạc YouTube";
+        } else if (urlInput?.dataset?.directAudio) {
+          url = urlInput.dataset.directAudio;
+          title = urlInput?.dataset?.title || "Nhạc TikTok";
+        } else {
+          url = rawUrl;
+          title = urlInput?.dataset?.title || "Nhạc tùy chỉnh";
+        }
       } else if (sel.value) {
         url = sel.value;
         const selOpt = sel.options[sel.selectedIndex];
@@ -1761,6 +1954,23 @@ function initFormSubmit() {
     btnPreviewCdFromMusic.addEventListener("click", handlePreviewCountdown);
   }
 
+  const btnJumpMusic = document.getElementById("btn-jump-to-countdown-music");
+  if (btnJumpMusic) {
+    btnJumpMusic.addEventListener("click", () => {
+      const card = document.querySelector('.scene-music-card[data-stage="countdown"]');
+      if (card) {
+        card.scrollIntoView({ behavior: "smooth", block: "center" });
+        card.style.transition = "transform 0.3s, box-shadow 0.3s";
+        card.style.transform = "scale(1.03)";
+        card.style.boxShadow = "0 0 25px rgba(56, 189, 248, 0.6)";
+        setTimeout(() => {
+          card.style.transform = "none";
+          card.style.boxShadow = "";
+        }, 1500);
+      }
+    });
+  }
+
   // Tự động hẹn giờ đúng 00:00 ngày sinh nhật
   const btnQuickSetBday = document.getElementById("btn-quick-set-bday-time");
   if (btnQuickSetBday) {
@@ -1784,9 +1994,59 @@ function initFormSubmit() {
       const startInput = document.getElementById("input-start-date");
       if (startInput) {
         startInput.value = formatted;
+        startInput.dispatchEvent(new Event("change"));
         startInput.scrollIntoView({ behavior: "smooth", block: "center" });
       }
     });
+  }
+
+  // Cập nhật thẻ trạng thái đếm ngược trực tiếp cho người dùng
+  const updateCountdownDateStatusHint = () => {
+    const startInput = document.getElementById("input-start-date");
+    const hintEl = document.getElementById("countdown-status-hint");
+    if (!startInput || !hintEl) return;
+
+    const val = startInput.value;
+    if (!val) {
+      hintEl.style.display = "none";
+      return;
+    }
+
+    const targetDate = new Date(val);
+    if (isNaN(targetDate.getTime())) {
+      hintEl.style.display = "none";
+      return;
+    }
+
+    const now = new Date();
+    const diff = targetDate.getTime() - now.getTime();
+    hintEl.style.display = "block";
+
+    const daysOfWeek = ["Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"];
+    const dayName = daysOfWeek[targetDate.getDay()];
+    const dateFormatted = `${String(targetDate.getHours()).padStart(2, '0')}:${String(targetDate.getMinutes()).padStart(2, '0')} • ${dayName}, ${String(targetDate.getDate()).padStart(2, '0')}/${String(targetDate.getMonth() + 1).padStart(2, '0')}/${targetDate.getFullYear()}`;
+
+    if (diff <= 0) {
+      hintEl.innerHTML = `⚠️ <b>Lưu ý mốc thời gian:</b> Mốc <b>${dateFormatted}</b> đã qua so với hiện tại.<br>👉 Khi người nhận mở link thiệp thực tế, thiệp sẽ mở trực tiếp vào hành trình sinh nhật mà không cần chờ đếm ngược! Bấm <i>Xem Thử Màn Hình Khóa</i> bên dưới để kiểm tra giao diện đếm ngược mốc này.`;
+      hintEl.style.color = "#fef08a";
+      hintEl.style.background = "rgba(234, 179, 8, 0.15)";
+      hintEl.style.border = "1px solid rgba(234, 179, 8, 0.35)";
+    } else {
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const mins = Math.floor((diff / (1000 * 60)) % 60);
+      hintEl.innerHTML = `⏳ <b>Màn đếm ngược sẽ kích hoạt:</b> Thiệp khóa đếm ngược còn <b>${days} ngày ${hours} giờ ${mins} phút</b> nữa (Mở vào: <b>${dateFormatted}</b>).`;
+      hintEl.style.color = "#7dd3fc";
+      hintEl.style.background = "rgba(14, 165, 233, 0.15)";
+      hintEl.style.border = "1px solid rgba(14, 165, 233, 0.35)";
+    }
+  };
+
+  const startInputEl = document.getElementById("input-start-date");
+  if (startInputEl) {
+    startInputEl.addEventListener("input", updateCountdownDateStatusHint);
+    startInputEl.addEventListener("change", updateCountdownDateStatusHint);
+    setTimeout(updateCountdownDateStatusHint, 500);
   }
 
   // Đóng Modal
@@ -1943,6 +2203,14 @@ function saveDraft(showStatus = true) {
       localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
       // Tương thích ngược với key cũ
       localStorage.setItem(LEGACY_DRAFT_KEY, JSON.stringify(draft.fields));
+
+      // Đồng bộ thời gian thực sang custom_birthday_card để các tab preview (gift.html?id=preview) luôn tải ngay cấu hình mới nhất
+      try {
+        const liveCard = collectFormData();
+        saveToStorage("custom_birthday_card", liveCard);
+      } catch (syncErr) {
+        console.warn("Đồng bộ custom_birthday_card trong saveDraft:", syncErr);
+      }
     } catch (quotaError) {
       console.warn("Storage quota vượt quá giới hạn, lưu bản nháp an toàn ký tự:", quotaError);
       // Nếu có ảnh base64 quá lớn, dùng link placeholder an toàn để không làm mất chữ viết

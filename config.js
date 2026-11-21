@@ -129,6 +129,7 @@ Tớ chỉ mong cậu ăn ngon ngủ đủ, bớt lo một chút, và nhớ là 
   ],
 
   // 10. NHẠC NỀN & HIỆU ỨNG ÂM THANH
+  // Hỗ trợ: file mp3 cục bộ, link MP3 online hoặc link video YouTube / TikTok tùy ý!
   musicUrl: "assets/audio/birthday.mp3",
   musicTitle: "Happy Birthday (Romantic Melody)",
 

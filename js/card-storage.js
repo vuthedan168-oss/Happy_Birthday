@@ -123,10 +123,10 @@ const CardStorage = {
   // Lấy dữ liệu thiệp hiện tại từ URL (ID Cloud hoặc Hash Fallback)
   async getFromUrl() {
     try {
-      // 1. Ưu tiên kiểm tra ID từ tham số URL (?id=...)
+      // 1. Ưu tiên kiểm tra ID từ tham số URL (?id=...) (bỏ qua 'preview' để không tốn request mạng lỗi)
       const params = new URLSearchParams(window.location.search);
       const binId = params.get("id");
-      if (binId) {
+      if (binId && binId !== "preview") {
         const cloudData = await this.loadFromCloud(binId);
         if (cloudData) return cloudData;
       }
@@ -146,10 +146,51 @@ const CardStorage = {
         if (data) return data;
       }
 
-      // 4. Fallback cuối cùng: localStorage backup
+      // 4. Fallback cuối cùng: localStorage custom_birthday_card và đồng bộ bản nháp Studio mới nhất
+      let resultData = null;
       const localData = localStorage.getItem("custom_birthday_card");
       if (localData) {
-        return JSON.parse(localData);
+        try {
+          resultData = JSON.parse(localData);
+        } catch (e) {
+          console.error("Lỗi parse backup local card:", e);
+        }
+      }
+
+      // Luôn đồng bộ mốc ngày giờ và thông tin từ bản nháp Studio nếu đang ở chế độ xem trước (preview)
+      const isPreviewMode = binId === "preview" || params.get("countdown") === "preview" || !binId;
+      if (isPreviewMode) {
+        const draftStr = localStorage.getItem("birthday_creator_draft_v2");
+        if (draftStr) {
+          try {
+            const draft = JSON.parse(draftStr);
+            if (draft && draft.fields) {
+              if (!resultData) resultData = {};
+              if (draft.fields["input-start-date"] !== undefined) {
+                resultData.startDate = draft.fields["input-start-date"];
+                resultData.unlockDateTime = draft.fields["input-start-date"];
+              }
+              if (draft.fields["input-end-date"] !== undefined) {
+                resultData.endDate = draft.fields["input-end-date"];
+              }
+              if (draft.fields["input-recipient"]) {
+                resultData.recipientName = draft.fields["input-recipient"];
+              }
+              if (draft.fields["input-sender"]) {
+                resultData.senderName = draft.fields["input-sender"];
+              }
+              if (draft.fields["input-title"]) {
+                resultData.title = draft.fields["input-title"];
+              }
+            }
+          } catch (draftErr) {
+            console.warn("Lỗi đọc draft đồng bộ preview:", draftErr);
+          }
+        }
+      }
+
+      if (resultData) {
+        return resultData;
       }
     } catch (e) {
       console.warn("Không tìm thấy dữ liệu thiệp hợp lệ:", e);

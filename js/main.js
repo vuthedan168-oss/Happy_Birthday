@@ -662,6 +662,115 @@ document.addEventListener("DOMContentLoaded", () => {
   if (btnFinish) btnFinish.addEventListener('click', triggerOutro);
 });
 // ==================== END NEW FEATURES ====================
+// =========================================================
+// HỆ THỐNG PHÁT NHẠC TÍCH HỢP YOUTUBE & TIKTOK TRÊN THIỆP
+// =========================================================
+function extractYouTubeId(url) {
+  if (!url || typeof url !== "string") return null;
+  const trimmed = url.trim();
+  if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed)) return trimmed;
+  const match = trimmed.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|v\/|shorts\/))([a-zA-Z0-9_-]{11})/i);
+  return match ? match[1] : null;
+}
+
+function isTikTokUrl(url) {
+  if (!url || typeof url !== "string") return false;
+  return /tiktok\.com/i.test(url.trim());
+}
+
+async function resolveTikTokAudio(url) {
+  try {
+    const res = await fetch(`https://www.tikwm.com/api/?url=${encodeURIComponent(url.trim())}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (data && data.code === 0 && data.data) {
+      return {
+        musicUrl: data.data.music || data.data.play,
+        title: data.data.music_info?.title || data.data.title || "Nhạc TikTok",
+        author: data.data.music_info?.author || data.data.author?.nickname || ""
+      };
+    }
+  } catch (e) {
+    console.warn("Lỗi trích xuất nhạc TikTok:", e);
+  }
+  return null;
+}
+
+let ytMainPlayer = null;
+let isYtMainReady = false;
+let pendingYtTrack = null;
+
+function initMainYouTubePlayer() {
+  const container = document.getElementById("yt-player-container");
+  if (!container) return;
+  const setup = () => {
+    if (ytMainPlayer) return;
+    try {
+      ytMainPlayer = new YT.Player("yt-player-container", {
+        height: "100",
+        width: "100",
+        playerVars: {
+          autoplay: 0,
+          controls: 0,
+          disablekb: 1,
+          loop: 1
+        },
+        events: {
+          onReady: (e) => {
+            isYtMainReady = true;
+            e.target.setVolume(60);
+            if (pendingYtTrack) {
+              playMainYouTubeTrack(pendingYtTrack);
+              pendingYtTrack = null;
+            }
+          },
+          onStateChange: (e) => {
+            if (e.data === YT.PlayerState.ENDED) {
+              e.target.playVideo();
+            }
+          }
+        }
+      });
+    } catch (err) {
+      console.warn("YouTube main player init error:", err);
+    }
+  };
+
+  if (window.YT && window.YT.Player) {
+    setup();
+  } else {
+    const prevReady = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = () => {
+      if (typeof prevReady === "function") prevReady();
+      setup();
+    };
+  }
+}
+
+function playMainYouTubeTrack(videoId) {
+  if (!isYtMainReady || !ytMainPlayer || typeof ytMainPlayer.loadVideoById !== "function") {
+    pendingYtTrack = videoId;
+    return;
+  }
+  try {
+    ytMainPlayer.loadVideoById(videoId);
+    ytMainPlayer.playVideo();
+    window.activeAudioType = "youtube";
+    const audioIcon = document.getElementById("audio-icon");
+    if (audioIcon) audioIcon.textContent = "🔊";
+  } catch (e) {
+    console.warn("Play YouTube track error:", e);
+  }
+}
+
+function pauseMainYouTubeTrack() {
+  if (ytMainPlayer && isYtMainReady && typeof ytMainPlayer.pauseVideo === "function") {
+    try {
+      ytMainPlayer.pauseVideo();
+    } catch (e) {}
+  }
+}
+
 let OPENING_TIMER = null;
 let IS_CARD_LOCKED = false;
 let IS_JOURNEY_STARTED = false;
@@ -697,16 +806,20 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // 3. Khởi tạo nhạc nền ngay lập tức và ép trình duyệt tải trước
   const musicSrc = ACTIVE_CONFIG.musicUrl || 'assets/audio/birthday.mp3';
-  window.currentAudio = new Audio(musicSrc);
-  window.currentAudio.preload = 'auto';
+  const ytMusicId = extractYouTubeId(musicSrc);
+  if (!ytMusicId) {
+    window.currentAudio = new Audio(musicSrc);
+    window.currentAudio.preload = 'auto';
+  }
 
   // Khởi tạo nhạc nền hẹn giờ đếm ngược (Stage 0 Countdown - Âm thanh đoạn chờ mở thiệp)
   const cdMusicSrc = (ACTIVE_CONFIG.countdownMusicUrl !== undefined)
     ? ACTIVE_CONFIG.countdownMusicUrl
     : (ACTIVE_CONFIG.musicUrl || 'assets/audio/ngan-nam-anh-sang.mp3');
+  const ytCdMusicId = extractYouTubeId(cdMusicSrc);
   const cdAudioEl = document.getElementById('countdown-audio');
   if (cdAudioEl) {
-    if (cdMusicSrc) {
+    if (cdMusicSrc && !ytCdMusicId) {
       cdAudioEl.src = cdMusicSrc;
       cdAudioEl.preload = 'auto';
       cdAudioEl.loop = true;
@@ -714,11 +827,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       cdAudioEl.removeAttribute('src');
     }
     window.countdownAudio = cdAudioEl;
-  } else if (cdMusicSrc) {
+  } else if (cdMusicSrc && !ytCdMusicId) {
     window.countdownAudio = new Audio(cdMusicSrc);
     window.countdownAudio.loop = true;
     window.countdownAudio.preload = 'auto';
   }
+
+  initMainYouTubePlayer();
 
   // Khởi tạo hệ thống điều khiển âm thanh sớm
   initAudioSystem();
@@ -779,13 +894,27 @@ document.addEventListener("DOMContentLoaded", async () => {
     const startBtnAction = document.getElementById("start-btn-action");
 
     // Lắng nghe khi nhạc đã tải xong đủ để phát không giật lag
-    window.currentAudio.addEventListener('canplaythrough', function () {
+    if (window.currentAudio) {
+      window.currentAudio.addEventListener('canplaythrough', function () {
+        if (startBtnAction && !startBtnAction.dataset.requesting) {
+          startBtnAction.style.pointerEvents = "auto";
+          startBtnAction.style.opacity = "1";
+          startBtnAction.classList.add('pulse-animation');
+        }
+      });
+      window.currentAudio.addEventListener('error', function () {
+        if (startBtnAction && !startBtnAction.dataset.requesting) {
+          startBtnAction.style.pointerEvents = "auto";
+          startBtnAction.style.opacity = "1";
+        }
+      });
+    } else {
       if (startBtnAction && !startBtnAction.dataset.requesting) {
         startBtnAction.style.pointerEvents = "auto";
         startBtnAction.style.opacity = "1";
         startBtnAction.classList.add('pulse-animation');
       }
-    });
+    }
 
     let isRequestingPermission = false;
 
@@ -852,21 +981,33 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         if (lockStatus.isLocked) {
           // Giai đoạn 0: Phát nhạc hẹn giờ đếm ngược (Âm thanh đoạn chờ mở thiệp)
-          if (window.countdownAudio && ACTIVE_CONFIG.countdownMusicUrl) {
+          const cdSrc = ACTIVE_CONFIG.countdownMusicUrl;
+          const ytCd = extractYouTubeId(cdSrc);
+          if (ytCd) {
+            playMainYouTubeTrack(ytCd);
+            window.activeAudioType = "youtube";
+          } else if (window.countdownAudio && cdSrc) {
             const currentCdSrc = window.countdownAudio.getAttribute("src") || window.countdownAudio.src || "";
-            if (!currentCdSrc.includes(ACTIVE_CONFIG.countdownMusicUrl)) {
-              window.countdownAudio.src = ACTIVE_CONFIG.countdownMusicUrl;
+            if (!currentCdSrc.includes(cdSrc)) {
+              window.countdownAudio.src = cdSrc;
               window.countdownAudio.load();
             }
             window.countdownAudio.volume = 0.6;
             window.countdownAudio.play().catch(e => console.log("Countdown audio autoplay:", e));
+            window.activeAudioType = "html5";
           }
           initStageCountdown(lockStatus);
         } else {
           // Giai đoạn 1+: Phát nhạc thiệp chính và bắt đầu kỷ niệm
-          if (window.currentAudio) {
+          const mSrc = ACTIVE_CONFIG.musicUrl || 'assets/audio/birthday.mp3';
+          const ytM = extractYouTubeId(mSrc);
+          if (ytM) {
+            playMainYouTubeTrack(ytM);
+            window.activeAudioType = "youtube";
+          } else if (window.currentAudio) {
             window.currentAudio.volume = 0.6;
             window.currentAudio.play().catch(() => {});
+            window.activeAudioType = "html5";
           }
           startCelebrationJourney();
         }
@@ -1053,8 +1194,29 @@ async function initCardConfiguration() {
   setSafeText("starlight-tap-hint", ACTIVE_CONFIG.starlightTapHint || "Chạm vào bầu trời để thả thêm sao băng nhé ✧");
 }
 
-function changeStageMusic(newSrc) {
+async function changeStageMusic(newSrc) {
   if (!newSrc) return;
+
+  const ytId = extractYouTubeId(newSrc);
+  if (ytId) {
+    if (window.currentAudio) {
+      window.currentAudio.pause();
+    }
+    playMainYouTubeTrack(ytId);
+    window.activeAudioType = "youtube";
+    return;
+  }
+
+  if (isTikTokUrl(newSrc)) {
+    const tt = await resolveTikTokAudio(newSrc);
+    if (tt && tt.musicUrl) {
+      newSrc = tt.musicUrl;
+    }
+  }
+
+  pauseMainYouTubeTrack();
+  window.activeAudioType = "html5";
+
   if (!window.currentAudio) {
     window.currentAudio = new Audio(newSrc);
     window.currentAudio.volume = 0.6;
@@ -1063,7 +1225,12 @@ function changeStageMusic(newSrc) {
   }
   const currentSrc = window.currentAudio.getAttribute("src") || window.currentAudio.src || "";
   // Check if we are already playing this track (using endsWith or indexOf to handle absolute/relative paths)
-  if (currentSrc.indexOf(newSrc) !== -1 || (newSrc && currentSrc.endsWith(newSrc))) return;
+  if (currentSrc.indexOf(newSrc) !== -1 || (newSrc && currentSrc.endsWith(newSrc))) {
+    if (window.currentAudio.paused) {
+      window.currentAudio.play().catch(() => {});
+    }
+    return;
+  }
 
   // Fade out current track and switch to new chapter music
   const fadeOutInterval = setInterval(() => {
@@ -1153,6 +1320,20 @@ function initAudioSystem() {
     audioBtn._hasAudioListener = true;
 
     audioBtn.addEventListener("click", () => {
+      // Nếu đang phát YouTube
+      if (window.activeAudioType === "youtube" && ytMainPlayer && isYtMainReady) {
+        const state = typeof ytMainPlayer.getPlayerState === "function" ? ytMainPlayer.getPlayerState() : -1;
+        if (state === 1) { // Đang phát
+          ytMainPlayer.pauseVideo();
+          if (audioIcon) audioIcon.textContent = "🔇";
+        } else {
+          ytMainPlayer.playVideo();
+          if (audioIcon) audioIcon.textContent = "🔊";
+        }
+        return;
+      }
+
+      // Nhạc HTML5 thông thường
       const activeAudio = (IS_CARD_LOCKED && window.countdownAudio) ? window.countdownAudio : window.currentAudio;
       if (!activeAudio) return;
 
@@ -2473,19 +2654,6 @@ function checkCardLockStatus() {
     urlParams.get("lock") === "1" ||
     hash.includes("countdown=preview");
 
-  if (isPreview) {
-    // Tạo mốc thời gian demo: 2 ngày 5 giờ 30 phút từ hiện tại để hiển thị đếm ngược sống động
-    const demoUnlock = new Date(Date.now() + (2 * 86400000) + (5 * 3600000) + (30 * 60000));
-    return {
-      isLocked: true,
-      isPreview: true,
-      isExpired: false,
-      unlockDate: demoUnlock,
-      unlockTimeStr: demoUnlock.toISOString(),
-      endDate: null
-    };
-  }
-
   // 2. Lấy cấu hình từ ACTIVE_CONFIG
   const unlockTimeStr = ACTIVE_CONFIG.unlockDateTime || ACTIVE_CONFIG.startDate || "";
   const endTimeStr = ACTIVE_CONFIG.endDate || "";
@@ -2507,6 +2675,23 @@ function checkCardLockStatus() {
   }
 
   const now = Date.now();
+
+  if (isPreview) {
+    // Ưu tiên thời gian mà người dùng đã thiết lập trong Studio để xem thử chính xác mốc đó
+    let previewTarget = unlockDate;
+    if (!previewTarget) {
+      // Nếu chưa điền ngày mở, dùng mốc mẫu 2 ngày 5 giờ 30 phút
+      previewTarget = new Date(now + (2 * 86400000) + (5 * 3600000) + (30 * 60000));
+    }
+    return {
+      isLocked: true,
+      isPreview: true,
+      isExpired: false,
+      unlockDate: previewTarget,
+      unlockTimeStr: previewTarget.toISOString(),
+      endDate: null
+    };
+  }
 
   // Kiểm tra quá hạn
   if (endDate && now > endDate.getTime()) {
@@ -2664,6 +2849,20 @@ function initStageCountdown(lockInfo) {
 
     if (diff <= 0) {
       if (COUNTDOWN_INTERVAL) clearInterval(COUNTDOWN_INTERVAL);
+      if (lockInfo.isPreview) {
+        const dEl = document.getElementById("cd-days");
+        const hEl = document.getElementById("cd-hours");
+        const mEl = document.getElementById("cd-minutes");
+        const sEl = document.getElementById("cd-seconds");
+        if (dEl) dEl.textContent = "00";
+        if (hEl) hEl.textContent = "00";
+        if (mEl) mEl.textContent = "00";
+        if (sEl) sEl.textContent = "00";
+        if (subTextEl) {
+          subTextEl.innerHTML = `✨ <b>Đã đến giờ mở thiệp!</b> (${unlockDate.toLocaleDateString("vi-VN")})<br>Vì mốc hẹn giờ đã qua, người nhận thực tế sẽ xem được thiệp ngay lập tức!`;
+        }
+        return;
+      }
       unlockAndStartCard();
       return;
     }
@@ -2759,7 +2958,9 @@ function startCelebrationJourney() {
 
   // 1. Khởi tạo âm thanh & nhạc nền thiệp chính
   initAudioSystem();
-  if (window.currentAudio && window.currentAudio.paused) {
+  if (window.activeAudioType === "youtube") {
+    // YouTube player đang phát
+  } else if (window.currentAudio && window.currentAudio.paused) {
     window.currentAudio.volume = 0.6;
     window.currentAudio.play().catch(e => console.log("Card audio play error:", e));
   }
