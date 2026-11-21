@@ -694,19 +694,22 @@ function initMusicManager() {
   const previewBtns = document.querySelectorAll(".audio-preview-btn");
 
   previewBtns.forEach(btn => {
-    btn.addEventListener("click", () => {
+    btn.addEventListener("click", async () => {
       const targetId = btn.getAttribute("data-target");
       const selectEl = document.getElementById(targetId);
       if (!selectEl) return;
       
-      let trackUrl = selectEl.value;
+      const selectMode = selectEl.value;
       const stage = selectEl.getAttribute("data-stage") || (targetId.replace("music-", ""));
+      const urlIn = document.querySelector(`.stage-url-input[data-stage="${stage}"]`);
 
-      if (trackUrl === "custom-upload") {
+      let trackUrl = "";
+      if (selectMode === "custom-upload") {
         trackUrl = customUploadedAudios[stage]?.src || selectEl.options[selectEl.selectedIndex]?.dataset?.customSrc || "";
-      } else if (trackUrl === "custom-url") {
-        const urlIn = document.querySelector(`.stage-url-input[data-stage="${stage}"]`);
+      } else if (selectMode === "custom-url") {
         trackUrl = urlIn?.value.trim() || "";
+      } else {
+        trackUrl = selectEl.value;
       }
 
       if (btn.classList.contains("playing")) {
@@ -722,20 +725,31 @@ function initMusicManager() {
         audioPlayer.pause();
         pauseYouTubePreview();
 
-        if (trackUrl === "custom-url") {
-          const urlIn = document.querySelector(`.stage-url-input[data-stage="${stage}"]`);
-          const rawUrl = urlIn?.value.trim() || "";
-          const ytId = extractYouTubeId(rawUrl);
-          if (ytId) {
-            playYouTubePreview(ytId);
-            btn.textContent = "⏸️ Dừng lại";
-            btn.classList.add("playing");
-            return;
+        // 1. Kiểm tra nếu là link video YouTube (cả Shorts, watch, music, embed)
+        const ytId = extractYouTubeId(trackUrl);
+        if (ytId) {
+          playYouTubePreview(ytId);
+          btn.textContent = "⏸️ Dừng lại";
+          btn.classList.add("playing");
+          return;
+        }
+
+        // 2. Kiểm tra nếu là link TikTok
+        if (isTikTokUrl(trackUrl)) {
+          let directAudio = urlIn?.dataset?.directAudio;
+          if (!directAudio) {
+            btn.textContent = "⏳ Đang trích xuất...";
+            const tt = await resolveTikTokAudio(trackUrl);
+            if (tt && tt.musicUrl) {
+              directAudio = tt.musicUrl;
+              if (urlIn) {
+                urlIn.dataset.directAudio = directAudio;
+                urlIn.dataset.title = tt.title || "Nhạc TikTok";
+              }
+            }
           }
-          if (urlIn?.dataset?.directAudio) {
-            trackUrl = urlIn.dataset.directAudio;
-          } else {
-            trackUrl = rawUrl;
+          if (directAudio) {
+            trackUrl = directAudio;
           }
         }
 
