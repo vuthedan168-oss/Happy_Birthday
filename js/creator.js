@@ -267,9 +267,35 @@ let currentAudioTitle = "Món Quà Sinh Nhật Lãng Mạn";
 function extractYouTubeId(url) {
   if (!url || typeof url !== "string") return null;
   const trimmed = url.trim();
+  // 1. Mã ID độc lập 11 ký tự
   if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed)) return trimmed;
-  const match = trimmed.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|v\/|shorts\/))([a-zA-Z0-9_-]{11})/i);
-  return match ? match[1] : null;
+
+  // 2. Link thumbnail: i.ytimg.com/vi/ID/... hoặc img.youtube.com/vi/ID/...
+  const thumbMatch = trimmed.match(/(?:ytimg\.com|youtube\.com)\/vi\/([a-zA-Z0-9_-]{11})/i);
+  if (thumbMatch) return thumbMatch[1];
+
+  // 3. Link rút gọn youtu.be/ID
+  const shortMatch = trimmed.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/i);
+  if (shortMatch) return shortMatch[1];
+
+  // 4. Link shorts: youtube.com/shorts/ID
+  const shortsMatch = trimmed.match(/youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/i);
+  if (shortsMatch) return shortsMatch[1];
+
+  // 5. Link embed / live / v
+  const embedMatch = trimmed.match(/youtube\.com\/(?:embed|v|live)\/([a-zA-Z0-9_-]{11})/i);
+  if (embedMatch) return embedMatch[1];
+
+  // 6. Link có tham số v=ID (hỗ trợ youtube.com, music.youtube.com, m.youtube.com)
+  const paramMatch = trimmed.match(/[?&]v=([a-zA-Z0-9_-]{11})/i);
+  if (paramMatch) return paramMatch[1];
+
+  // 7. Mọi URL chứa /vi/ hoặc /v/ kèm 11 ký tự
+  const genericMatch = trimmed.match(/[\/=]([a-zA-Z0-9_-]{11})(?:[?&#/]|$)/);
+  if (genericMatch && genericMatch[1] && (trimmed.includes("youtu") || trimmed.includes("ytimg"))) {
+    return genericMatch[1];
+  }
+  return null;
 }
 
 function isTikTokUrl(url) {
@@ -297,6 +323,7 @@ async function resolveTikTokAudio(url) {
 
 let ytPreviewPlayer = null;
 let isYtPreviewReady = false;
+let pendingYtPreview = null;
 
 function initYouTubePreview() {
   const container = document.getElementById("yt-preview-player");
@@ -305,8 +332,8 @@ function initYouTubePreview() {
     if (ytPreviewPlayer) return;
     try {
       ytPreviewPlayer = new YT.Player("yt-preview-player", {
-        height: "100",
-        width: "100",
+        height: "200",
+        width: "200",
         playerVars: {
           autoplay: 0,
           controls: 0,
@@ -316,11 +343,31 @@ function initYouTubePreview() {
         events: {
           onReady: (e) => {
             isYtPreviewReady = true;
-            e.target.setVolume(70);
+            try {
+              e.target.setVolume(75);
+            } catch (volErr) {}
+            if (pendingYtPreview) {
+              try {
+                e.target.loadVideoById(pendingYtPreview);
+                e.target.playVideo();
+              } catch (pErr) {}
+              pendingYtPreview = null;
+            }
           },
           onStateChange: (e) => {
             if (e.data === YT.PlayerState.ENDED) {
               e.target.playVideo();
+            }
+          },
+          onError: (e) => {
+            console.warn("YouTube preview player error:", e.data);
+            const previewBtns = document.querySelectorAll(".audio-preview-btn");
+            previewBtns.forEach(b => {
+              b.textContent = "▶️ Nghe thử";
+              b.classList.remove("playing");
+            });
+            if (e.data === 101 || e.data === 150) {
+              alert("⚠️ Video YouTube này bị chủ sở hữu giới hạn bản quyền không cho phép nhúng phát ngoài web.\n\n👉 Bạn hãy đổi sang link video Lyric hoặc bản Audio/Remix khác của bài này trên YouTube nhé!");
             }
           }
         }
@@ -342,14 +389,9 @@ function initYouTubePreview() {
 }
 
 function playYouTubePreview(videoId) {
-  if (!ytPreviewPlayer || !isYtPreviewReady) {
+  if (!isYtPreviewReady || !ytPreviewPlayer || typeof ytPreviewPlayer.loadVideoById !== "function") {
+    pendingYtPreview = videoId;
     initYouTubePreview();
-    setTimeout(() => {
-      if (ytPreviewPlayer && typeof ytPreviewPlayer.loadVideoById === "function") {
-        ytPreviewPlayer.loadVideoById(videoId);
-        ytPreviewPlayer.playVideo();
-      }
-    }, 800);
     return;
   }
   try {
@@ -881,19 +923,25 @@ function initMusicManager() {
         if (ytId) {
           urlInput.dataset.youtubeId = ytId;
           urlInput.dataset.directAudio = "";
+          const canonicalUrl = `https://www.youtube.com/watch?v=${ytId}`;
+          if (opt) {
+            opt.dataset.customSrc = canonicalUrl;
+          }
           if (statusBadge) statusBadge.textContent = "⏳ Đang kết nối YouTube...";
           try {
-            const ytRes = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${ytId}&format=json`);
+            const ytRes = await fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent(canonicalUrl)}&format=json`);
             if (ytRes.ok) {
               const ytData = await ytRes.json();
               const ytTitle = ytData.title || "Nhạc YouTube";
               urlInput.dataset.title = ytTitle;
               if (statusBadge) statusBadge.textContent = `🎵 YouTube: ${ytTitle}`;
+              if (typeof triggerDraftAutoSave === "function") triggerDraftAutoSave();
               return;
             }
           } catch (e) {}
           urlInput.dataset.title = "Nhạc YouTube";
           if (statusBadge) statusBadge.textContent = `🎵 YouTube: Video (${ytId})`;
+          if (typeof triggerDraftAutoSave === "function") triggerDraftAutoSave();
           return;
         }
 
@@ -1532,7 +1580,7 @@ function collectFormData() {
         const rawUrl = urlInput?.value.trim() || defaultUrl;
         const ytId = extractYouTubeId(rawUrl);
         if (ytId) {
-          url = rawUrl;
+          url = `https://www.youtube.com/watch?v=${ytId}`;
           title = urlInput?.dataset?.title || "Nhạc YouTube";
         } else if (urlInput?.dataset?.directAudio) {
           url = urlInput.dataset.directAudio;
@@ -1688,7 +1736,7 @@ function initFormSubmit() {
         console.warn("Lưu cloud gặp sự cố, tự động dùng link dự phòng an toàn:", cloudErr);
         const safeData = JSON.parse(JSON.stringify(cloudData));
         if (safeData.countdownMusicUrl && safeData.countdownMusicUrl.startsWith("data:")) {
-          safeData.countdownMusicUrl = "assets/audio/chung-ta-cua-hien-tai.mp3";
+          safeData.countdownMusicUrl = "assets/audio/ngan-nam-anh-sang.mp3";
         }
         targetShareUrl = window.CardStorage.createShareUrl(safeData, chosenSlug);
       }

@@ -668,9 +668,35 @@ document.addEventListener("DOMContentLoaded", () => {
 function extractYouTubeId(url) {
   if (!url || typeof url !== "string") return null;
   const trimmed = url.trim();
+  // 1. Mã ID độc lập 11 ký tự
   if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed)) return trimmed;
-  const match = trimmed.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|v\/|shorts\/))([a-zA-Z0-9_-]{11})/i);
-  return match ? match[1] : null;
+
+  // 2. Link thumbnail: i.ytimg.com/vi/ID/... hoặc img.youtube.com/vi/ID/...
+  const thumbMatch = trimmed.match(/(?:ytimg\.com|youtube\.com)\/vi\/([a-zA-Z0-9_-]{11})/i);
+  if (thumbMatch) return thumbMatch[1];
+
+  // 3. Link rút gọn youtu.be/ID
+  const shortMatch = trimmed.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/i);
+  if (shortMatch) return shortMatch[1];
+
+  // 4. Link shorts: youtube.com/shorts/ID
+  const shortsMatch = trimmed.match(/youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/i);
+  if (shortsMatch) return shortsMatch[1];
+
+  // 5. Link embed / live / v
+  const embedMatch = trimmed.match(/youtube\.com\/(?:embed|v|live)\/([a-zA-Z0-9_-]{11})/i);
+  if (embedMatch) return embedMatch[1];
+
+  // 6. Link có tham số v=ID (hỗ trợ youtube.com, music.youtube.com, m.youtube.com)
+  const paramMatch = trimmed.match(/[?&]v=([a-zA-Z0-9_-]{11})/i);
+  if (paramMatch) return paramMatch[1];
+
+  // 7. Mọi URL chứa /vi/ hoặc /v/ kèm 11 ký tự
+  const genericMatch = trimmed.match(/[\/=]([a-zA-Z0-9_-]{11})(?:[?&#/]|$)/);
+  if (genericMatch && genericMatch[1] && (trimmed.includes("youtu") || trimmed.includes("ytimg"))) {
+    return genericMatch[1];
+  }
+  return null;
 }
 
 function isTikTokUrl(url) {
@@ -707,8 +733,8 @@ function initMainYouTubePlayer() {
     if (ytMainPlayer) return;
     try {
       ytMainPlayer = new YT.Player("yt-player-container", {
-        height: "100",
-        width: "100",
+        height: "200",
+        width: "200",
         playerVars: {
           autoplay: 0,
           controls: 0,
@@ -718,7 +744,9 @@ function initMainYouTubePlayer() {
         events: {
           onReady: (e) => {
             isYtMainReady = true;
-            e.target.setVolume(60);
+            try {
+              e.target.setVolume(65);
+            } catch (volErr) {}
             if (pendingYtTrack) {
               playMainYouTubeTrack(pendingYtTrack);
               pendingYtTrack = null;
@@ -728,6 +756,9 @@ function initMainYouTubePlayer() {
             if (e.data === YT.PlayerState.ENDED) {
               e.target.playVideo();
             }
+          },
+          onError: (e) => {
+            console.warn("YouTube main player error:", e.data);
           }
         }
       });
@@ -2751,7 +2782,8 @@ function initStageCountdown(lockInfo) {
   const musicTrackName = document.getElementById("countdown-music-track-name");
 
   // Hiển thị pill bài hát hẹn giờ nếu có
-  const trackTitle = ACTIVE_CONFIG.countdownMusicTitle || "Giai điệu chờ mở thiệp 🎵";
+  const ytCd = extractYouTubeId(ACTIVE_CONFIG.countdownMusicUrl);
+  const trackTitle = ACTIVE_CONFIG.countdownMusicTitle || (ytCd ? "Nhạc YouTube 🎵" : "Giai điệu chờ mở thiệp 🎵");
   if (musicTrackName) {
     musicTrackName.textContent = trackTitle;
   }
@@ -2759,23 +2791,33 @@ function initStageCountdown(lockInfo) {
     musicPill.style.display = ACTIVE_CONFIG.countdownMusicUrl ? "inline-flex" : "none";
   }
 
-  // Đảm bảo audio có bài hát chính xác theo cấu hình mới nhất
-  if (window.countdownAudio && ACTIVE_CONFIG.countdownMusicUrl) {
+  // Phát nhạc hẹn giờ đếm ngược (Hỗ trợ cả YouTube & HTML5 Audio)
+  if (ytCd) {
+    playMainYouTubeTrack(ytCd);
+    window.activeAudioType = "youtube";
+  } else if (window.countdownAudio && ACTIVE_CONFIG.countdownMusicUrl) {
     const currentSrc = window.countdownAudio.getAttribute("src") || window.countdownAudio.src || "";
     if (!currentSrc.includes(ACTIVE_CONFIG.countdownMusicUrl)) {
       window.countdownAudio.src = ACTIVE_CONFIG.countdownMusicUrl;
       window.countdownAudio.load();
     }
+    if (window.countdownAudio.paused) {
+      window.countdownAudio.volume = 0.6;
+      window.countdownAudio.play().catch(() => {});
+    }
+    window.activeAudioType = "html5";
   }
 
-  // Phát nhạc hẹn giờ đếm ngược
-  if (window.countdownAudio && ACTIVE_CONFIG.countdownMusicUrl && window.countdownAudio.paused) {
-    window.countdownAudio.volume = 0.6;
-    window.countdownAudio.play().catch(() => {});
-  }
   const tryPlayCd = () => {
-    if (IS_CARD_LOCKED && window.countdownAudio && ACTIVE_CONFIG.countdownMusicUrl && window.countdownAudio.paused) {
+    if (!IS_CARD_LOCKED) return;
+    const currentYt = extractYouTubeId(ACTIVE_CONFIG.countdownMusicUrl);
+    if (currentYt) {
+      playMainYouTubeTrack(currentYt);
+      window.activeAudioType = "youtube";
+    } else if (window.countdownAudio && ACTIVE_CONFIG.countdownMusicUrl && window.countdownAudio.paused) {
+      window.countdownAudio.volume = 0.6;
       window.countdownAudio.play().catch(() => {});
+      window.activeAudioType = "html5";
     }
   };
   if (overlay) {

@@ -182,6 +182,13 @@ const CardStorage = {
               if (draft.fields["input-title"]) {
                 resultData.title = draft.fields["input-title"];
               }
+              if (draft.fields["input-countdown-url"] && draft.musicStageCountdown === "custom-url") {
+                const cdUrl = draft.fields["input-countdown-url"].trim();
+                resultData.countdownMusicUrl = cdUrl;
+                if (!resultData.sceneMusic) resultData.sceneMusic = {};
+                if (!resultData.sceneMusic.countdown) resultData.sceneMusic.countdown = {};
+                resultData.sceneMusic.countdown.src = cdUrl;
+              }
             }
           } catch (draftErr) {
             console.warn("Lỗi đọc draft đồng bộ preview:", draftErr);
