@@ -1031,7 +1031,7 @@ function initIconThemeManager() {
  */
 const VIP_SYSTEM = {
   SECRET_SALT: "DAN168_BDAY_SECURE_SALT_2026",
-  OWNER_CODES: ["DAN168_OWNER", "DAN168_CHUSOHUU", "BDAY_OWNER_DAN", "CHUSOHUU168", "VUTHEDAN168", "ADMIN168"],
+  OWNER_CODES: ["06112007", "DAN168_OWNER", "DAN168_CHUSOHUU", "BDAY_OWNER_DAN", "CHUSOHUU168", "VUTHEDAN168", "ADMIN168"],
 
   // 1. Lấy hoặc sinh Device ID duy nhất cho trình duyệt này
   getDeviceId() {
@@ -1066,8 +1066,8 @@ const VIP_SYSTEM = {
     const key = (inputKey || "").trim().toUpperCase();
     if (!key) return { valid: false, message: "Vui lòng nhập mã kích hoạt VIP!" };
 
-    // Kiểm tra mã Master của Chủ Sở Hữu
-    if (this.OWNER_CODES.includes(key)) {
+    // Kiểm tra mã Master của Chủ Sở Hữu (Mật khẩu: 06112007)
+    if (key === "06112007" || this.OWNER_CODES.includes(key)) {
       return { 
         valid: true, 
         isOwner: true, 
@@ -1417,7 +1417,7 @@ function initVipPaymentManager() {
     });
   }
 
-  // Kích hoạt bằng mã VIP Code (Kiểm tra chống chia sẻ thiết bị)
+  // Kích hoạt bằng mã VIP Code (Kiểm tra chống chia sẻ thiết bị hoặc mật khẩu Chủ Sở Hữu)
   if (btnVerifyCode && inputVipCode) {
     btnVerifyCode.addEventListener("click", () => {
       const code = inputVipCode.value.trim();
@@ -1425,6 +1425,12 @@ function initVipPaymentManager() {
       if (result.valid) {
         VIP_SYSTEM.activate(result.isOwner);
         activateVipSuccess(result.message);
+        if (result.isOwner) {
+          if (btnOpenOwner) btnOpenOwner.style.display = "inline-flex";
+          const vipModal = document.getElementById("vip-upgrade-modal");
+          if (vipModal) vipModal.classList.remove("active");
+          if (ownerModal) ownerModal.classList.add("active");
+        }
         alert(result.message);
       } else {
         alert(result.message);
@@ -1444,13 +1450,11 @@ function initVipPaymentManager() {
   const btnOwnerSelfActivate = document.getElementById("btn-owner-self-activate");
   const ownerPassInput = document.getElementById("owner-secret-passcode");
 
-  // Kiểm tra quyền Chủ sở hữu: chỉ hiện nút trên thanh Header khi đã xác thực chủ sở hữu hoặc có param admin/owner
-  const urlParams = new URLSearchParams(window.location.search);
-  const isOwnerUrl = urlParams.get("admin") === "168" || urlParams.get("owner") === "dan168" || urlParams.get("vip") === "owner";
+  // Kiểm tra quyền Chủ sở hữu: chỉ hiện nút khi đã xác thực chủ sở hữu trên trình duyệt này
   const isOwnerSaved = localStorage.getItem("birthday_vip_owner") === "true";
 
   if (btnOpenOwner) {
-    if (isOwnerUrl || isOwnerSaved) {
+    if (isOwnerSaved) {
       btnOpenOwner.style.display = "inline-flex";
     }
     btnOpenOwner.addEventListener("click", () => {
@@ -1458,33 +1462,25 @@ function initVipPaymentManager() {
     });
   }
 
-  // Easter Egg bảo mật: Bấm nhanh 3 lần vào logo Header để mở bảng Chủ sở hữu
-  const logoEl = document.getElementById("header-logo");
-  let logoClickCount = 0;
-  let logoClickTimer = null;
-  if (logoEl) {
-    logoEl.addEventListener("click", () => {
-      logoClickCount++;
-      if (logoClickTimer) clearTimeout(logoClickTimer);
-      logoClickTimer = setTimeout(() => { logoClickCount = 0; }, 1200);
-      if (logoClickCount >= 3) {
-        logoClickCount = 0;
-        if (btnOpenOwner) btnOpenOwner.style.display = "inline-flex";
-        if (ownerModal) ownerModal.classList.add("active");
-        showCreatorToast("Đã mở Cổng Quản Lý Chủ Sở Hữu (Bảo Mật)", "🔑");
-      }
+  // Chuyển nhanh từ modal VIP sang Cổng Quản Lý Chủ Sở Hữu
+  const btnSwitchToOwner = document.getElementById("btn-switch-to-owner-modal");
+  if (btnSwitchToOwner) {
+    btnSwitchToOwner.addEventListener("click", () => {
+      const vipModal = document.getElementById("vip-upgrade-modal");
+      if (vipModal) vipModal.classList.remove("active");
+      if (ownerModal) ownerModal.classList.add("active");
     });
   }
 
-  // Hàm xác thực mật khẩu Chủ Sở Hữu
+  // Hàm xác thực mật khẩu Chủ Sở Hữu (Mật khẩu: 06112007)
   const verifyOwnerPasscode = () => {
-    const entered = (ownerPassInput?.value || "").trim().toUpperCase();
+    const entered = (ownerPassInput?.value || "").trim();
     if (!entered) {
       alert("❌ Vui lòng nhập Mật Khẩu Xác Thực Chủ Sở Hữu vào ô trên cùng trước!");
       if (ownerPassInput) ownerPassInput.focus();
       return false;
     }
-    if (VIP_SYSTEM.OWNER_CODES.includes(entered) || entered === "168168" || entered === "VUTHEDAN") {
+    if (entered === "06112007" || VIP_SYSTEM.OWNER_CODES.includes(entered.toUpperCase()) || entered === "168168" || entered.toUpperCase() === "VUTHEDAN") {
       return true;
     }
     alert("❌ Sai Mật Khẩu Chủ Sở Hữu! Quyền truy cập bị từ chối.");
@@ -2581,12 +2577,13 @@ function initDraftManager() {
       }
     });
 
-    // 7. Bảo vệ Header Logo không làm gián đoạn người dùng
+    // 7. Bấm vào Header Logo chuyển hướng về trang giới thiệu (index.html)
     const logoHeader = document.getElementById("header-logo");
     if (logoHeader) {
+      logoHeader.style.cursor = "pointer";
       logoHeader.addEventListener("click", () => {
         if (isFormDirty) {
-          showCreatorToast("Dữ liệu thiệp của bạn luôn được tự động lưu an toàn! 💖", "🛡️");
+          saveDraft(false);
         }
       });
     }
