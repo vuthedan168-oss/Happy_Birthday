@@ -57,7 +57,7 @@
           <span class="btn-icon">👁️</span>
           <span class="btn-text">Thiệp Mẫu</span>
         </a>
-        <button type="button" class="btn-header-item btn-header-admin btn-owner-admin" id="btn-open-owner-modal" title="Dành riêng cho Chủ Sở Hữu (Cấp mã kích hoạt & quản lý VIP)">
+        <button type="button" class="btn-header-item btn-header-admin btn-owner-admin" id="btn-open-owner-modal" title="Dành riêng cho Chủ Sở Hữu (Cấp mã kích hoạt & quản lý VIP)" style="display: none;">
           <span class="btn-icon">🔑</span>
           <span class="btn-text">Chủ Sở Hữu</span>
         </button>
@@ -882,6 +882,14 @@ Chúc cậu tuổi mới ngập tràn niềm vui, nụ cười rạng rỡ và l
       <h3 class="payment-modal-title" style="color: #38bdf8;">Bảng Cấp Mã VIP Cho Khách Hàng</h3>
       <p class="payment-modal-subtitle">Dành riêng cho Chủ sở hữu: Nhập mã thiết bị của khách để tạo mã kích hoạt độc quyền (chống chia sẻ).</p>
 
+      <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid #334155; padding: 12px; border-radius: 12px; margin-bottom: 14px; text-align: left;">
+        <label style="font-size: 0.8rem; font-weight: 700; color: #facc15; display: block; margin-bottom: 4px;">
+          🔐 Mật khẩu xác thực Chủ Sở Hữu (Bắt buộc):
+        </label>
+        <input type="password" id="owner-secret-passcode" class="form-control" placeholder="Nhập mật khẩu Chủ Sở Hữu..." style="background: #020617; border-color: #475569; color: #facc15; font-weight: 700;">
+        <small style="display: block; font-size: 0.72rem; color: #94a3b8; margin-top: 4px;">Chỉ người có mật khẩu mới có thể tạo mã VIP hoặc kích hoạt trên thiết bị này.</small>
+      </div>
+
       <div style="background: rgba(255,255,255,0.06); padding: 16px; border-radius: 16px; margin: 15px 0; text-align: left;">
         <label style="font-size: 0.82rem; font-weight: 700; color: #94a3b8; display: block; margin-bottom: 6px;">
           1. Mã Thiết Bị Của Khách (từ nội dung CK VietQR):
@@ -921,9 +929,9 @@ Chúc cậu tuổi mới ngập tràn niềm vui, nụ cười rạng rỡ và l
   </div>
 
   <!-- Scripts -->
-  <script src="config.js?v=7"></script>
-  <script src="js/card-storage.js?v=7"></script>
-  <script src="js/creator.js?v=7"></script>
+  <script src="config.js?v=8"></script>
+  <script src="js/card-storage.js?v=8"></script>
+  <script src="js/creator.js?v=8"></script>
   <script>
     // Tự động nhận diện Vibe và gói VIP từ URL
     window.addEventListener('DOMContentLoaded', () => {

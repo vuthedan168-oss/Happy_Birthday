@@ -1109,6 +1109,18 @@ async function initCardConfiguration() {
   const activeVibe = ACTIVE_CONFIG.vibe || 'party';
   document.body.setAttribute('data-vibe', activeVibe);
 
+  // Nạp toàn bộ album ảnh thực tế từ IndexedDB nếu có (chống lỗi tràn quota localStorage)
+  if (window.CardAudioStorage) {
+    try {
+      const cachedPhotos = await window.CardAudioStorage.get("gallery_photos");
+      if (Array.isArray(cachedPhotos) && cachedPhotos.length > 0) {
+        ACTIVE_CONFIG.gallery = cachedPhotos;
+      }
+    } catch (photoErr) {
+      console.warn("CardAudioStorage gallery read error:", photoErr);
+    }
+  }
+
   // Nạp âm thanh từ CardAudioStorage (IndexedDB) nếu có lưu bài hát hẹn giờ
   if (!ACTIVE_CONFIG.countdownMusicUrl || ACTIVE_CONFIG.countdownMusicUrl === "indexeddb://audio_countdown") {
     if (window.CardAudioStorage) {
@@ -1947,13 +1959,14 @@ function initStageHeart() {
       const n = pseudoRandom(3.7 * r + 19.1 * c + 5);
       const o = pseudoRandom(8.3 * r + 2.9 * c + 1);
       const imgIndex = Math.floor(pseudoRandom(5.2 * r + 9.7 * c + 3) * gallery.length) % gallery.length;
-      const photo = gallery[imgIndex];
+      const photo = gallery[imgIndex] || {};
+      const safeUrl = photo.url || "assets/images/girl/girl2.jpeg";
 
       const tile = document.createElement("button");
       tile.type = "button";
       tile.className = "lovegift-tile-spiral";
       tile.title = photo.caption || "Xem ảnh kỷ niệm";
-      tile.style.backgroundImage = `url('${photo.url}')`;
+      tile.style.backgroundImage = `url("${safeUrl.replace(/"/g, '\\"')}")`;
       tile.style.setProperty("--spin", `${210 + 90 * n}deg`);
       tile.style.setProperty("--sc", `${1.55 + 0.7 * n}`);
       tile.style.animationDelay = `${0.35 * o}s`;
@@ -2091,9 +2104,14 @@ function initStageStarlight() {
       // Đổi nhạc sang bài Remix ngay khi gửi điều ước
       changeStageMusic("assets/audio/Happy Birthday Remix.m4a");
 
-      const swooshSound = new Audio('assets/audio/swoosh.mp3');
-      swooshSound.volume = 1.0;
-      swooshSound.play();
+      // Tiếng sao băng bay lên trời bằng âm thanh ngân vang huyền ảo
+      if (window.BirthdayAudio && typeof window.BirthdayAudio.playSwoosh === 'function') {
+        window.BirthdayAudio.playSwoosh();
+      } else {
+        const swooshSound = new Audio('assets/audio/swoosh.mp3');
+        swooshSound.volume = 0.4;
+        swooshSound.play().catch(() => {});
+      }
 
       // Star phóng lên trời
       if (starElement) {
@@ -2907,21 +2925,42 @@ function initStageCountdown(lockInfo) {
 
     if (diff <= 0) {
       if (COUNTDOWN_INTERVAL) clearInterval(COUNTDOWN_INTERVAL);
-      if (lockInfo.isPreview) {
-        const dEl = document.getElementById("cd-days");
-        const hEl = document.getElementById("cd-hours");
-        const mEl = document.getElementById("cd-minutes");
-        const sEl = document.getElementById("cd-seconds");
-        if (dEl) dEl.textContent = "00";
-        if (hEl) hEl.textContent = "00";
-        if (mEl) mEl.textContent = "00";
-        if (sEl) sEl.textContent = "00";
-        if (subTextEl) {
-          subTextEl.innerHTML = `✨ <b>Đã đến giờ mở thiệp!</b> (${unlockDate.toLocaleDateString("vi-VN")})<br>Vì mốc hẹn giờ đã qua, người nhận thực tế sẽ xem được thiệp ngay lập tức!`;
+      const dEl = document.getElementById("cd-days");
+      const hEl = document.getElementById("cd-hours");
+      const mEl = document.getElementById("cd-minutes");
+      const sEl = document.getElementById("cd-seconds");
+      if (dEl) dEl.textContent = "00";
+      if (hEl) hEl.textContent = "00";
+      if (mEl) mEl.textContent = "00";
+      if (sEl) sEl.textContent = "00";
+
+      let dateFormatted = "";
+      if (unlockDate) {
+        try {
+          const daysOfWeek = ["Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"];
+          const dayName = daysOfWeek[unlockDate.getDay()];
+          const hours = String(unlockDate.getHours()).padStart(2, "0");
+          const minutes = String(unlockDate.getMinutes()).padStart(2, "0");
+          const day = String(unlockDate.getDate()).padStart(2, "0");
+          const month = String(unlockDate.getMonth() + 1).padStart(2, "0");
+          const year = unlockDate.getFullYear();
+          dateFormatted = `${hours}:${minutes} • ${dayName}, ${day}/${month}/${year}`;
+        } catch (e) {
+          dateFormatted = unlockDate.toLocaleString("vi-VN");
         }
-        return;
       }
-      unlockAndStartCard();
+
+      if (titleEl) {
+        titleEl.textContent = "⏳ Đã Quá Mốc Giờ Mở Thiệp";
+      }
+      if (subTextEl) {
+        subTextEl.innerHTML = `⚠️ <b>Đã quá thời gian mở thiệp!</b> (${dateFormatted})<br>Mốc thời gian hẹn giờ mở món quà bí mật đã đến và đã qua so với thời gian hiện tại. Bấm bên dưới để mở thiệp ngay!`;
+      }
+      if (bypassBtn) {
+        bypassBtn.style.display = "inline-flex";
+        bypassBtn.textContent = "✨ Mở Khóa Xem Thiệp Ngay ✨";
+        bypassBtn.onclick = () => unlockAndStartCard();
+      }
       return;
     }
 

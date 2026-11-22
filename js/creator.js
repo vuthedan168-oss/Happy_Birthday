@@ -463,6 +463,9 @@ function initPhotoManager() {
 
   window.renderPhotoList = renderList;
   renderList();
+  if (window.CardAudioStorage && Array.isArray(galleryPhotos)) {
+    window.CardAudioStorage.set("gallery_photos", galleryPhotos);
+  }
 
   // Nút thêm ảnh từ URL
   if (btnAddUrl) {
@@ -1439,12 +1442,54 @@ function initVipPaymentManager() {
   const ownerResultKey = document.getElementById("owner-result-key-text");
   const btnOwnerCopyKey = document.getElementById("btn-owner-copy-key");
   const btnOwnerSelfActivate = document.getElementById("btn-owner-self-activate");
+  const ownerPassInput = document.getElementById("owner-secret-passcode");
+
+  // Kiểm tra quyền Chủ sở hữu: chỉ hiện nút trên thanh Header khi đã xác thực chủ sở hữu hoặc có param admin/owner
+  const urlParams = new URLSearchParams(window.location.search);
+  const isOwnerUrl = urlParams.get("admin") === "168" || urlParams.get("owner") === "dan168" || urlParams.get("vip") === "owner";
+  const isOwnerSaved = localStorage.getItem("birthday_vip_owner") === "true";
 
   if (btnOpenOwner) {
+    if (isOwnerUrl || isOwnerSaved) {
+      btnOpenOwner.style.display = "inline-flex";
+    }
     btnOpenOwner.addEventListener("click", () => {
       if (ownerModal) ownerModal.classList.add("active");
     });
   }
+
+  // Easter Egg bảo mật: Bấm nhanh 3 lần vào logo Header để mở bảng Chủ sở hữu
+  const logoEl = document.getElementById("header-logo");
+  let logoClickCount = 0;
+  let logoClickTimer = null;
+  if (logoEl) {
+    logoEl.addEventListener("click", () => {
+      logoClickCount++;
+      if (logoClickTimer) clearTimeout(logoClickTimer);
+      logoClickTimer = setTimeout(() => { logoClickCount = 0; }, 1200);
+      if (logoClickCount >= 3) {
+        logoClickCount = 0;
+        if (btnOpenOwner) btnOpenOwner.style.display = "inline-flex";
+        if (ownerModal) ownerModal.classList.add("active");
+        showCreatorToast("Đã mở Cổng Quản Lý Chủ Sở Hữu (Bảo Mật)", "🔑");
+      }
+    });
+  }
+
+  // Hàm xác thực mật khẩu Chủ Sở Hữu
+  const verifyOwnerPasscode = () => {
+    const entered = (ownerPassInput?.value || "").trim().toUpperCase();
+    if (!entered) {
+      alert("❌ Vui lòng nhập Mật Khẩu Xác Thực Chủ Sở Hữu vào ô trên cùng trước!");
+      if (ownerPassInput) ownerPassInput.focus();
+      return false;
+    }
+    if (VIP_SYSTEM.OWNER_CODES.includes(entered) || entered === "168168" || entered === "VUTHEDAN") {
+      return true;
+    }
+    alert("❌ Sai Mật Khẩu Chủ Sở Hữu! Quyền truy cập bị từ chối.");
+    return false;
+  };
 
   if (btnCloseOwner) {
     btnCloseOwner.addEventListener("click", () => {
@@ -1458,9 +1503,10 @@ function initVipPaymentManager() {
     });
   }
 
-  // Chủ sở hữu tạo mã mở khóa độc quyền cho từng khách hàng
+  // Chủ sở hữu tạo mã mở khóa độc quyền cho từng khách hàng (bắt buộc nhập mật khẩu)
   if (btnOwnerGen && inputClientDevId) {
     btnOwnerGen.addEventListener("click", () => {
+      if (!verifyOwnerPasscode()) return;
       const rawId = inputClientDevId.value.trim();
       if (!rawId) {
         alert("Vui lòng nhập Mã Thiết Bị của khách hàng (ví dụ: DEV-A1B2-C3D4 hoặc lấy từ nội dung chuyển khoản)!");
@@ -1485,11 +1531,13 @@ function initVipPaymentManager() {
     });
   }
 
-  // Chủ sở hữu kích hoạt ngay trên máy của mình
+  // Chủ sở hữu kích hoạt ngay trên máy của mình (bắt buộc nhập mật khẩu)
   if (btnOwnerSelfActivate) {
     btnOwnerSelfActivate.addEventListener("click", () => {
+      if (!verifyOwnerPasscode()) return;
       VIP_SYSTEM.activate(true);
-      activateVipSuccess("👑 Xin chào Vũ Thế Dân! Đã kích hoạt vĩnh viễn toàn quyền Chủ Sở Hữu trên thiết bị này!");
+      if (btnOpenOwner) btnOpenOwner.style.display = "inline-flex";
+      activateVipSuccess("👑 Xin chào Vũ Thế Dân! Đã xác thực mật khẩu và kích hoạt vĩnh viễn toàn quyền Chủ Sở Hữu trên thiết bị này!");
       if (ownerModal) ownerModal.classList.remove("active");
     });
   }
@@ -1665,8 +1713,11 @@ function saveToStorage(key, data) {
   try {
     const textOnlyData = { ...data };
 
-    // Lưu âm thanh lớn vào IndexedDB trước để preview luôn phát đầy đủ không lo lỗi quota
+    // Lưu âm thanh lớn & toàn bộ ảnh vào IndexedDB trước để preview luôn phát đầy đủ không lo lỗi quota
     if (window.CardAudioStorage) {
+      if (Array.isArray(textOnlyData.gallery) && textOnlyData.gallery.length > 0) {
+        window.CardAudioStorage.set('gallery_photos', textOnlyData.gallery);
+      }
       if (textOnlyData.countdownMusicUrl && textOnlyData.countdownMusicUrl.startsWith('data:')) {
         window.CardAudioStorage.set('audio_countdown', {
           src: textOnlyData.countdownMusicUrl,
@@ -2257,6 +2308,11 @@ function saveDraft(showStatus = true) {
           unlockDateTime: sVal
         }));
       } catch (dErr) {}
+
+      // Đồng bộ ảnh vào IndexedDB để không bị mất ảnh khi localStorage đầy
+      if (window.CardAudioStorage && Array.isArray(galleryPhotos) && galleryPhotos.length > 0) {
+        window.CardAudioStorage.set("gallery_photos", galleryPhotos);
+      }
     } catch (quotaError) {
       console.warn("Storage quota vượt quá giới hạn, lưu bản nháp an toàn ký tự:", quotaError);
       // Nếu có ảnh base64 quá lớn, dùng link placeholder an toàn để không làm mất chữ viết

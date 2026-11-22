@@ -333,33 +333,79 @@ class SoundEffects {
     } catch (e) {}
   }
 
-  // 10. PHAN THUONG TRUNG THUONG (FANFARE)
-  playFanfare() {
+  // 10. PHAN THUONG TRUNG THUONG (MAGICAL CELEBRATION CHIMES)
+  playWinPrize() {
     try {
       this.initContext();
       if (!this.ctx) return;
-      const notes = [523.25, 659.25, 783.99, 1046.5]; // C5, E5, G5, C6
       const now = this.ctx.currentTime;
 
-      notes.forEach((freq, idx) => {
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        const start = now + idx * 0.12;
+      // Chuỗi arpeggio chuông pha lê vàng óng ánh (C major 9th)
+      const arpeggio = [
+        { f: 523.25, t: 0.00, dur: 0.9 }, // C5
+        { f: 659.25, t: 0.09, dur: 0.9 }, // E5
+        { f: 783.99, t: 0.18, dur: 1.0 }, // G5
+        { f: 987.77, t: 0.27, dur: 1.1 }, // B5
+        { f: 1046.50, t: 0.36, dur: 1.2 }, // C6
+        { f: 1318.51, t: 0.45, dur: 1.4 }, // E6
+        { f: 1567.98, t: 0.54, dur: 1.8 }  // G6
+      ];
 
+      arpeggio.forEach(({ f, t, dur }) => {
+        const osc = this.ctx.createOscillator();
+        const overtone = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        const start = now + t;
+
+        // Âm gốc tròn trịa
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(freq, start);
+        osc.frequency.setValueAtTime(f, start);
+
+        // Họa âm chuông lung linh
+        overtone.type = 'triangle';
+        overtone.frequency.setValueAtTime(f * 2, start);
 
         gain.gain.setValueAtTime(0, start);
-        gain.gain.linearRampToValueAtTime(0.35, start + 0.03);
-        gain.gain.exponentialRampToValueAtTime(0.001, start + (idx === 3 ? 0.9 : 0.28));
+        gain.gain.linearRampToValueAtTime(0.28, start + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, start + dur);
 
         osc.connect(gain);
+        overtone.connect(gain);
         gain.connect(this.ctx.destination);
 
         osc.start(start);
-        osc.stop(start + (idx === 3 ? 0.9 : 0.28));
+        overtone.start(start);
+        osc.stop(start + dur);
+        overtone.stop(start + dur);
       });
-    } catch (e) {}
+
+      // Hợp âm ngân vang ấm áp phía sau (C - E - G - B pad)
+      const chordNotes = [523.25, 659.25, 783.99, 1046.50];
+      chordNotes.forEach((f) => {
+        const padOsc = this.ctx.createOscillator();
+        const padGain = this.ctx.createGain();
+        const start = now + 0.5;
+
+        padOsc.type = 'sine';
+        padOsc.frequency.setValueAtTime(f, start);
+
+        padGain.gain.setValueAtTime(0, start);
+        padGain.gain.linearRampToValueAtTime(0.08, start + 0.1);
+        padGain.gain.exponentialRampToValueAtTime(0.0005, start + 2.2);
+
+        padOsc.connect(padGain);
+        padGain.connect(this.ctx.destination);
+
+        padOsc.start(start);
+        padOsc.stop(start + 2.2);
+      });
+    } catch (e) {
+      console.warn("Audio win prize error:", e);
+    }
+  }
+
+  playFanfare() {
+    this.playWinPrize();
   }
 
   // 11. NHAC NEN (BACKGROUND MUSIC)
@@ -504,27 +550,7 @@ class SoundEffects {
   }
 
   playStarLaunch() {
-    try {
-      this.initContext();
-      if (!this.ctx) return;
-      const now = this.ctx.currentTime;
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(440, now);
-      osc.frequency.exponentialRampToValueAtTime(1760, now + 1.2);
-
-      gain.gain.setValueAtTime(0.01, now);
-      gain.gain.linearRampToValueAtTime(0.4, now + 0.3);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 1.4);
-
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-
-      osc.start(now);
-      osc.stop(now + 1.4);
-    } catch (e) {}
+    this.playSwoosh();
   }
 
   playMeteorDrop() {
@@ -561,15 +587,66 @@ class SoundEffects {
     }
   }
 
-  // TIENG SWOOSH / VUUT BAY QUA (SAO BANG)
+  // TIENG SAO BANG VUUT SANG & LUNG LINH (CELESTIAL SHOOTING STAR)
   playSwoosh() {
     try {
-      const swooshAudio = new Audio("assets/audio/swoosh.mp3");
-      swooshAudio.volume = 0.8;
-      swooshAudio.play().catch(e => console.warn("Cannot play swoosh.mp3:", e));
-      this.playSparkle(); // Mix với tiếng lấp lánh
+      this.initContext();
+      if (!this.ctx) return;
+      const now = this.ctx.currentTime;
+
+      // 1. Luồng gió ngân êm dịu (Soft celestial breeze)
+      const bufferSize = Math.floor(this.ctx.sampleRate * 0.9);
+      const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = Math.random() * 2 - 1;
+      }
+
+      const noise = this.ctx.createBufferSource();
+      noise.buffer = buffer;
+
+      const filter = this.ctx.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.frequency.setValueAtTime(350, now);
+      filter.frequency.exponentialRampToValueAtTime(2400, now + 0.45);
+      filter.frequency.exponentialRampToValueAtTime(500, now + 0.9);
+      filter.Q.setValueAtTime(3.2, now);
+
+      const noiseGain = this.ctx.createGain();
+      noiseGain.gain.setValueAtTime(0.001, now);
+      noiseGain.gain.linearRampToValueAtTime(0.18, now + 0.2);
+      noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.9);
+
+      noise.connect(filter);
+      filter.connect(noiseGain);
+      noiseGain.connect(this.ctx.destination);
+
+      noise.start(now);
+      noise.stop(now + 0.9);
+
+      // 2. Chuỗi tinh tú ngân vang vút lên (Celestial Stardust Glissando)
+      const stardust = [880.00, 1046.50, 1318.51, 1567.98, 2093.00, 2637.02];
+      stardust.forEach((freq, idx) => {
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        const start = now + idx * 0.07;
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, start);
+        osc.frequency.exponentialRampToValueAtTime(freq * 1.2, start + 0.35);
+
+        gain.gain.setValueAtTime(0.001, start);
+        gain.gain.linearRampToValueAtTime(0.14, start + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.45);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        osc.start(start);
+        osc.stop(start + 0.45);
+      });
     } catch (e) {
-      console.warn("Audio swoosh error:", e);
+      console.warn("Audio celestial swoosh error:", e);
     }
   }
 
@@ -582,30 +659,6 @@ class SoundEffects {
     } catch (e) {
       console.warn("Audio applause error:", e);
     }
-  }
-
-  playWinPrize() {
-    this.playFanfare();
-  }
-
-  fadeOutAudio(duration = 2000) {
-    if (this.bgAudio && !this.bgAudio.paused) {
-      const startVolume = this.bgAudio.volume;
-      const step = startVolume / (duration / 50);
-      
-      const fadeInterval = setInterval(() => {
-        if (this.bgAudio && this.bgAudio.volume > step) {
-          this.bgAudio.volume -= step;
-        } else {
-          if (this.bgAudio) {
-            this.bgAudio.volume = 0;
-            this.bgAudio.pause();
-          }
-          clearInterval(fadeInterval);
-        }
-      }, 50);
-    }
-    this.stopSynthMelody();
   }
 }
 
