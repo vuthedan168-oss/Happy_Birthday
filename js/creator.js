@@ -1744,8 +1744,8 @@ function saveToStorage(key, data) {
         safeData.musicUrl = 'indexeddb://audio_bg';
       }
       if (Array.isArray(safeData.gallery)) {
-        safeData.gallery = safeData.gallery.map(p => ({
-          url: p.url && p.url.startsWith('data:') ? 'assets/images/photo1.jpg' : p.url,
+        safeData.gallery = safeData.gallery.map((p, idx) => ({
+          url: p.url && p.url.startsWith('data:') ? `indexeddb://gallery_${idx}` : (p.url || ''),
           caption: p.caption || ''
         }));
       }
@@ -2281,10 +2281,22 @@ function saveDraft(showStatus = true) {
       });
     });
 
+    // 1. Luôn đồng bộ toàn bộ ảnh kỷ niệm vào IndexedDB trước để không bao giờ bị mất ảnh khi localStorage đầy
+    if (window.CardAudioStorage && Array.isArray(galleryPhotos) && galleryPhotos.length > 0) {
+      window.CardAudioStorage.set("gallery_photos", galleryPhotos);
+    }
+
+    // 2. Tạo bản draft lưu localStorage: rút gọn ảnh base64 sang indexeddb:// để không bao giờ bị văng lỗi QuotaExceededError
+    const compactPhotos = (draft.photos || []).map((p, idx) => ({
+      url: p.url && p.url.startsWith("data:") ? `indexeddb://gallery_${idx}` : (p.url || ""),
+      caption: p.caption || ""
+    }));
+    const compactDraft = { ...draft, photos: compactPhotos };
+
     try {
-      localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
+      localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(compactDraft));
       // Tương thích ngược với key cũ
-      localStorage.setItem(LEGACY_DRAFT_KEY, JSON.stringify(draft.fields));
+      localStorage.setItem(LEGACY_DRAFT_KEY, JSON.stringify(compactDraft.fields));
 
       // Đồng bộ thời gian thực sang custom_birthday_card để các tab preview (gift.html?id=preview) luôn tải ngay cấu hình mới nhất
       try {
@@ -2304,24 +2316,8 @@ function saveDraft(showStatus = true) {
           unlockDateTime: sVal
         }));
       } catch (dErr) {}
-
-      // Đồng bộ ảnh vào IndexedDB để không bị mất ảnh khi localStorage đầy
-      if (window.CardAudioStorage && Array.isArray(galleryPhotos) && galleryPhotos.length > 0) {
-        window.CardAudioStorage.set("gallery_photos", galleryPhotos);
-      }
     } catch (quotaError) {
-      console.warn("Storage quota vượt quá giới hạn, lưu bản nháp an toàn ký tự:", quotaError);
-      // Nếu có ảnh base64 quá lớn, dùng link placeholder an toàn để không làm mất chữ viết
-      const safePhotos = draft.photos.map(p => ({
-        url: p.url && p.url.startsWith("data:") ? "assets/images/photo1.jpg" : p.url,
-        caption: p.caption
-      }));
-      draft.photos = safePhotos;
-      try {
-        localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
-      } catch (e2) {
-        console.error("Không thể lưu localStorage:", e2);
-      }
+      console.warn("Storage quota vượt quá giới hạn khi lưu draft vào localStorage:", quotaError);
     }
 
     if (showStatus) {
@@ -2398,6 +2394,17 @@ function loadAndRestoreDraft() {
       if (typeof window.renderPhotoList === "function") {
         window.renderPhotoList();
       }
+    }
+    // Nạp thêm từ IndexedDB để khôi phục ảnh gốc chất lượng cao không bị phụ thuộc vào localStorage
+    if (window.CardAudioStorage) {
+      window.CardAudioStorage.get("gallery_photos").then(idbPhotos => {
+        if (Array.isArray(idbPhotos) && idbPhotos.length > 0) {
+          galleryPhotos = idbPhotos;
+          if (typeof window.renderPhotoList === "function") {
+            window.renderPhotoList();
+          }
+        }
+      }).catch(() => {});
     }
 
     // 4.5. Khôi phục Vibe & phong cách mối quan hệ

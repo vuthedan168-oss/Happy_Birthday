@@ -1914,16 +1914,18 @@ function initStageHeart() {
 
   if (!gridContainer) return;
 
-  const gallery = (ACTIVE_CONFIG.gallery && ACTIVE_CONFIG.gallery.length > 0)
-    ? ACTIVE_CONFIG.gallery
-    : [
-      { url: "assets/images/girl/girl2.jpeg", caption: "Nụ cười rạng rỡ nhất ☀️" },
-      { url: "assets/images/girl/girl3.jpeg", caption: "Những khoảnh khắc ngập tràn niềm vui 🌸" },
-      { url: "assets/images/photo1.jpg", caption: "Kỷ niệm ngọt ngào 💖" },
-      { url: "assets/images/photo2.jpg", caption: "Mỗi ngày đều là món quà ✨" },
-      { url: "assets/images/photo3.jpg", caption: "Bình yên và hạnh phúc 🍀" },
-      { url: "assets/images/photo4.jpg", caption: "Tuổi mới thật rực rỡ! 🎂" }
-    ];
+  const validUserPhotos = (ACTIVE_CONFIG.gallery || []).filter(p => p && p.url && !p.url.includes("photo1.jpg") && !p.url.startsWith("indexeddb://"));
+  const gallery = (validUserPhotos.length > 0)
+    ? validUserPhotos
+    : ((ACTIVE_CONFIG.gallery && ACTIVE_CONFIG.gallery.length > 0)
+      ? ACTIVE_CONFIG.gallery
+      : [
+        { url: "assets/images/girl/girl2.jpeg", caption: "Nụ cười rạng rỡ nhất ☀️" },
+        { url: "assets/images/girl/girl3.jpeg", caption: "Những khoảnh khắc ngập tràn niềm vui 🌸" },
+        { url: "assets/images/photo2.jpg", caption: "Mỗi ngày đều là món quà ✨" },
+        { url: "assets/images/photo3.jpg", caption: "Bình yên và hạnh phúc 🍀" },
+        { url: "assets/images/photo4.jpg", caption: "Tuổi mới thật rực rỡ! 🎂" }
+      ]);
 
   // Ma trận trái tim 10 hàng x 11 cột
   const HEART_MATRIX = [
@@ -1960,7 +1962,11 @@ function initStageHeart() {
       const o = pseudoRandom(8.3 * r + 2.9 * c + 1);
       const imgIndex = Math.floor(pseudoRandom(5.2 * r + 9.7 * c + 3) * gallery.length) % gallery.length;
       const photo = gallery[imgIndex] || {};
-      const safeUrl = photo.url || "assets/images/girl/girl2.jpeg";
+      let safeUrl = photo.url;
+      if (!safeUrl || safeUrl.includes("photo1.jpg") || safeUrl.startsWith("indexeddb://")) {
+        const fallbackPhoto = gallery.find(p => p.url && !p.url.includes("photo1.jpg") && !p.url.startsWith("indexeddb://"));
+        safeUrl = fallbackPhoto ? fallbackPhoto.url : "assets/images/girl/girl2.jpeg";
+      }
 
       const tile = document.createElement("button");
       tile.type = "button";
@@ -2951,10 +2957,13 @@ function initStageCountdown(lockInfo) {
       }
 
       if (titleEl) {
-        titleEl.textContent = "⏳ Đã Quá Mốc Giờ Mở Thiệp";
+        titleEl.textContent = "⏳ Đã Quá Ngày Mở Thiệp";
+      }
+      if (targetDisplay) {
+        targetDisplay.innerHTML = `<span class="pill-icon">⚠️</span><span>Mốc hẹn giờ mở thiệp đã qua vào: <strong id="countdown-target-time" style="color: #fca5a5;">${dateFormatted}</strong></span>`;
       }
       if (subTextEl) {
-        subTextEl.innerHTML = `⚠️ <b>Đã quá thời gian mở thiệp!</b> (${dateFormatted})<br>Mốc thời gian hẹn giờ mở món quà bí mật đã đến và đã qua so với thời gian hiện tại. Bấm bên dưới để mở thiệp ngay!`;
+        subTextEl.innerHTML = `⚠️ <b>Đã quá ngày mở thiệp!</b> (Mốc hẹn: ${dateFormatted})<br>Thời gian hẹn giờ mở món quà bí mật đã đến và đã qua so với thời gian hiện tại. Bấm bên dưới để mở thiệp ngay!`;
       }
       if (bypassBtn) {
         bypassBtn.style.display = "inline-flex";
