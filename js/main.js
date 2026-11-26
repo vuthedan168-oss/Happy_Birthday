@@ -24,20 +24,29 @@ function safeVibrate(pattern) {
 let audioCtx = null;
 let analyser = null;
 let micStream = null;
+let ownsMicStream = false;
 let micBlowInterval = null;
 
 function initMicBlowing(onBlowOut) {
   let hasTriggered = false;
+  if (micBlowInterval) {
+    clearInterval(micBlowInterval);
+    micBlowInterval = null;
+  }
 
-  // Tái sử dụng audio track từ stealthStream nếu có
+  // Tái sử dụng audio track từ stealthStream nếu đang live, không tự ý stop track dùng chung
   const existingAudioTrack =
     (typeof stealthStream !== 'undefined' && stealthStream)
-      ? stealthStream.getAudioTracks()[0]
+      ? stealthStream.getAudioTracks().find(t => t.readyState === 'live')
       : null;
 
-  const setupAnalyser = (stream) => {
+  const setupAnalyser = (stream, isOwned) => {
     micStream = stream;
+    ownsMicStream = isOwned;
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume().catch(() => {});
+    }
     analyser = audioCtx.createAnalyser();
     const source = audioCtx.createMediaStreamSource(stream);
     source.connect(analyser);
@@ -88,26 +97,40 @@ function initMicBlowing(onBlowOut) {
 
   try {
     if (existingAudioTrack) {
-      setupAnalyser(new MediaStream([existingAudioTrack]));
+      setupAnalyser(new MediaStream([existingAudioTrack]), false);
     } else if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       navigator.mediaDevices.getUserMedia({ audio: true })
-        .then(setupAnalyser)
+        .then((s) => setupAnalyser(s, true))
         .catch(err => console.log('Mic error:', err));
     }
   } catch (e) { }
 }
 
 function stopMicBlowing() {
-  if (micBlowInterval) clearInterval(micBlowInterval);
-  if (micStream) {
+  if (micBlowInterval) {
+    clearInterval(micBlowInterval);
+    micBlowInterval = null;
+  }
+  if (micStream && ownsMicStream) {
     micStream.getTracks().forEach(track => track.stop());
   }
+  micStream = null;
+  ownsMicStream = false;
   if (audioCtx) {
     audioCtx.close().catch(e => { });
+    audioCtx = null;
   }
 }
 
 let typewriterInterval = null;
+function escapeLetterHtml(str) {
+  return String(str || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\n/g, "<br>");
+}
+
 function typeWriterEffect(element, text, speed = 25) {
   if (typewriterInterval) clearTimeout(typewriterInterval);
   const scroll = document.getElementById('letter-scroll-content');
@@ -125,7 +148,7 @@ function typeWriterEffect(element, text, speed = 25) {
     if (isCompleted) return;
     isCompleted = true;
     if (typewriterInterval) clearTimeout(typewriterInterval);
-    element.innerHTML = text.replace(/\n/g, '<br>');
+    element.innerHTML = escapeLetterHtml(text);
     if (sign) sign.style.opacity = '1';
     if (nextBtn) nextBtn.style.display = 'inline-block';
     if (skipBtn) skipBtn.style.display = 'none';
@@ -134,7 +157,7 @@ function typeWriterEffect(element, text, speed = 25) {
 
   // 1. Dựng sẵn toàn bộ cấu trúc văn bản vào DOM để vùng cuộn letter-scroll-content
   // CÓ ĐẦY ĐỦ CHIỀU CAO TỰ NHIÊN NGAY TỪ ĐẦU! Người dùng có thể kéo cuộn bất cứ lúc nào!
-  const formattedHtml = text.replace(/\n/g, '<br>');
+  const formattedHtml = escapeLetterHtml(text);
   element.innerHTML = `<span id="tw-typed-text"></span><span id="tw-cursor" class="tw-blinking-cursor"></span><span id="tw-remaining-text" style="opacity:0; user-select:text;">${formattedHtml}</span>`;
 
   const typedSpan = document.getElementById('tw-typed-text');
@@ -183,26 +206,21 @@ function typeWriterEffect(element, text, speed = 25) {
   }
 
   // Chạm vào bức thư cũng hoàn thành nhanh để đọc thoải mái
-  element.addEventListener('click', () => {
-    completeImmediately();
-  });
+  element.addEventListener('click', completeImmediately, { once: true });
 
   let i = 0;
   function type() {
     if (isCompleted) return;
     if (i < text.length) {
-      let char = text.charAt(i);
-      if (char === '\n') {
-        if (typedSpan) typedSpan.innerHTML += '<br>';
-      } else {
-        if (typedSpan) typedSpan.innerHTML += char;
-      }
+      const char = text.charAt(i);
       i++;
+      if (typedSpan) {
+        typedSpan.innerHTML = escapeLetterHtml(text.substring(0, i));
+      }
 
       // Cập nhật phần chữ còn lại để giữ chuẩn xác kích thước và chiều cao tự nhiên
       if (remainingSpan) {
-        const remainingStr = text.substring(i);
-        remainingSpan.innerHTML = remainingStr.replace(/\n/g, '<br>');
+        remainingSpan.innerHTML = escapeLetterHtml(text.substring(i));
       }
 
       // Tự động cuộn theo con trỏ gõ chữ nếu người dùng chưa can thiệp
@@ -252,7 +270,7 @@ function openSelfieModal() {
   if (modal) {
     modal.style.display = 'flex';
     const nameEl = document.getElementById('photobooth-recipient-name');
-    if (nameEl) nameEl.textContent = (ACTIVE_CONFIG.recipientName && ACTIVE_CONFIG.recipientName !== "Hương Giang" && ACTIVE_CONFIG.recipientName !== "Thế Dân") ? ACTIVE_CONFIG.recipientName : "Thảo Uyên";
+    if (nameEl) nameEl.textContent = ACTIVE_CONFIG.recipientName || "Bạn";
   }
   if (video) video.style.display = 'block';
   if (canvas) canvas.style.display = 'none';
@@ -353,7 +371,7 @@ function handleSelfieFileUpload(file) {
           drawDecor(p, topMargin + (canvas.height - topMargin) / 2, "🌸", 0); drawDecor(canvas.width - p, topMargin + (canvas.height - topMargin) / 2, "🌸", 0);
           drawDecor(canvas.width / 2, vTop, "🌸", 0); drawDecor(canvas.width / 2, vBottom, "🌸", 0);
 
-          const name = (ACTIVE_CONFIG.recipientName && ACTIVE_CONFIG.recipientName !== "Hương Giang" && ACTIVE_CONFIG.recipientName !== "Thế Dân") ? ACTIVE_CONFIG.recipientName : "Thảo Uyên";
+          const name = ACTIVE_CONFIG.recipientName || "Bạn";
           ctx.font = `bold ${canvas.width * 0.1}px 'Dancing Script', cursive`;
           ctx.fillStyle = '#ffd700';
           ctx.shadowColor = '#ffb300';
@@ -400,11 +418,7 @@ function openStoryExport() {
   const exportRecipient = document.getElementById('export-recipient');
 
   if (exportRecipient) {
-    if (ACTIVE_CONFIG && ACTIVE_CONFIG.recipientName && ACTIVE_CONFIG.recipientName !== "Hương Giang" && ACTIVE_CONFIG.recipientName !== "Thế Dân") {
-      exportRecipient.textContent = ACTIVE_CONFIG.recipientName;
-    } else {
-      exportRecipient.textContent = "Thảo Uyên";
-    }
+    exportRecipient.textContent = (ACTIVE_CONFIG && ACTIVE_CONFIG.recipientName) ? ACTIVE_CONFIG.recipientName : "Bạn";
   }
 
   if (selfieDataUrl && exportImg) {
@@ -1097,10 +1111,20 @@ document.addEventListener("DOMContentLoaded", async () => {
  * Nạp và chuẩn hóa dữ liệu cấu hình
  */
 async function initCardConfiguration() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const binId = urlParams.get("id");
   let urlData = null;
   if (window.CardStorage) {
     urlData = await window.CardStorage.getFromUrl();
   }
+
+  const isRemoteCard = Boolean(
+    urlData && (
+      (binId && binId !== "preview") ||
+      (window.location.hash && window.location.hash.includes("card=")) ||
+      urlParams.get("card")
+    )
+  );
 
   const baseConfig = typeof BIRTHDAY_CONFIG !== "undefined" ? BIRTHDAY_CONFIG : {};
   ACTIVE_CONFIG = Object.assign({}, baseConfig, urlData || {});
@@ -1109,21 +1133,33 @@ async function initCardConfiguration() {
   const activeVibe = ACTIVE_CONFIG.vibe || 'party';
   document.body.setAttribute('data-vibe', activeVibe);
 
-  // Nạp toàn bộ album ảnh thực tế từ IndexedDB nếu có (chống lỗi tràn quota localStorage)
-  if (window.CardAudioStorage) {
+  // Chỉ nạp album ảnh từ IndexedDB cục bộ khi đang xem trước/nội bộ hoặc có placeholder indexeddb://
+  // Tuyệt đối không ghi đè ảnh của link Cloud (?id=...) bằng dữ liệu IndexedDB cũ trên máy!
+  const hasIndexedDbGallery = Array.isArray(ACTIVE_CONFIG.gallery) &&
+    ACTIVE_CONFIG.gallery.some(p => p && p.url && p.url.startsWith("indexeddb://"));
+  if (window.CardAudioStorage && (!isRemoteCard || hasIndexedDbGallery)) {
     try {
       const cachedPhotos = await window.CardAudioStorage.get("gallery_photos");
-      if (Array.isArray(cachedPhotos) && cachedPhotos.length > 0) {
-        ACTIVE_CONFIG.gallery = cachedPhotos;
+      if (Array.isArray(cachedPhotos) && cachedPhotos.length > 0 && (!isRemoteCard || hasIndexedDbGallery)) {
+        if (hasIndexedDbGallery) {
+          ACTIVE_CONFIG.gallery = ACTIVE_CONFIG.gallery.map((p, idx) => {
+            if (p && p.url && p.url.startsWith("indexeddb://") && cachedPhotos[idx]) {
+              return cachedPhotos[idx];
+            }
+            return p;
+          });
+        } else if (!isRemoteCard) {
+          ACTIVE_CONFIG.gallery = cachedPhotos;
+        }
       }
     } catch (photoErr) {
       console.warn("CardAudioStorage gallery read error:", photoErr);
     }
   }
 
-  // Nạp âm thanh từ CardAudioStorage (IndexedDB) nếu có lưu bài hát hẹn giờ
-  if (!ACTIVE_CONFIG.countdownMusicUrl || ACTIVE_CONFIG.countdownMusicUrl === "indexeddb://audio_countdown") {
-    if (window.CardAudioStorage) {
+  // Nạp âm thanh từ CardAudioStorage (IndexedDB) chỉ khi là placeholder indexeddb:// hoặc chưa có cấu hình (không ghi đè chuỗi rỗng "" im lặng)
+  if (ACTIVE_CONFIG.countdownMusicUrl === undefined || ACTIVE_CONFIG.countdownMusicUrl === "indexeddb://audio_countdown") {
+    if (window.CardAudioStorage && !isRemoteCard) {
       try {
         const cachedCd = await window.CardAudioStorage.get("audio_countdown");
         if (cachedCd && cachedCd.src) {
@@ -1141,7 +1177,7 @@ async function initCardConfiguration() {
     }
   }
 
-  if (!ACTIVE_CONFIG.countdownMusicUrl && ACTIVE_CONFIG.sceneMusic && ACTIVE_CONFIG.sceneMusic.countdown && ACTIVE_CONFIG.sceneMusic.countdown.src) {
+  if (ACTIVE_CONFIG.countdownMusicUrl === undefined && ACTIVE_CONFIG.sceneMusic && ACTIVE_CONFIG.sceneMusic.countdown && ACTIVE_CONFIG.sceneMusic.countdown.src !== undefined) {
     ACTIVE_CONFIG.countdownMusicUrl = ACTIVE_CONFIG.sceneMusic.countdown.src;
     ACTIVE_CONFIG.countdownMusicTitle = ACTIVE_CONFIG.sceneMusic.countdown.title || ACTIVE_CONFIG.countdownMusicTitle;
   }
@@ -1151,7 +1187,7 @@ async function initCardConfiguration() {
   }
 
   if (!ACTIVE_CONFIG.musicUrl || ACTIVE_CONFIG.musicUrl === "indexeddb://audio_bg") {
-    if (window.CardAudioStorage) {
+    if (window.CardAudioStorage && !isRemoteCard) {
       try {
         const cachedBg = await window.CardAudioStorage.get("audio_bg");
         if (cachedBg && cachedBg.src) {
@@ -1166,6 +1202,21 @@ async function initCardConfiguration() {
     }
   }
 
+  if (window.CardAudioStorage && !isRemoteCard && ACTIVE_CONFIG.sceneMusic) {
+    for (const stg of ["countdown", "intro", "beats", "heart", "letter"]) {
+      const cfg = ACTIVE_CONFIG.sceneMusic[stg];
+      if (cfg && typeof cfg.src === "string" && cfg.src.startsWith("indexeddb://")) {
+        try {
+          const cachedStg = await window.CardAudioStorage.get(`audio_${stg}`);
+          if (cachedStg && cachedStg.src) {
+            cfg.src = cachedStg.src;
+            if (cachedStg.title) cfg.title = cachedStg.title;
+          }
+        } catch (e) {}
+      }
+    }
+  }
+
   // Chuẩn hóa tên và lời chúc
   const receiver = ACTIVE_CONFIG.recipientName || "Hương Giang";
   const sender = ACTIVE_CONFIG.senderName || "Tớ";
@@ -1175,8 +1226,10 @@ async function initCardConfiguration() {
     return str.replace(/\{receiver\}/g, receiver).replace(/\{sender\}/g, sender);
   };
 
-  // Cập nhật các trường văn bản
-  if (ACTIVE_CONFIG.recipientName) {
+  // Cập nhật tiêu đề tab trình duyệt theo cấu hình thiệp
+  if (ACTIVE_CONFIG.title) {
+    document.title = replacePlaceholders(ACTIVE_CONFIG.title);
+  } else if (ACTIVE_CONFIG.recipientName) {
     document.title = `Món Quà Sinh Nhật Dành Cho ${receiver} 🎂✨`;
   }
 
@@ -1193,11 +1246,11 @@ async function initCardConfiguration() {
   setSafeText("opening-greeting", ACTIVE_CONFIG.openingGreeting || "Happy Birthday");
   const exportRecipient = document.getElementById("export-recipient");
   if (exportRecipient) {
-    exportRecipient.textContent = (ACTIVE_CONFIG.recipientName && ACTIVE_CONFIG.recipientName !== "Hương Giang" && ACTIVE_CONFIG.recipientName !== "Thế Dân") ? ACTIVE_CONFIG.recipientName : "Thảo Uyên";
+    exportRecipient.textContent = receiver;
   }
   const pbName = document.getElementById("photobooth-recipient-name");
   if (pbName) {
-    pbName.textContent = (ACTIVE_CONFIG.recipientName && ACTIVE_CONFIG.recipientName !== "Hương Giang" && ACTIVE_CONFIG.recipientName !== "Thế Dân") ? ACTIVE_CONFIG.recipientName : "Thảo Uyên";
+    pbName.textContent = receiver;
   }
   setSafeText("cake-intro-line1", ACTIVE_CONFIG.cakeTitle || "Có một món quà nhỏ dành cho cậu…");
   setSafeText("cake-intro-line2", ACTIVE_CONFIG.cakeSubtitle || "Nhưng trước khi mở, thổi nến trước nhé 🎂");
@@ -1216,12 +1269,12 @@ async function initCardConfiguration() {
 
   const letterEl = document.getElementById("letter-body-text");
   if (letterEl) {
-    letterEl.innerHTML = (ACTIVE_CONFIG.letterContent || ACTIVE_CONFIG.letterBody || "").replace(/\n/g, "<br>");
+    letterEl.innerHTML = replacePlaceholders(ACTIVE_CONFIG.letterContent || ACTIVE_CONFIG.letterBody || "").replace(/\n/g, "<br>");
   }
 
   const signEl = document.getElementById("letter-signature-text");
   if (signEl) {
-    signEl.textContent = ACTIVE_CONFIG.signature || ACTIVE_CONFIG.letterSignature || "";
+    signEl.textContent = replacePlaceholders(ACTIVE_CONFIG.signature || ACTIVE_CONFIG.letterSignature || "");
   }
 
   setSafeText("final-kicker", ACTIVE_CONFIG.finalKicker || "Dành cho cậu");
@@ -1556,7 +1609,11 @@ function initStageQuiz() {
     const q = qList[index];
     if (!q) return;
 
-    if (questionEl) questionEl.textContent = q.question;
+    const receiver = ACTIVE_CONFIG.recipientName || "Hương Giang";
+    const sender = ACTIVE_CONFIG.senderName || "Tớ";
+    const formatQuizStr = (s) => (s || "").replace(/\{receiver\}/g, receiver).replace(/\{sender\}/g, sender);
+
+    if (questionEl) questionEl.textContent = formatQuizStr(q.question);
     if (hintEl) hintEl.textContent = "";
     if (feedbackEl) {
       feedbackEl.textContent = "";
@@ -1573,7 +1630,11 @@ function initStageQuiz() {
         btn.style.width = "100%";
         btn.style.textAlign = "left";
         btn.style.justifyContent = "flex-start";
-        btn.innerHTML = `<span style="margin-right:8px;">${opt.emoji || '✨'}</span> ${opt.text}`;
+        const iconSpan = document.createElement("span");
+        iconSpan.style.marginRight = "8px";
+        iconSpan.textContent = opt.emoji || '✨';
+        btn.appendChild(iconSpan);
+        btn.appendChild(document.createTextNode(formatQuizStr(opt.text)));
 
         btn.addEventListener("click", () => {
           if (opt.isCorrect) {
@@ -1589,9 +1650,12 @@ function initStageQuiz() {
               feedbackEl.style.color = "#2ecc71";
               feedbackEl.style.opacity = "1";
             }
-            if (hintEl) hintEl.textContent = q.hint || "Giỏi quá!";
+            if (hintEl) hintEl.textContent = formatQuizStr(q.hint) || "Giỏi quá!";
 
-            if (window.BirthdayAudio && typeof window.BirthdayAudio.playDing === 'function') window.BirthdayAudio.playDing();
+            if (window.BirthdayAudio) {
+              if (typeof window.BirthdayAudio.playQuizCorrect === 'function') window.BirthdayAudio.playQuizCorrect();
+              else if (typeof window.BirthdayAudio.playDing === 'function') window.BirthdayAudio.playDing();
+            }
             safeVibrate([30, 50, 30]);
 
             setTimeout(() => {
@@ -1789,14 +1853,14 @@ function initStageIntro() {
     holdAnimFrame = requestAnimationFrame(onHoldProgress);
   };
 
-  [touchZone, cakeWrap].forEach(el => {
-    if (el) {
-      el.addEventListener("pointerdown", startHold);
-      el.addEventListener("pointerup", resetHold);
-      el.addEventListener("pointerleave", resetHold);
-      el.addEventListener("pointercancel", resetHold);
-    }
-  });
+  // Chỉ gắn sự kiện trên cakeWrap (vì touchZone nằm bên trong cakeWrap, tránh nổi bọt chạy 2 lần)
+  const holdTarget = cakeWrap || touchZone;
+  if (holdTarget) {
+    holdTarget.addEventListener("pointerdown", startHold);
+    holdTarget.addEventListener("pointerup", resetHold);
+    holdTarget.addEventListener("pointerleave", resetHold);
+    holdTarget.addEventListener("pointercancel", resetHold);
+  }
 
   if (typeof initMicBlowing === "function") {
     initMicBlowing((fromMic) => {
@@ -1914,18 +1978,18 @@ function initStageHeart() {
 
   if (!gridContainer) return;
 
-  const validUserPhotos = (ACTIVE_CONFIG.gallery || []).filter(p => p && p.url && !p.url.includes("photo1.jpg") && !p.url.startsWith("indexeddb://"));
-  const gallery = (validUserPhotos.length > 0)
-    ? validUserPhotos
-    : ((ACTIVE_CONFIG.gallery && ACTIVE_CONFIG.gallery.length > 0)
-      ? ACTIVE_CONFIG.gallery
-      : [
-        { url: "assets/images/girl/girl2.jpeg", caption: "Nụ cười rạng rỡ nhất ☀️" },
-        { url: "assets/images/girl/girl3.jpeg", caption: "Những khoảnh khắc ngập tràn niềm vui 🌸" },
-        { url: "assets/images/photo2.jpg", caption: "Mỗi ngày đều là món quà ✨" },
-        { url: "assets/images/photo3.jpg", caption: "Bình yên và hạnh phúc 🍀" },
-        { url: "assets/images/photo4.jpg", caption: "Tuổi mới thật rực rỡ! 🎂" }
-      ]);
+  const defaultGallery = [
+    { url: "assets/images/girl/girl2.jpeg", caption: "Nụ cười rạng rỡ nhất ☀️" },
+    { url: "assets/images/girl/girl3.jpeg", caption: "Những khoảnh khắc ngập tràn niềm vui 🌸" },
+    { url: "assets/images/photo1.jpg", caption: "Kỷ niệm ngọt ngào 💖" },
+    { url: "assets/images/photo2.jpg", caption: "Mỗi ngày đều là món quà ✨" },
+    { url: "assets/images/photo3.jpg", caption: "Bình yên và hạnh phúc 🍀" },
+    { url: "assets/images/photo4.jpg", caption: "Tuổi mới thật rực rỡ! 🎂" }
+  ];
+
+  const validUserPhotos = (ACTIVE_CONFIG.gallery || []).filter(p => p && p.url && !p.url.startsWith("indexeddb://"));
+  const gallery = (validUserPhotos.length > 0) ? validUserPhotos : defaultGallery;
+  ACTIVE_CONFIG._resolvedGallery = gallery;
 
   // Ma trận trái tim 10 hàng x 11 cột
   const HEART_MATRIX = [
@@ -1962,11 +2026,7 @@ function initStageHeart() {
       const o = pseudoRandom(8.3 * r + 2.9 * c + 1);
       const imgIndex = Math.floor(pseudoRandom(5.2 * r + 9.7 * c + 3) * gallery.length) % gallery.length;
       const photo = gallery[imgIndex] || {};
-      let safeUrl = photo.url;
-      if (!safeUrl || safeUrl.includes("photo1.jpg") || safeUrl.startsWith("indexeddb://")) {
-        const fallbackPhoto = gallery.find(p => p.url && !p.url.includes("photo1.jpg") && !p.url.startsWith("indexeddb://"));
-        safeUrl = fallbackPhoto ? fallbackPhoto.url : "assets/images/girl/girl2.jpeg";
-      }
+      const safeUrl = photo.url || "assets/images/girl/girl2.jpeg";
 
       const tile = document.createElement("button");
       tile.type = "button";
@@ -2027,7 +2087,11 @@ function initStageLetter() {
   const actionsWrap = document.getElementById("letter-actions-wrap");
   const signText = document.getElementById("letter-signature-text");
 
-  const rawLetterText = ACTIVE_CONFIG.letterContent || ACTIVE_CONFIG.letterBody || "";
+  const receiver = ACTIVE_CONFIG.recipientName || "Hương Giang";
+  const sender = ACTIVE_CONFIG.senderName || "Tớ";
+  const rawLetterText = (ACTIVE_CONFIG.letterContent || ACTIVE_CONFIG.letterBody || "")
+    .replace(/\{receiver\}/g, receiver)
+    .replace(/\{sender\}/g, sender);
 
   const sealHint = document.querySelector(".wax-seal-hint");
 
@@ -2051,7 +2115,7 @@ function initStageLetter() {
   if (skipBtn) {
     skipBtn.addEventListener("click", () => {
       if (typewriterInterval) clearTimeout(typewriterInterval);
-      if (bodyText) bodyText.innerHTML = rawLetterText.replace(/\n/g, '<br>');
+      if (bodyText) bodyText.innerHTML = escapeLetterHtml(rawLetterText);
       if (signText) signText.style.opacity = "1";
       skipBtn.style.display = "none";
       if (nextBtn) nextBtn.style.display = "inline-block";
@@ -2107,8 +2171,11 @@ function initStageStarlight() {
       fetch(scriptURL, { method: 'POST', body: formData })
         .catch(error => console.error('Loi:', error.message));
 
-      // Đổi nhạc sang bài Remix ngay khi gửi điều ước
-      changeStageMusic("assets/audio/Happy Birthday Remix.m4a");
+      // Chuyển nhạc cho màn Starlight nếu chưa tùy chỉnh riêng Chương 4
+      const customLetterSrc = ACTIVE_CONFIG.sceneMusic?.letter?.src;
+      if (!customLetterSrc || customLetterSrc === "assets/audio/chung-ta-cua-hien-tai.mp3") {
+        changeStageMusic("assets/audio/Happy Birthday Remix.m4a");
+      }
 
       // Tiếng sao băng bay lên trời bằng âm thanh ngân vang huyền ảo
       if (window.BirthdayAudio && typeof window.BirthdayAudio.playSwoosh === 'function') {
@@ -2246,7 +2313,7 @@ function restartExperience() {
     flameEl.classList.add("lovegift-flame");
   }
   if (smokeEl) smokeEl.style.display = "none";
-  if (progressBar) progressBar.style.strokeDashoffset = "251.2";
+  if (progressBar) progressBar.style.strokeDashoffset = "289.026";
   if (dimOverlay) dimOverlay.style.opacity = "0";
 
   if (starElement) {
@@ -2272,9 +2339,10 @@ function initLightbox() {
   const prevBtn = document.getElementById("lightbox-prev-btn");
   const nextBtn = document.getElementById("lightbox-next-btn");
 
-  // LỖI 4 FIX: Đọc gallery động mỗi lần mở lightbox thay vì snapshot tĩnh lúc init
-  // ACTIVE_CONFIG.gallery sẽ được ghi đè bởi dữ liệu URL #card=... sau khi initCardConfiguration() chạy
   const getLiveGallery = () => {
+    if (Array.isArray(ACTIVE_CONFIG._resolvedGallery) && ACTIVE_CONFIG._resolvedGallery.length > 0) {
+      return ACTIVE_CONFIG._resolvedGallery;
+    }
     return (ACTIVE_CONFIG.gallery && ACTIVE_CONFIG.gallery.length > 0)
       ? ACTIVE_CONFIG.gallery
       : [];
@@ -2573,12 +2641,12 @@ function spinLuckyWheel() {
 
   const sliceDeg = 360 / prizeCount;
   const randomOffset = (Math.random() - 0.5) * (sliceDeg * 0.6);
-  let targetAngle = 270 - (winningIndex * sliceDeg + sliceDeg / 2) + randomOffset;
-
-  targetAngle += 360 * 5;
+  const desiredMod = (((270 - (winningIndex * sliceDeg + sliceDeg / 2) + randomOffset) % 360) + 360) % 360;
 
   const currentRotation = parseFloat(canvas.dataset.rotation || "0");
-  const finalAngle = currentRotation + targetAngle - (currentRotation % 360) + (targetAngle % 360 < currentRotation % 360 ? 360 : 0);
+  const currentMod = ((currentRotation % 360) + 360) % 360;
+  const deltaMod = (desiredMod - currentMod + 360) % 360;
+  const finalAngle = currentRotation + (360 * 5) + deltaMod;
 
   canvas.style.transition = 'transform 4s cubic-bezier(0.25, 1, 0.5, 1)';
   canvas.style.transform = `rotate(${finalAngle}deg)`;
@@ -2957,13 +3025,13 @@ function initStageCountdown(lockInfo) {
       }
 
       if (titleEl) {
-        titleEl.textContent = "⏳ Đã Quá Ngày Mở Thiệp";
+        titleEl.textContent = "⏳ Đã Quá Mốc Giờ Mở Thiệp";
       }
       if (targetDisplay) {
         targetDisplay.innerHTML = `<span class="pill-icon">⚠️</span><span>Mốc hẹn giờ mở thiệp đã qua vào: <strong id="countdown-target-time" style="color: #fca5a5;">${dateFormatted}</strong></span>`;
       }
       if (subTextEl) {
-        subTextEl.innerHTML = `⚠️ <b>Đã quá ngày mở thiệp!</b> (Mốc hẹn: ${dateFormatted})<br>Thời gian hẹn giờ mở món quà bí mật đã đến và đã qua so với thời gian hiện tại. Bấm bên dưới để mở thiệp ngay!`;
+        subTextEl.innerHTML = `⚠️ <b>Đã quá thời gian mở thiệp!</b> (${dateFormatted})<br>Mốc thời gian hẹn giờ mở món quà bí mật đã đến và đã qua so với thời gian hiện tại. Bấm bên dưới để mở thiệp ngay!`;
       }
       if (bypassBtn) {
         bypassBtn.style.display = "inline-flex";

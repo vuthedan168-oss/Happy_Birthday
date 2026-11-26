@@ -178,7 +178,7 @@ const CardStorage = {
       // Luôn đồng bộ mốc ngày giờ và thông tin từ bản nháp Studio nếu đang ở chế độ xem trước (preview)
       const isPreviewMode = binId === "preview" || params.get("countdown") === "preview" || !binId;
       if (isPreviewMode) {
-        const draftStr = localStorage.getItem("birthday_creator_draft_v2");
+        const draftStr = localStorage.getItem("birthday_card_draft_v2");
         if (draftStr) {
           try {
             const draft = JSON.parse(draftStr);

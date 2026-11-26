@@ -3,40 +3,12 @@ let scene, camera, renderer, particles;
 let carouselGroup;
 const carouselRadius = 15;
 
-function initThreeScene(galleryData) {
-  const canvas = document.getElementById("webgl-canvas");
-  if (!canvas) return;
-
-  scene = new THREE.Scene();
-
-  camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-  camera.position.z = 30;
-
-  renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setPixelRatio(window.devicePixelRatio);
-
-  // Ánh sáng
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-  scene.add(ambientLight);
-  const pointLight = new THREE.PointLight(0xffaa00, 1, 100);
-  pointLight.position.set(0, 10, 20);
-  scene.add(pointLight);
-
-  // Tạo hiệu ứng hạt (Starfield / Confetti)
-  createParticles();
-
-  // Tạo 3D Image Carousel từ galleryData
-  if (galleryData && galleryData.length > 0) {
-    createCarousel(galleryData);
-  }
-
-  
 let cakeGroup;
 let candleLights = [];
 let candleFlames = [];
 
 function createCake() {
+  if (!scene) return;
   cakeGroup = new THREE.Group();
   scene.add(cakeGroup);
 
@@ -100,6 +72,34 @@ function blowCandles3D(progress) {
 
 window.show3DCake = show3DCake;
 window.blowCandles3D = blowCandles3D;
+
+function initThreeScene(galleryData) {
+  const canvas = document.getElementById("webgl-canvas");
+  if (!canvas) return;
+
+  scene = new THREE.Scene();
+
+  camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+  camera.position.z = 30;
+
+  renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(window.devicePixelRatio);
+
+  // Ánh sáng
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+  scene.add(ambientLight);
+  const pointLight = new THREE.PointLight(0xffaa00, 1, 100);
+  pointLight.position.set(0, 10, 20);
+  scene.add(pointLight);
+
+  // Tạo hiệu ứng hạt (Starfield / Confetti)
+  createParticles();
+
+  // Tạo 3D Image Carousel từ galleryData
+  if (galleryData && galleryData.length > 0) {
+    createCarousel(galleryData);
+  }
 
   createCake();
   // Animation Loop

@@ -126,6 +126,10 @@ class SoundEffects {
     }
   }
 
+  playDing() {
+    this.playQuizCorrect();
+  }
+
   // 4. TIENG BONG BAY / NUT BAM POP
   playPop() {
     try {
@@ -490,9 +494,13 @@ class SoundEffects {
 
   updateMusicUI(playing) {
     const musicBtn = document.getElementById('music-toggle-btn');
+    const audioIcon = document.getElementById('audio-icon');
     const vinyl = document.getElementById('vinyl-disc');
     const eqBars = document.querySelectorAll('.eq-bar');
 
+    if (audioIcon) {
+      audioIcon.textContent = playing ? '🔊' : '🔇';
+    }
     if (musicBtn) {
       musicBtn.classList.toggle('playing', playing);
       musicBtn.setAttribute('aria-label', playing ? 'Tat nhac' : 'Bat nhac');

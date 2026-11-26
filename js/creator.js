@@ -76,7 +76,8 @@ async function compressImageBase64(base64Url, maxDim = 720, quality = 0.72) {
 }
 
 /**
- * Tự động tối ưu dữ liệu thiệp để luôn nhỏ hơn giới hạn 4.5MB của Cloud
+ * Chuyển đổi Data URL sang Blob để tải lên đám mây
+ */
 function dataURLtoBlob(dataurl) {
   try {
     const arr = dataurl.split(',');
@@ -100,52 +101,75 @@ function dataURLtoBlob(dataurl) {
  */
 async function autoCompressDataPayload(cardData, onProgress = null) {
   const cloned = JSON.parse(JSON.stringify(cardData));
-  let jsonStr = JSON.stringify(cloned);
-  let sizeKb = Math.round(jsonStr.length / 1024);
-
-  // 1. Tối ưu âm thanh Base64 nếu có
   const isAudioDataUrl = (str) => typeof str === "string" && str.startsWith("data:audio");
-  const hasAudioData = isAudioDataUrl(cloned.countdownMusicUrl) || (cloned.sceneMusic?.countdown?.src && isAudioDataUrl(cloned.sceneMusic.countdown.src));
+  const defaultStageTracks = {
+    countdown: "assets/audio/ngan-nam-anh-sang.mp3",
+    intro: "assets/audio/birthday.mp3",
+    beats: "assets/audio/Yung Kai.m4a",
+    heart: "assets/audio/Noi Nay Co Anh.m4a",
+    letter: "assets/audio/chung-ta-cua-hien-tai.mp3"
+  };
 
-  if (hasAudioData) {
-    const rawAudioData = isAudioDataUrl(cloned.countdownMusicUrl) ? cloned.countdownMusicUrl : cloned.sceneMusic.countdown.src;
-    const title = (cloned.countdownMusicTitle || "").toLowerCase();
-    
-    // Nếu là bài Chúng Ta Của Hiện Tại -> dùng ngay file nội bộ và đám mây có sẵn
-    if (title.includes("chung ta") || title.includes("chúng ta")) {
-      cloned.countdownMusicUrl = "assets/audio/chung-ta-cua-hien-tai.mp3";
-      cloned.countdownMusicTitle = "Chúng Ta Của Hiện Tại - Sơn Tùng M-TP";
-    } else {
-      if (onProgress) onProgress("⏳ Đang lưu trữ file nhạc lớn lên đám mây...");
-      try {
-        const audioBlob = dataURLtoBlob(rawAudioData);
-        if (audioBlob && window.CardStorage && typeof window.CardStorage.uploadAudioToCloud === "function") {
-          const cloudAudioUrl = await window.CardStorage.uploadAudioToCloud(audioBlob);
-          if (cloudAudioUrl) {
-            cloned.countdownMusicUrl = cloudAudioUrl;
-          }
+  // 1. Tối ưu âm thanh Base64 cho tất cả 5 chương
+  const uploadedAudioMap = new Map();
+  const resolveAudioDataUrl = async (rawDataUrl, title, fallbackSrc) => {
+    if (!isAudioDataUrl(rawDataUrl)) return rawDataUrl;
+    if (uploadedAudioMap.has(rawDataUrl)) return uploadedAudioMap.get(rawDataUrl);
+
+    const lowerTitle = (title || "").toLowerCase();
+    if (lowerTitle.includes("chung ta") || lowerTitle.includes("chúng ta")) {
+      const localTrack = "assets/audio/chung-ta-cua-hien-tai.mp3";
+      uploadedAudioMap.set(rawDataUrl, localTrack);
+      return localTrack;
+    }
+
+    if (onProgress) onProgress("⏳ Đang lưu trữ file nhạc lớn lên đám mây...");
+    try {
+      const audioBlob = dataURLtoBlob(rawDataUrl);
+      if (audioBlob && window.CardStorage && typeof window.CardStorage.uploadAudioToCloud === "function") {
+        const cloudAudioUrl = await window.CardStorage.uploadAudioToCloud(audioBlob);
+        if (cloudAudioUrl) {
+          uploadedAudioMap.set(rawDataUrl, cloudAudioUrl);
+          return cloudAudioUrl;
         }
-      } catch (err) {
-        console.warn("Upload binary audio lên đám mây không thành công:", err);
+      }
+    } catch (err) {
+      console.warn("Upload binary audio lên đám mây không thành công:", err);
+    }
+
+    uploadedAudioMap.set(rawDataUrl, fallbackSrc);
+    return fallbackSrc;
+  };
+
+  if (cloned.sceneMusic) {
+    for (const stg of Object.keys(defaultStageTracks)) {
+      const stageCfg = cloned.sceneMusic[stg];
+      if (stageCfg && isAudioDataUrl(stageCfg.src)) {
+        stageCfg.src = await resolveAudioDataUrl(stageCfg.src, stageCfg.title, defaultStageTracks[stg]);
       }
     }
-
-    // Đảm bảo không còn chuỗi Base64 âm thanh khổng lồ trong JSON thiệp nếu upload cloud lỗi
-    const finalAudio = isAudioDataUrl(cloned.countdownMusicUrl) ? "assets/audio/ngan-nam-anh-sang.mp3" : cloned.countdownMusicUrl;
-    cloned.countdownMusicUrl = finalAudio;
-    if (cloned.sceneMusic && cloned.sceneMusic.countdown) {
-      cloned.sceneMusic.countdown.src = finalAudio;
-    }
-    if (cloned.backgroundMusic && isAudioDataUrl(cloned.backgroundMusic)) {
-      cloned.backgroundMusic = finalAudio;
-    }
-    if (cloned.musicUrl && isAudioDataUrl(cloned.musicUrl)) {
-      cloned.musicUrl = "assets/audio/birthday.mp3";
-    }
-
-    jsonStr = JSON.stringify(cloned);
-    sizeKb = Math.round(jsonStr.length / 1024);
   }
+
+  if (isAudioDataUrl(cloned.countdownMusicUrl)) {
+    cloned.countdownMusicUrl = await resolveAudioDataUrl(
+      cloned.countdownMusicUrl,
+      cloned.countdownMusicTitle,
+      cloned.sceneMusic?.countdown?.src || defaultStageTracks.countdown
+    );
+  }
+  if (cloned.sceneMusic?.countdown && !isAudioDataUrl(cloned.countdownMusicUrl) && cloned.countdownMusicUrl) {
+    cloned.sceneMusic.countdown.src = cloned.countdownMusicUrl;
+  }
+
+  if (isAudioDataUrl(cloned.musicUrl)) {
+    cloned.musicUrl = cloned.sceneMusic?.intro?.src || defaultStageTracks.intro;
+  }
+  if (isAudioDataUrl(cloned.backgroundMusic)) {
+    cloned.backgroundMusic = cloned.sceneMusic?.intro?.src || defaultStageTracks.intro;
+  }
+
+  let jsonStr = JSON.stringify(cloned);
+  let sizeKb = Math.round(jsonStr.length / 1024);
 
   // 2. Tự động nén toàn bộ ảnh Polaroid nếu dung lượng vượt 3500KB
   if (sizeKb > 3500 && Array.isArray(cloned.gallery) && cloned.gallery.length > 0) {
@@ -426,10 +450,10 @@ function initPhotoManager() {
       const item = document.createElement("div");
       item.className = "polaroid-edit-item";
       item.innerHTML = `
-        <img src="${photo.url}" alt="Preview" class="polaroid-thumb" onerror="this.src='https://placehold.co/100x100?text=No+Image'">
+        <img src="${escapeHtml(photo.url)}" alt="Preview" class="polaroid-thumb" onerror="this.src='https://placehold.co/100x100?text=No+Image'">
         <div class="polaroid-inputs">
-          <input type="text" class="form-control form-control-sm photo-url-input" value="${photo.url}" placeholder="Đường dẫn ảnh URL...">
-          <input type="text" class="form-control form-control-sm photo-caption-input" value="${photo.caption}" placeholder="Chú thích cho ảnh...">
+          <input type="text" class="form-control form-control-sm photo-url-input" value="${escapeHtml(photo.url)}" placeholder="Đường dẫn ảnh URL...">
+          <input type="text" class="form-control form-control-sm photo-caption-input" value="${escapeHtml(photo.caption)}" placeholder="Chú thích cho ảnh...">
         </div>
         <button type="button" class="btn-remove-photo" title="Xóa ảnh này" data-index="${index}">&times;</button>
       `;
@@ -1427,8 +1451,8 @@ function initVipPaymentManager() {
         activateVipSuccess(result.message);
         if (result.isOwner) {
           if (btnOpenOwner) btnOpenOwner.style.display = "inline-flex";
-          const vipModal = document.getElementById("vip-upgrade-modal");
-          if (vipModal) vipModal.classList.remove("active");
+          const payModal = document.getElementById("payment-modal");
+          if (payModal) payModal.classList.remove("active");
           if (ownerModal) ownerModal.classList.add("active");
         }
         alert(result.message);
@@ -1466,8 +1490,8 @@ function initVipPaymentManager() {
   const btnSwitchToOwner = document.getElementById("btn-switch-to-owner-modal");
   if (btnSwitchToOwner) {
     btnSwitchToOwner.addEventListener("click", () => {
-      const vipModal = document.getElementById("vip-upgrade-modal");
-      if (vipModal) vipModal.classList.remove("active");
+      const payModal = document.getElementById("payment-modal");
+      if (payModal) payModal.classList.remove("active");
       if (ownerModal) ownerModal.classList.add("active");
     });
   }
@@ -1554,7 +1578,7 @@ function collectFormData() {
   const birthMonth = parseInt(document.getElementById("input-birth-month")?.value, 10) || 7;
   const nickname = document.getElementById("input-nickname")?.value.trim() || "";
   const wishesText = document.getElementById("input-wishes")?.value.trim() || "";
-  const birthdayDate = document.getElementById("input-birthday-date")?.value.trim() || `${birthDay} Tháng ${birthMonth}`;
+  const birthdayDate = `${birthDay} Tháng ${birthMonth}`;
   const signature = document.getElementById("input-signature")?.value.trim() || `— ${sender}`;
   const customSlug = document.getElementById("input-custom-slug")?.value.trim() || "";
   let startDate = document.getElementById("input-start-date")?.value || "";
@@ -1562,23 +1586,27 @@ function collectFormData() {
   if (startDate && isNaN(Date.parse(startDate))) startDate = "";
   if (endDate && isNaN(Date.parse(endDate))) endDate = "";
 
-  // 4 điều ước may mắn
-  const wish1 = document.getElementById("input-wish-1")?.value.trim() || "Hạnh phúc hơn";
-  const wish2 = document.getElementById("input-wish-2")?.value.trim() || "Trúng Vietlott";
-  const wish3 = document.getElementById("input-wish-3")?.value.trim() || "Khỏe mạnh hơn";
-  const wish4 = document.getElementById("input-wish-4")?.value.trim() || "Bình yên hơn";
-  const wishList = [wish1, wish2, wish3, wish4];
+  // Danh sách điều ước mặc định
+  const wishList = (typeof BIRTHDAY_CONFIG !== "undefined" && Array.isArray(BIRTHDAY_CONFIG.wishes))
+    ? BIRTHDAY_CONFIG.wishes
+    : ["Hạnh phúc hơn", "Trúng Vietlott", "Khỏe mạnh hơn", "Bình yên hơn"];
 
   // Thu thập danh sách câu hỏi trắc nghiệm động
   const quizQuestions = dynamicQuizList.map((qItem, idx) => {
     return {
       id: idx + 1,
       question: qItem.question,
-      options: qItem.options.map((opt, oIdx) => ({
-        text: opt,
-        isCorrect: oIdx === qItem.correctIndex,
-        emoji: "✨"
-      })),
+      options: qItem.options.map((opt, oIdx) => {
+        let finalOpt = opt;
+        if (idx === 0 && oIdx === 0 && opt === "✨ Hương Giang xinh đẹp & rạng ngời ✨" && recipient !== "Hương Giang") {
+          finalOpt = `✨ ${recipient} xinh đẹp & rạng ngời ✨`;
+        }
+        return {
+          text: finalOpt,
+          isCorrect: oIdx === qItem.correctIndex,
+          emoji: "✨"
+        };
+      }),
       hint: qItem.hint || ""
     };
   }).filter((q) => q.question && q.question.trim());
@@ -1647,10 +1675,13 @@ function collectFormData() {
           url = rawUrl;
           title = urlInput?.dataset?.title || "Nhạc tùy chỉnh";
         }
-      } else if (sel.value) {
+      } else if (sel.value !== undefined && sel.value !== "") {
         url = sel.value;
         const selOpt = sel.options[sel.selectedIndex];
         title = selOpt ? selOpt.textContent.trim().replace(/^[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\s]+/u, '') : defaultTitle;
+      } else if (sel.value === "") {
+        url = "";
+        title = "";
       }
     }
     return { src: url, title: title };
@@ -1728,14 +1759,26 @@ function saveToStorage(key, data) {
           stage: 'bg'
         });
       }
+      if (textOnlyData.sceneMusic) {
+        Object.keys(textOnlyData.sceneMusic).forEach(stg => {
+          const stgAudio = textOnlyData.sceneMusic[stg];
+          if (stgAudio?.src && stgAudio.src.startsWith('data:')) {
+            window.CardAudioStorage.set('audio_' + stg, {
+              src: stgAudio.src,
+              title: stgAudio.title,
+              stage: stg
+            });
+          }
+        });
+      }
     }
 
-    // Thử lưu vào localStorage (nếu dung lượng quá lớn thì fallback)
+    // Thử lưu vào localStorage (nếu dung lượng quá lớn thì fallback rút gọn sang indexeddb://)
     try {
       localStorage.setItem(key, JSON.stringify(textOnlyData));
     } catch (quotaErr) {
       console.warn("localStorage quota exceeded, saving text-safe version with IndexedDB references:", quotaErr);
-      const safeData = { ...textOnlyData };
+      const safeData = JSON.parse(JSON.stringify(textOnlyData));
       if (safeData.countdownMusicUrl && safeData.countdownMusicUrl.startsWith('data:')) {
         safeData.countdownMusicUrl = 'indexeddb://audio_countdown';
       }
@@ -1812,19 +1855,23 @@ function initFormSubmit() {
         if (triggerBtn) triggerBtn.innerHTML = msg;
       });
 
-      // Lưu lên Cloud Database với cơ chế an toàn tuyệt đối
+      // Lưu lên Cloud Database
       let targetShareUrl = "";
+      let isCloudSaved = false;
       const chosenSlug = (data.slug && data.slug.trim()) ? data.slug.trim() : "";
       try {
         const recordId = await window.CardStorage.saveToCloud(cloudData);
         targetShareUrl = window.CardStorage.createShareUrl(recordId, chosenSlug);
+        isCloudSaved = true;
       } catch (cloudErr) {
-        console.warn("Lưu cloud gặp sự cố, tự động dùng link dự phòng an toàn:", cloudErr);
+        console.warn("Lưu cloud gặp sự cố:", cloudErr);
         const safeData = JSON.parse(JSON.stringify(cloudData));
         if (safeData.countdownMusicUrl && safeData.countdownMusicUrl.startsWith("data:")) {
           safeData.countdownMusicUrl = "assets/audio/ngan-nam-anh-sang.mp3";
         }
         targetShareUrl = window.CardStorage.createShareUrl(safeData, chosenSlug);
+        showCreatorToast("⚠️ Không thể tải lên Cloud, đang dùng link xem trước cục bộ (?id=preview)!", "⚠️");
+        alert(`⚠️ Không thể lưu thiệp lên Cloud (${cloudErr.message || "Lỗi kết nối"}).\n\nLink dự phòng (?id=preview) dưới đây CHỈ xem được trên trình duyệt này, nếu gửi sang máy khác sẽ hiện thiệp mẫu mặc định. Vui lòng kiểm tra mạng hoặc giảm bớt ảnh nặng rồi bấm Tạo & Lấy Link lại!`);
       }
 
       if (shareInput) shareInput.value = targetShareUrl;
@@ -1855,16 +1902,19 @@ function initFormSubmit() {
 
         const frameType = qrFrameSelect ? qrFrameSelect.value : 'none';
 
-        // Xác định link render QR: nếu URL quá dài hoặc dính file:///, fallback về URL hợp lệ ngắn gọn
+        // Xác định link render QR: giữ nguyên đường dẫn & query ?id=... nếu là URL HTTP(S) hợp lệ
         let qrRenderUrl = targetShareUrl;
         const isFileProtocol = !qrRenderUrl || qrRenderUrl.startsWith('file:') || window.location.protocol === 'file:';
         const isUrlTooLong = qrRenderUrl && qrRenderUrl.length > 1200;
 
-        // LỖI 3 FIX: Dùng window.location.origin thực tế thay vì hardcode localhost
-        // Điều này đảm bảo QR Code luôn chứa IP mạng LAN đúng khi test qua Wi-Fi
         const buildFallbackBase = () => {
           if (window.location.protocol.startsWith('http')) {
-            return `${window.location.origin}/gift.html`;
+            const urlObj = new URL(window.location.href);
+            let dir = urlObj.pathname;
+            if (!dir.endsWith('/')) {
+              dir = dir.includes('.html') ? dir.substring(0, dir.lastIndexOf('/') + 1) : dir + '/';
+            }
+            return `${urlObj.origin}${dir}gift.html${isCloudSaved ? new URL(targetShareUrl).search : ''}`;
           }
           return 'http://localhost:3000/gift.html';
         };
@@ -2249,6 +2299,20 @@ function saveDraft(showStatus = true) {
     const now = new Date();
     const timeStr = now.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
 
+    const sceneMusicDraft = {};
+    ["countdown", "intro", "beats", "heart", "letter"].forEach((stg) => {
+      const sel = document.getElementById(`music-${stg}`);
+      const urlIn = document.querySelector(`.stage-url-input[data-stage="${stg}"]`);
+      sceneMusicDraft[stg] = {
+        value: sel ? sel.value : "",
+        url: urlIn ? urlIn.value : "",
+        title: urlIn?.dataset?.title || customUploadedAudios[stg]?.title || "",
+        directAudio: urlIn?.dataset?.directAudio || "",
+        youtubeId: urlIn?.dataset?.youtubeId || "",
+        cloudUrl: customUploadedAudios[stg]?.cloudUrl || ""
+      };
+    });
+
     const draft = {
       version: 2,
       savedAt: now.toISOString(),
@@ -2260,6 +2324,7 @@ function saveDraft(showStatus = true) {
       vibe: document.querySelector('input[name="vibe-preset"]:checked')?.value || "party",
       iconTheme: document.querySelector('input[name="icon-theme"]:checked')?.value || "birthday",
       musicStageCountdown: document.getElementById("music-countdown")?.value || "",
+      sceneMusicSelections: sceneMusicDraft,
       qrFrame: document.getElementById("qr-frame-select")?.value || "none"
     };
 
@@ -2317,7 +2382,17 @@ function saveDraft(showStatus = true) {
         }));
       } catch (dErr) {}
     } catch (quotaError) {
-      console.warn("Storage quota vượt quá giới hạn khi lưu draft vào localStorage:", quotaError);
+      console.warn("Storage quota vượt quá giới hạn, lưu bản nháp an toàn ký tự:", quotaError);
+      const safePhotos = compactPhotos.map(p => ({
+        url: p.url && p.url.startsWith("data:") ? "assets/images/photo1.jpg" : p.url,
+        caption: p.caption
+      }));
+      const safeCompactDraft = { ...compactDraft, photos: safePhotos };
+      try {
+        localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(safeCompactDraft));
+      } catch (e2) {
+        console.error("Không thể lưu localStorage:", e2);
+      }
     }
 
     if (showStatus) {
@@ -2427,8 +2502,53 @@ function loadAndRestoreDraft() {
       }
     }
 
-    // 6. Khôi phục bài hát đếm ngược
-    if (draft.musicStageCountdown) {
+    // 6. Khôi phục nhạc theo từng chương
+    if (draft.sceneMusicSelections && typeof draft.sceneMusicSelections === "object") {
+      Object.keys(draft.sceneMusicSelections).forEach((stg) => {
+        const selCfg = draft.sceneMusicSelections[stg];
+        const selEl = document.getElementById(`music-${stg}`);
+        const urlIn = document.querySelector(`.stage-url-input[data-stage="${stg}"]`);
+        const uploadBox = document.querySelector(`.stage-upload-box[data-stage="${stg}"]`);
+        const urlBox = document.querySelector(`.stage-url-box[data-stage="${stg}"]`);
+        const statusBadge = document.querySelector(`.audio-status-badge[data-stage="${stg}"]`);
+
+        if (selEl && selCfg && selCfg.value !== undefined) {
+          selEl.value = selCfg.value;
+          if (selCfg.value === "custom-url" && urlIn) {
+            urlIn.value = selCfg.url || "";
+            if (selCfg.title) urlIn.dataset.title = selCfg.title;
+            if (selCfg.directAudio) urlIn.dataset.directAudio = selCfg.directAudio;
+            if (selCfg.youtubeId) urlIn.dataset.youtubeId = selCfg.youtubeId;
+            if (urlBox) urlBox.style.display = "block";
+            if (uploadBox) uploadBox.style.display = "none";
+            if (statusBadge) statusBadge.textContent = selCfg.title || (selCfg.url ? "Link tùy chỉnh đã nhập" : "Chưa nhập link");
+          } else if (selCfg.value === "custom-upload") {
+            if (uploadBox) uploadBox.style.display = "block";
+            if (urlBox) urlBox.style.display = "none";
+            if (selCfg.cloudUrl) {
+              customUploadedAudios[stg] = { src: selCfg.cloudUrl, cloudUrl: selCfg.cloudUrl, title: selCfg.title || "Nhạc tải lên" };
+              const opt = selEl.querySelector('option[value="custom-upload"]');
+              if (opt) opt.dataset.customSrc = selCfg.cloudUrl;
+              if (statusBadge) statusBadge.textContent = `✅ ${selCfg.title || "Đã sẵn sàng đám mây"}`;
+            } else if (window.CardAudioStorage) {
+              window.CardAudioStorage.get(`audio_${stg}`).then(cachedAudio => {
+                if (cachedAudio && cachedAudio.src) {
+                  customUploadedAudios[stg] = cachedAudio;
+                  const opt = selEl.querySelector('option[value="custom-upload"]');
+                  if (opt) opt.dataset.customSrc = cachedAudio.src;
+                  if (statusBadge) statusBadge.textContent = `✅ ${cachedAudio.title || "Nhạc đã lưu nháp"}`;
+                }
+              }).catch(() => {});
+            }
+          } else {
+            if (uploadBox) uploadBox.style.display = "none";
+            if (urlBox) urlBox.style.display = "none";
+            const selOpt = selEl.options[selEl.selectedIndex];
+            if (statusBadge && selOpt) statusBadge.textContent = selOpt.textContent.trim();
+          }
+        }
+      });
+    } else if (draft.musicStageCountdown) {
       const musicCdSelect = document.getElementById("music-countdown");
       if (musicCdSelect) {
         musicCdSelect.value = draft.musicStageCountdown;
