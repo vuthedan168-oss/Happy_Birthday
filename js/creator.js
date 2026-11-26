@@ -171,8 +171,8 @@ async function autoCompressDataPayload(cardData, onProgress = null) {
   let jsonStr = JSON.stringify(cloned);
   let sizeKb = Math.round(jsonStr.length / 1024);
 
-  // 2. Tự động nén toàn bộ ảnh Polaroid nếu dung lượng vượt 3500KB
-  if (sizeKb > 3500 && Array.isArray(cloned.gallery) && cloned.gallery.length > 0) {
+  // 2. Tự động nén toàn bộ ảnh Polaroid nếu dung lượng vượt 1500KB
+  if (sizeKb > 1500 && Array.isArray(cloned.gallery) && cloned.gallery.length > 0) {
     if (onProgress) onProgress("⏳ Đang tối ưu dung lượng ảnh mây...");
     for (let i = 0; i < cloned.gallery.length; i++) {
       if (cloned.gallery[i].url && cloned.gallery[i].url.startsWith("data:image")) {
@@ -183,11 +183,34 @@ async function autoCompressDataPayload(cardData, onProgress = null) {
     sizeKb = Math.round(jsonStr.length / 1024);
   }
 
-  // 3. Nếu vẫn còn quá 4500KB, nén sâu hơn nữa
-  if (sizeKb > 4500 && Array.isArray(cloned.gallery) && cloned.gallery.length > 0) {
+  // 3. Nếu vẫn vượt 2400KB, nén sâu hơn
+  if (sizeKb > 2400 && Array.isArray(cloned.gallery) && cloned.gallery.length > 0) {
     for (let i = 0; i < cloned.gallery.length; i++) {
       if (cloned.gallery[i].url && cloned.gallery[i].url.startsWith("data:image")) {
-        cloned.gallery[i].url = await compressImageBase64(cloned.gallery[i].url, 500, 0.55);
+        cloned.gallery[i].url = await compressImageBase64(cloned.gallery[i].url, 520, 0.56);
+      }
+    }
+    jsonStr = JSON.stringify(cloned);
+    sizeKb = Math.round(jsonStr.length / 1024);
+  }
+
+  // 4. Nếu vẫn quá 3200KB (rất nhiều ảnh), tách từng ảnh thành binary upload riêng để JSON nhẹ
+  if (sizeKb > 3200 && Array.isArray(cloned.gallery) && window.CardStorage && typeof window.CardStorage.uploadBinaryToCloud === "function") {
+    if (onProgress) onProgress("⏳ Đang tách ảnh lớn lên đám mây...");
+    for (let i = 0; i < cloned.gallery.length; i++) {
+      const imgUrl = cloned.gallery[i].url;
+      if (imgUrl && imgUrl.startsWith("data:image")) {
+        try {
+          const imgBlob = dataURLtoBlob(imgUrl);
+          if (imgBlob) {
+            const cloudImgUrl = await window.CardStorage.uploadBinaryToCloud(imgBlob, "image/jpeg");
+            if (cloudImgUrl) {
+              cloned.gallery[i].url = cloudImgUrl;
+            }
+          }
+        } catch (imgUpErr) {
+          console.warn("Tách ảnh lên cloud thất bại, giữ base64 nén:", imgUpErr);
+        }
       }
     }
   }
@@ -878,7 +901,7 @@ function initMusicManager() {
             }
             customUploadedAudios[stage] = {
               src: targetUrl,
-              cloudUrl: "https://bytebin.lucko.me/CZdC95qipJ",
+              cloudUrl: targetUrl,
               title: "Chúng Ta Của Hiện Tại - Sơn Tùng M-TP",
               size: file.size
             };
@@ -1870,8 +1893,12 @@ function initFormSubmit() {
           safeData.countdownMusicUrl = "assets/audio/ngan-nam-anh-sang.mp3";
         }
         targetShareUrl = window.CardStorage.createShareUrl(safeData, chosenSlug);
-        showCreatorToast("⚠️ Không thể tải lên Cloud, đang dùng link xem trước cục bộ (?id=preview)!", "⚠️");
-        alert(`⚠️ Không thể lưu thiệp lên Cloud (${cloudErr.message || "Lỗi kết nối"}).\n\nLink dự phòng (?id=preview) dưới đây CHỈ xem được trên trình duyệt này, nếu gửi sang máy khác sẽ hiện thiệp mẫu mặc định. Vui lòng kiểm tra mạng hoặc giảm bớt ảnh nặng rồi bấm Tạo & Lấy Link lại!`);
+        if (targetShareUrl.includes("#card=")) {
+          showCreatorToast("⚠️ Cloud tạm bận, đã tự động nén thiệp trực tiếp vào URL!", "🔗");
+        } else {
+          showCreatorToast("⚠️ Không thể tải lên Cloud, đang dùng link xem trước cục bộ (?id=preview)!", "⚠️");
+          alert(`⚠️ Không thể lưu thiệp lên Cloud (${cloudErr.message || "Lỗi kết nối"}).\n\nLink dự phòng (?id=preview) dưới đây CHỈ xem được trên trình duyệt này, nếu gửi sang máy khác sẽ hiện thiệp mẫu mặc định. Vui lòng kiểm tra mạng hoặc giảm bớt ảnh nặng rồi bấm Tạo & Lấy Link lại!`);
+        }
       }
 
       if (shareInput) shareInput.value = targetShareUrl;

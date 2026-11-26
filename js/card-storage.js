@@ -8,6 +8,22 @@
 const JSONBIN_KEY = '$2a$10$9UrD.pyl/tW.yznI0vX3ge5.u7USfVKfz/iy/RCFCQMboP1lHtj52';
 
 const CardStorage = {
+  // Mã hóa JSON Object sang URL-Safe Base64 (đồng bộ 100% với decode)
+  encode(cardData) {
+    try {
+      const jsonStr = JSON.stringify(cardData);
+      const bytes = new TextEncoder().encode(jsonStr);
+      let binary = "";
+      for (let i = 0; i < bytes.length; i++) {
+        binary += String.fromCharCode(bytes[i]);
+      }
+      return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+    } catch (e) {
+      console.error("Lỗi mã hóa card data:", e);
+      return null;
+    }
+  },
+
   // Giải mã chuỗi URL-Safe Base64 thành JSON Object (Giữ lại để tương thích ngược các link cũ)
   decode(safeBase64) {
     try {
@@ -29,13 +45,24 @@ const CardStorage = {
     }
   },
 
-  // Tải file âm thanh nhị phân lên Cloud (hỗ trợ file nhạc lớn tới 10MB mà không làm phình JSON thiệp)
-  async uploadAudioToCloud(fileOrBlob) {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 40000); // 40s timeout cho file âm thanh lớn
+  // Nén gzip chuỗi JSON bằng CompressionStream gốc của trình duyệt
+  async _gzipString(str) {
     try {
-      const mime = fileOrBlob.type || 'audio/mpeg';
-      const response = await fetch('https://bytebin.lucko.me/post', {
+      if (typeof CompressionStream === "undefined") return null;
+      const stream = new Blob([str]).stream().pipeThrough(new CompressionStream("gzip"));
+      return await new Response(stream).blob();
+    } catch (e) {
+      return null;
+    }
+  },
+
+  // Tải file nhị phân (âm thanh / ảnh) lên Cloud (api.pastes.dev - CORS đầy đủ, không bị WAF chặn)
+  async uploadBinaryToCloud(fileOrBlob, defaultMime = 'application/octet-stream') {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 40000);
+    try {
+      const mime = fileOrBlob.type || defaultMime;
+      const response = await fetch('https://api.pastes.dev/post', {
         method: 'POST',
         headers: {
           'Content-Type': mime
@@ -45,18 +72,23 @@ const CardStorage = {
       });
       clearTimeout(timeoutId);
       if (!response.ok) {
-        throw new Error('Máy chủ đám mây từ chối file âm thanh (Mã lỗi: ' + response.status + ').');
+        throw new Error('Máy chủ đám mây từ chối file (Mã lỗi: ' + response.status + ').');
       }
       const data = await response.json();
-      return `https://bytebin.lucko.me/${data.key}`;
+      return `https://api.pastes.dev/${data.key}`;
     } catch (e) {
       clearTimeout(timeoutId);
-      console.error("Lỗi khi tải file nhạc lên ByteBin:", e);
+      console.error("Lỗi khi tải file nhị phân lên Cloud:", e);
       throw e;
     }
   },
 
-  // Lưu dữ liệu lên Cloud Database
+  // Tải file âm thanh nhị phân lên Cloud (hỗ trợ file nhạc lớn tới 10MB mà không làm phình JSON thiệp)
+  async uploadAudioToCloud(fileOrBlob) {
+    return await this.uploadBinaryToCloud(fileOrBlob, 'audio/mpeg');
+  },
+
+  // Lưu dữ liệu lên Cloud Database (Ưu tiên api.pastes.dev, tự động dự phòng sang pastefy.app)
   async saveToCloud(cardData) {
     const payload = JSON.stringify(cardData);
     const sizeInKB = Math.round(payload.length / 1024);
@@ -64,56 +96,112 @@ const CardStorage = {
       throw new Error(`Dữ liệu thiệp quá nặng (${sizeInKB}KB > 9500KB giới hạn đám mây). Hãy tối ưu bớt ảnh chụp!`);
     }
 
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 25000); // 25s timeout
+    let primaryError = null;
 
+    // 1. Primary: api.pastes.dev (Open CORS, tốc độ cao, hỗ trợ payload lớn)
+    const controller1 = new AbortController();
+    const timeout1 = setTimeout(() => controller1.abort(), 20000);
     try {
-      // Đổi sang ByteBin (Miễn phí, Không cần Key, Tốc độ cao)
-      const response = await fetch('https://bytebin.lucko.me/post', {
+      const response = await fetch('https://api.pastes.dev/post', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: payload,
-        signal: controller.signal
+        signal: controller1.signal
       });
-      clearTimeout(timeoutId);
-      if (!response.ok) {
-        throw new Error('Máy chủ Cloud từ chối kết nối (Mã lỗi: ' + response.status + ').');
+      clearTimeout(timeout1);
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data.key) {
+          return data.key;
+        }
       }
-      const data = await response.json();
-      return data.key; // Trả về ID của bản ghi trên ByteBin
-    } catch (e) {
-      clearTimeout(timeoutId);
-      if (e.name === 'AbortError') {
-        throw new Error('Quá thời gian kết nối (25s). Do mạng chậm hoặc ảnh quá nặng!');
+      throw new Error('Máy chủ pastes.dev từ chối kết nối (Mã lỗi: ' + response.status + ').');
+    } catch (e1) {
+      clearTimeout(timeout1);
+      primaryError = e1;
+      console.warn("Primary Cloud (pastes.dev) lỗi, chuyển sang Backup Cloud:", e1);
+    }
+
+    // 2. Fallback: pastefy.app (Open CORS *)
+    const controller2 = new AbortController();
+    const timeout2 = setTimeout(() => controller2.abort(), 20000);
+    try {
+      const pfRes = await fetch('https://pastefy.app/api/v2/paste', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: 'Happy Birthday Card',
+          content: payload,
+          type: 'PASTE',
+          visibility: 'UNLISTED'
+        }),
+        signal: controller2.signal
+      });
+      clearTimeout(timeout2);
+      if (pfRes.ok) {
+        const pfData = await pfRes.json();
+        const pfId = pfData?.id || pfData?.paste?.id;
+        if (pfId) {
+          return 'pf_' + pfId;
+        }
       }
-      console.error("Lỗi khi lưu dữ liệu thiệp lên cloud:", e);
-      throw new Error(e.message || 'Lỗi mạng (Failed to fetch). Vui lòng thử lại sau.');
+      throw new Error('Backup Cloud không trả về ID hợp lệ.');
+    } catch (e2) {
+      clearTimeout(timeout2);
+      console.error("Cả hai máy chủ Cloud đều thất bại:", primaryError, e2);
+      if (primaryError && primaryError.name === 'AbortError') {
+        throw new Error('Quá thời gian kết nối (20s). Do mạng chậm hoặc ảnh quá nặng!');
+      }
+      throw new Error((primaryError && primaryError.message) || e2.message || 'Lỗi mạng (Failed to fetch). Vui lòng thử lại sau.');
     }
   },
 
-  // Tải dữ liệu từ Cloud Database dựa trên ID
+  // Tải dữ liệu từ Cloud Database dựa trên ID (hỗ trợ pastes.dev, pastefy.app, bytebin cũ & JSONBin cũ)
   async loadFromCloud(id) {
     try {
-      // Hỗ trợ cả link bytebin và tương thích ngược với JSONBin nếu ID có định dạng dài (JSONBin ID dài 24 ký tự)
-      const isLegacyJsonBin = id.length > 20; 
-      const fetchUrl = isLegacyJsonBin 
-          ? `https://api.jsonbin.io/v3/b/${id}` 
-          : `https://bytebin.lucko.me/${id}`;
-          
-      const headers = isLegacyJsonBin 
-          ? { 'X-Master-Key': '$2a$10$9UrD.pyl/tW.yznI0vX3ge5.u7USfVKfz/iy/RCFCQMboP1lHtj52' } 
-          : {};
+      if (!id) return null;
 
-      const response = await fetch(fetchUrl, {
-        method: 'GET',
-        headers: headers
-      });
-      
-      if (!response.ok) return null;
-      const data = await response.json();
-      return isLegacyJsonBin ? data.record : data;
+      // 1. Bản ghi Pastefy (pf_...)
+      if (id.startsWith('pf_')) {
+        const pfId = id.slice(3);
+        const pfRes = await fetch(`https://pastefy.app/api/v2/paste/${pfId}`);
+        if (!pfRes.ok) return null;
+        const pfData = await pfRes.json();
+        const rawContent = pfData?.content ?? pfData?.paste?.content;
+        return typeof rawContent === 'string' ? JSON.parse(rawContent) : (rawContent || null);
+      }
+
+      // 2. Tương thích ngược JSONBin cũ (ID dài > 20 ký tự)
+      if (id.length > 20) {
+        const jbRes = await fetch(`https://api.jsonbin.io/v3/b/${id}`, {
+          method: 'GET',
+          headers: { 'X-Master-Key': '$2a$10$9UrD.pyl/tW.yznI0vX3ge5.u7USfVKfz/iy/RCFCQMboP1lHtj52' }
+        });
+        if (!jbRes.ok) return null;
+        const jbData = await jbRes.json();
+        return jbData.record;
+      }
+
+      // 3. Mặc định: thử api.pastes.dev trước, nếu 404 thì thử legacy bytebin.lucko.me
+      try {
+        const pRes = await fetch(`https://api.pastes.dev/${id}`);
+        if (pRes.ok) {
+          return await pRes.json();
+        }
+      } catch (ePastes) {
+        console.warn("Lỗi tải từ pastes.dev, thử legacy bytebin:", ePastes);
+      }
+
+      try {
+        const bRes = await fetch(`https://bytebin.lucko.me/${id}`);
+        if (bRes.ok) {
+          return await bRes.json();
+        }
+      } catch (eLegacy) {}
+
+      return null;
     } catch (e) {
       console.error("Lỗi khi tải dữ liệu thiệp từ cloud:", e);
       return null;
@@ -249,17 +337,24 @@ const CardStorage = {
         }
     }
     
-    // Nếu recordId là Object dữ liệu dự phòng
+    // Nếu recordId là Object dữ liệu dự phòng (khi Cloud hoàn toàn ngoại tuyến)
     let idStr = recordId;
+    let hashCardSuffix = "";
     if (typeof recordId === "object" && recordId !== null) {
       try {
         localStorage.setItem("custom_birthday_card", JSON.stringify(recordId));
       } catch(e) {}
-      idStr = "preview";
+      const encoded = this.encode(recordId);
+      if (encoded && encoded.length <= 14000) {
+        idStr = "";
+        hashCardSuffix = "#card=" + encoded;
+      } else {
+        idStr = "preview";
+      }
     }
 
     // Gắn tham số ?id=... và ?to=... để hiển thị tên gợi nhớ đẹp mắt
-    let targetUrl = urlObj.origin + path + 'gift.html?id=' + idStr;
+    const queryParts = [];
     if (customSlug && typeof customSlug === "string" && customSlug.trim()) {
       // Chuẩn hóa tiếng Việt bỏ dấu và chuyển ký tự đặc biệt thành dấu gạch ngang
       const cleanSlug = customSlug.toString()
@@ -272,10 +367,15 @@ const CardStorage = {
         .replace(/-+/g, '-')
         .replace(/^-|-$/g, '');
       if (cleanSlug) {
-        targetUrl = urlObj.origin + path + 'gift.html?to=' + encodeURIComponent(cleanSlug) + '&id=' + idStr;
+        queryParts.push('to=' + encodeURIComponent(cleanSlug));
       }
     }
-    return targetUrl;
+    if (idStr) {
+      queryParts.push('id=' + idStr);
+    }
+
+    const queryStr = queryParts.length ? ('?' + queryParts.join('&')) : '';
+    return urlObj.origin + path + 'gift.html' + queryStr + hashCardSuffix;
   }
 };
 
